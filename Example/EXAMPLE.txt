@@ -20,13 +20,14 @@ few hours.
 1. Activate the DADA2_nifH conda environment. If your shell prompt starts with
    "(DADA2_nifH)" then the environment is already active.
 
-      source activate DADA2_nifH
+      conda activate DADA2_nifH
 
 
-2. Make a working directory. Call it whatever you like:
+2. Go to the example directory (that contains EXAMPLE.txt, this file).  Input
+   files for the example are already in this directory.  Pipeline outputs will
+   be placed here too.
 
-      mkdir MyDada2Example
-      cd MyDada2Example
+      cd $HOME/DADA2_nifH_pipeline/Example
    
 
 3. Gather the FASTQs into a directory hierarchy rooted at LinksToFastqs.  The

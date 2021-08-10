@@ -15,36 +15,60 @@ Below '%' is the unix shell prompt. Your's might differ.
 
 
 --------------------------------------------------------------------------------
+# 0. Get the DADA2 nifH pipeline, documents, etc.
+--------------------------------------------------------------------------------
+
+The file you are now reading is included in the DADA2 nifH package so you
+probably already did this step.  If not, just do the following:
+
+  % cd $HOME
+  % tar xvfz /home/jmagasin/ToolsShared/DADA2_nifH_pipeline.tgz .
+
+This creates a local copy of the tools in your home directory under
+DADA2_nifH_pipeline.
+
+
+--------------------------------------------------------------------------------
 # 1. Install Miniconda3
 --------------------------------------------------------------------------------
 
 In your home directory, create working directory for installing miniconda3.
 
+  % cd $HOME
   % mkdir Miniconda3Install
   % cd Miniconda3Install
+
+The instructions below are all executed within Miniconda3Install.
+
 
 For background, check out the Miniconda3 installation guide (but below are the
 few steps you need for installing):
     https://conda.io/projects/conda/en/latest/user-guide/install/index.html
 For thalassa we want to do a linux installation:
     https://docs.conda.io/projects/conda/en/latest/user-guide/install/linux.html
-I already grabbed the latest miniconda3 installer,
-Miniconda3-latest-Linux-x86_64.sh. "Latest" means "Conda 4.10.3 Python 3.9.5
-released July 21, 2021".  The following steps (done within Miniconda3Install)
-will start the installation:
+The following will download the latest Miniconda3 installer for 64-bit linux and
+calculate its SHA256 hash:
 
-  % cp /home/jmagasin/ToolsShared/NifH_amplicons/DADA2/Installation/Miniconda3-latest-Linux-x86_64.sh .
-  % ls -l Miniconda3-latest-Linux-x86_64.sh
-  % Miniconda3-latest-Linux-x86_64.sh -p $HOME/miniconda3
+  % wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+  % sha256sum Miniconda3-latest-Linux-x86_64.sh
+
+You should check that installer has not been corrupted or compromised by verifying
+that the hash above matches the one you see at:
+    https://docs.conda.io/en/latest/miniconda.html#latest-miniconda-installer-links
+(If it does not, let me know!!)  In the table at the link you will see that the
+latest Conda version is something >= 4.10.3.
+
+Now to install Miniconda3:
+
+  % bash Miniconda3-latest-Linux-x86_64.sh -b -p $HOME/miniconda3
 
 The install script will guide you. When it asks for permission to do various
-things, in general just accept whatever it suggests:) In particular, say "yes"
-when it asks "Do you wish the installer to initialize Miniconda3 by running
-conda init?"  Saying "yes" will make it possible to run miniconda3 commands from
-the shell by simply typing "conda" rather than the full path to conda
-($HOME/miniconda3/bin/conda).  [Detail: "yes" gives permission to the installer
-to change your shell startup script (.bashrc or .tchsrc) to add miniconda3 to
-your path.]
+things, in general just accept whatever it suggests:) Do say "yes" when it asks
+"Do you wish the installer to initialize Miniconda3 by running conda init?"
+This makes it possible to run miniconda3 commands from the shell by simply
+typing "conda" rather than the full path to conda ($HOME/miniconda3/bin/conda).
+[Detail: "yes" gives permission to the installer to change your shell startup
+script (.bashrc or .tchsrc) to add miniconda3 to your path.]
 
 If the installer reports success, then the following two commands should
 succeed.
@@ -52,23 +76,20 @@ succeed.
   % which conda
   % conda --help
 
-You can now delete your local copy of the installer.
+You can now delete Miniconda3-latest-Linux-x86_64.sh.
 
 
 --------------------------------------------------------------------------------
 # 2. Create the DADA2_nifH environment
 --------------------------------------------------------------------------------
 
-You will create a conda environment called "DADA2_nifH" that includes everything
-needed to run the DADA2 nifH pipeline.  Copy environment_DADA2_nifH.yml to your
-working directory, and then create the conda environment that it describes:
+Create a conda environment called "DADA2_nifH" that includes everything needed
+to run the DADA2 nifH pipeline. This step will take awhile (~10 min):
 
-  % cp /home/jmagasin/ToolsShared/NifH_amplicons/DADA2/Installation/environment_DADA2_nifH.yml .
-  % conda env update -n DADA2_nifH --file environment_DADA2_nifH.yml
+  % conda env update -n DADA2_nifH --file $HOME/DADA2_nifH_pipeline/Installation/environment_DADA2_nifH.yml
 
-If you like, you can now delete your copy of environment_DADA2_nifH.yml.
-
-Now activate the DADA2_nifH environment.
+Install complete!  The remaining steps are to verify your installation.  First,
+activate the DADA2_nifH environment:
 
   % conda activate DADA2_nifH
 
@@ -77,8 +98,8 @@ environment:
 
   (DADA2_nifH) %
 
-Now all the tools required by the DADA2 nifH pipeline should be available.
-Let's check for a few of them:
+Demonstrate that a few of the tools required by the DADA2 nifH pipeline are now
+installed. (Example output shown for user "yourLoginHere".)
 
   (DADA2_nifH) % which R
   /home/yourLoginHere/miniconda3/envs/DADA2_nifH/bin/R
@@ -95,13 +116,21 @@ after which the commands just above will either give errors or versions of the
 tools that are not managed by miniconda3 (e.g. the systemwide /usr/bin/R, which
 is old and will not work with DADA2).
 
+You can now delete the Miniconda3Install directory
+
 
 --------------------------------------------------------------------------------
 # 2. Try the mini Arctic 2017 example
 --------------------------------------------------------------------------------
 
+Please see the example:
+
+  % cd $HOME/DADA2_nifH_pipeline/Example
+
+
 In my homedir, ToolsShared/NifH_amplicons/DADA2/Example/EXAMPLE.txt describes
 how to run the pipeline on a very small subset of the Arctic 2017 data.  (You
 can probably begin at step 2:)
+
 
 -- END --

@@ -1,0 +1,76 @@
+################################################################################
+####################### Example of the DADA2 nifH pipeline #####################
+################################################################################
+
+The steps below run the DADA2 pipeline on a small data set comprised of eight
+samples from Arctic 2017, four from the 0.2-3um size fraction and four from
+>3um.  Each size fraction is processed completely independently.
+
+Execute each of the steps 1-4 from the command line in your unix shell, which
+can be whatever you like (bash, tcsh, etc.). The DADA2 pipeline (step 4) takes
+18 minutes to run on thalassa.  Full data sets with a few hundred samples take a
+few hours.
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+0. One time: Install tools and create a conda environment called DADA2_nifH that
+   makes the tools accessible.  Described in Installation/INSTALL.txt.
+
+
+1. Activate the DADA2_nifH conda environment. If your shell prompt starts with
+   "(DADA2_nifH)" then the environment is already active.
+
+      source activate DADA2_nifH
+
+
+2. Make a working directory. Call it whatever you like:
+
+      mkdir MyDada2Example
+      cd MyDada2Example
+   
+
+3. Gather the FASTQs into a directory hierarchy rooted at LinksToFastqs.  The
+   hierarchy is organized according to the processing groups defined in
+   fastqMap.tsv.  You only need to do this step is once (and not each time you
+   run the pipeline).  See notes in fastqMap.tsv and help via
+   "organizeFastqs.R --help
+
+      organizeFastqs.R fastqMap.tsv
+
+
+4. Run the DADA2 pipeline.  See notes in params.example.csv.  You can
+   run the pipeline multiple times to try different parameters for
+   DADA2 (but reusing outputs from previous pipeline stages). See
+   documentation with "run_DADA2_pipeline.sh --help".
+
+      run_DADA2_pipeline.sh params.example.csv > log.txt
+
+
+Key outputs:
+
+1. See the log file. It summarizes each stage, flags warnings / errors, and
+   points to outputs of interest.
+
+2. A summary of reads that passed cutadapt primer trimming is in:
+     ~/ToolsShared/NifH_amplicons/DADA2/Example/Data.nobackup/Data.trimmed/summary.cutadapt.txt
+
+3. To get an idea of how many NifH-like sequences are in your data, see:
+     ~/ToolsShared/NifH_amplicons/DADA2/Example/Data.nobackup/summary.NifH_prefilter.txt
+   These are the reads that were used to create the error models used by DADA2.
+
+4. Inspect the error model plots (.pdfs) Data.nobackup/ErrorModels (separate for
+   each size fraction).
+
+5. DADA2 output.  For each size fraction and for the date you ran the pipeline,
+   there is separate output.  E.g. Data.nobackup/Dada2PipeOutput/Filt_3/Out.2021Aug6/
+   FIXME
+     ASVs sequences and abundance tables are in TextData
+     Plots include quality plots of forward and reverse reads, critical for
+      assessing data quality and tuning parameters for DADA2
+     log file specifc to the DADA2 stage of the pipeline
+     readCountsDuringProcessing... plot that shows % of reads retained at
+      each stage of the pipeline. E.g. are reads dropped due to quality
+      or failure to overlap? Important quality assessment and parameter
+      tuning.
+
+-- END --

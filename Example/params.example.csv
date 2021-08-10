@@ -1,0 +1,32 @@
+## Parameters file for the DADA2 pipeline. Currently this is only used to
+## forward a few parameters to DADA2's filterAndTrim() (called by
+## dada2_nifH_amplicons.R). You can adjust the parameters to try to balance:
+##   1. % reads retained during quality filtering. You want a high % so
+##      that relative abundnaces can be analyzed.
+##   2. Erroneous bases in the ASVs. Your tolerance for errors will depend
+##      on how you use the data.  E.g. coarse taxonomic assignments vs.
+##      precise sequences for rare ASVs.
+##
+## The parameters in this example are expected NOT to cause aggressive
+## truncation of reads (maxEE will tolerate up to 6 errors). Instead they rely
+## on mergePairs() to drop read pairs if they have >1 mismatch in their
+## overlapping 3' regions (which should be much longer than the 12 nt
+## minOverlap!). For the 1 tolerated mismatch, let mergePairs() determine which
+## read is correct based on quality and abundance.
+##    -- Note that 6 errors in a 325 nt merged read for nifH would be 1.85%
+##       errors.  These errors would seem ulikely in the overlapping region
+##       (>150nt in the few data sets I've worked with) and also unlikely in the
+##       non-overlapping, more 5' regions because they are higher quality.
+##       Probably 1.85% is pessimistic -- and that is for one read pair, i.e.
+##       before DADA2 "denoises" over many read pairs when inferring the ASVs.
+
+## These are for filterAndTrim().
+truncQ,16
+maxEE.fwd,2
+maxEE.rev,4
+minLen,20
+
+## These are for mergePairs(). minOverlap 12 is the default. maxMismatch default
+## is 0 but I prefer 1 as described above.
+minOverlap,12
+maxMismatch,1

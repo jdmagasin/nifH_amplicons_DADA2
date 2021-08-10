@@ -1,0 +1,107 @@
+################################################################################
+#################### Installation of the DADA2 nifH pipeline ###################
+################################################################################
+
+The DADA2 nifH pipeline uses a bunch of external tools (R, DADA2, cutadapt,
+...).  Obtaining them is simplified by first installing miniconda3, a software
+package and environment manager. This document outlines how to get miniconda3
+and then use it to create an "environment" for running the DADA2 pipeline.
+
+These instructions are for installing tools on thalassa (linux machine).  The
+overall process should be very similar if you want to set up to run on your
+laptop.  Feel free to ask Jonathan for help.
+
+Below '%' is the unix shell prompt. Your's might differ.
+
+
+--------------------------------------------------------------------------------
+# 1. Install Miniconda3
+--------------------------------------------------------------------------------
+
+In your home directory, create working directory for installing miniconda3.
+
+  % mkdir Miniconda3Install
+  % cd Miniconda3Install
+
+For background, check out the Miniconda3 installation guide (but below are the
+few steps you need for installing):
+    https://conda.io/projects/conda/en/latest/user-guide/install/index.html
+For thalassa we want to do a linux installation:
+    https://docs.conda.io/projects/conda/en/latest/user-guide/install/linux.html
+I already grabbed the latest miniconda3 installer,
+Miniconda3-latest-Linux-x86_64.sh. "Latest" means "Conda 4.10.3 Python 3.9.5
+released July 21, 2021".  The following steps (done within Miniconda3Install)
+will start the installation:
+
+  % cp /home/jmagasin/ToolsShared/NifH_amplicons/DADA2/Installation/Miniconda3-latest-Linux-x86_64.sh .
+  % ls -l Miniconda3-latest-Linux-x86_64.sh
+  % Miniconda3-latest-Linux-x86_64.sh -p $HOME/miniconda3
+
+The install script will guide you. When it asks for permission to do various
+things, in general just accept whatever it suggests:) In particular, say "yes"
+when it asks "Do you wish the installer to initialize Miniconda3 by running
+conda init?"  Saying "yes" will make it possible to run miniconda3 commands from
+the shell by simply typing "conda" rather than the full path to conda
+($HOME/miniconda3/bin/conda).  [Detail: "yes" gives permission to the installer
+to change your shell startup script (.bashrc or .tchsrc) to add miniconda3 to
+your path.]
+
+If the installer reports success, then the following two commands should
+succeed.
+
+  % which conda
+  % conda --help
+
+You can now delete your local copy of the installer.
+
+
+--------------------------------------------------------------------------------
+# 2. Create the DADA2_nifH environment
+--------------------------------------------------------------------------------
+
+You will create a conda environment called "DADA2_nifH" that includes everything
+needed to run the DADA2 nifH pipeline.  Copy environment_DADA2_nifH.yml to your
+working directory, and then create the conda environment that it describes:
+
+  % cp /home/jmagasin/ToolsShared/NifH_amplicons/DADA2/Installation/environment_DADA2_nifH.yml .
+  % conda env update -n DADA2_nifH --file environment_DADA2_nifH.yml
+
+If you like, you can now delete your copy of environment_DADA2_nifH.yml.
+
+Now activate the DADA2_nifH environment.
+
+  % conda activate DADA2_nifH
+
+If this succeeds then your prompt will now be prefixed by the active conda
+environment:
+
+  (DADA2_nifH) %
+
+Now all the tools required by the DADA2 nifH pipeline should be available.
+Let's check for a few of them:
+
+  (DADA2_nifH) % which R
+  /home/yourLoginHere/miniconda3/envs/DADA2_nifH/bin/R
+  (DADA2_nifH) % which cutadapt
+  /home/yourLoginHere/miniconda3/envs/DADA2_nifH/bin/cutadapt
+  (DADA2_nifH) % which hmmalign
+  /home/yourLoginHere/miniconda3/envs/DADA2_nifH/bin/hmmalign
+
+You can deactivate the currently active environment with:
+
+  (DADA2_nifH) % conda deactivate
+
+after which the commands just above will either give errors or versions of the
+tools that are not managed by miniconda3 (e.g. the systemwide /usr/bin/R, which
+is old and will not work with DADA2).
+
+
+--------------------------------------------------------------------------------
+# 2. Try the mini Arctic 2017 example
+--------------------------------------------------------------------------------
+
+In my homedir, ToolsShared/NifH_amplicons/DADA2/Example/EXAMPLE.txt describes
+how to run the pipeline on a very small subset of the Arctic 2017 data.  (You
+can probably begin at step 2:)
+
+-- END --

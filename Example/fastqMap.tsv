@@ -1,0 +1,54 @@
+## Example of an input table for organizeFastqs.R. The table defines the
+## "processing groups" for the DADA2 pipeline.  Processing groups partition the
+## samples (paired MiSeq FASTQs) for separate proessing by DADA2.  So if you see
+## the same ASV sequence inferred for different processing groups, your
+## confidence in the ASV correctness increases.
+##
+## In this example that uses a small subset of the Arctic 2017 data, we want the
+## 0.2-3um and the >3um size fractions to be processing groups.  This is
+## accomplished by specifying the size fraction in column 2.  If Arctic 2017
+## also had mRNA samples, then I would suggest putting "DNA" or "mRNA" in column
+## 2 and the size fraction in column 3 to define four processing groups.
+## I.e. columns 2 through N-1 determine the processing groups.  The directory
+## hierarchy created by organizeFastqs.R follows the columns and would be:
+##   LinksToFastqs/DNA/Filt_3
+##   LinksToFastqs/DNA/Filt_0.2
+##   LinksToFastqs/mRNA/Filt_3
+##   LinksToFastqs/RNA/Filt_0.2
+##
+## To save disk space, organizeFastqs.R create symbolic links to the FASTQs in
+## column 1.  The last column N allows you to rename the directories that
+## contain the FASTQs. In this example we use it to drop the redundant
+## "_L001-ds" as well as the checksums from the sequencing center.  Column N is
+## always interpreted this way by organizeFastqs.R, so if you do not want to
+## rename the directories just reuse the component from column 1.
+##    The directory that contains the FASTQs usually corresponds to a sample.
+##    So this renaming feature let's you replace illegible directory names with
+##    descriptive sample names that can appear in tables and plots produced by
+##    the DADA2 pipeline.  (The feature is not supported for the FASTQ file
+##    names since FASTQ names rarely appear in outputs, except for FASTQ
+##    quality profiles.)
+##
+## Note that column 1 may have absolute or relative paths to the FASTQs. If
+## relative (as below), organizeFastqs.R will determine the absolute paths when
+## it creates symbolic links.
+##
+## Creating a file such as this for hundreds of FASTQs is best done with a
+## short script.  Jonathan is happy to help with this.
+
+Arctic2017_Data/Kendra001_70052_L001-ds.ea71347a995e4a49b2912db6fe305c12/Kendra001-70052_S1_L001_R1_001.fastq.gz	Filt_3	Kendra001_70052
+Arctic2017_Data/Kendra001_70052_L001-ds.ea71347a995e4a49b2912db6fe305c12/Kendra001-70052_S1_L001_R2_001.fastq.gz	Filt_3	Kendra001_70052
+Arctic2017_Data/Kendra002_70068_L001-ds.df5e969c637a45cc9cb4ea06ad24a8c8/Kendra002-70068_S2_L001_R1_001.fastq.gz	Filt_3	Kendra002_70068
+Arctic2017_Data/Kendra002_70068_L001-ds.df5e969c637a45cc9cb4ea06ad24a8c8/Kendra002-70068_S2_L001_R2_001.fastq.gz	Filt_3	Kendra002_70068
+Arctic2017_Data/Kendra003_70094_L001-ds.ac8179cf4ad0451b931111dc6e039b9c/Kendra003-70094_S3_L001_R1_001.fastq.gz	Filt_3	Kendra003_70094
+Arctic2017_Data/Kendra003_70094_L001-ds.ac8179cf4ad0451b931111dc6e039b9c/Kendra003-70094_S3_L001_R2_001.fastq.gz	Filt_3	Kendra003_70094
+Arctic2017_Data/Kendra004_70109_L001-ds.e62c5c70731f4ec79de3f387f0a48a36/Kendra004-70109_S4_L001_R1_001.fastq.gz	Filt_3	Kendra004_70109
+Arctic2017_Data/Kendra004_70109_L001-ds.e62c5c70731f4ec79de3f387f0a48a36/Kendra004-70109_S4_L001_R2_001.fastq.gz	Filt_3	Kendra004_70109
+Arctic2017_Data/Kendra006_70252_L001-ds.c31c0293b32947d7869a9b2d82e1c95f/Kendra006-70252_S6_L001_R1_001.fastq.gz	Filt_0.2	Kendra006_70252
+Arctic2017_Data/Kendra006_70252_L001-ds.c31c0293b32947d7869a9b2d82e1c95f/Kendra006-70252_S6_L001_R2_001.fastq.gz	Filt_0.2	Kendra006_70252
+Arctic2017_Data/Kendra008_70281_L001-ds.4da22e5f34d64d04a52ce4c517b68e1f/Kendra008-70281_S8_L001_R1_001.fastq.gz	Filt_0.2	Kendra008_70281
+Arctic2017_Data/Kendra008_70281_L001-ds.4da22e5f34d64d04a52ce4c517b68e1f/Kendra008-70281_S8_L001_R2_001.fastq.gz	Filt_0.2	Kendra008_70281
+Arctic2017_Data/Kendra009_70300_L001-ds.77163ae843a5488cb6cc7b4fb910ae8a/Kendra009-70300_S9_L001_R1_001.fastq.gz	Filt_0.2	Kendra009_70300
+Arctic2017_Data/Kendra009_70300_L001-ds.77163ae843a5488cb6cc7b4fb910ae8a/Kendra009-70300_S9_L001_R2_001.fastq.gz	Filt_0.2	Kendra009_70300
+Arctic2017_Data/Kendra010_70314_L001-ds.496d873632734989912e941fa38bc8ed/Kendra010-70314_S10_L001_R1_001.fastq.gz	Filt_0.2	Kendra010_70314
+Arctic2017_Data/Kendra010_70314_L001-ds.496d873632734989912e941fa38bc8ed/Kendra010-70314_S10_L001_R2_001.fastq.gz	Filt_0.2	Kendra010_70314

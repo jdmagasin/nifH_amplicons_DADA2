@@ -22,7 +22,7 @@ The file you are now reading is included in the DADA2 nifH package so you
 probably already did this step.  If not, just do the following:
 
   % cd $HOME
-  % tar xvfz /home/jmagasin/ToolsShared/DADA2_nifH_pipeline.tgz .
+  % tar xvfz /home/jmagasin/ToolsShared/NifH_amplicons/DADA2/DADA2_nifH_pipeline.tgz
 
 This creates a local copy of the tools in your home directory under
 DADA2_nifH_pipeline.

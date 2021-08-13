@@ -25,16 +25,16 @@ few hours.
 
 2. Go to the example directory (that contains EXAMPLE.txt, this file).  Input
    files for the example are already in this directory.  Pipeline outputs will
-   be placed here too.
+   be placed here too.  [For your own analyses you should work outside of the
+   DADA2_nifH_pipeline directory!]
 
-      cd $HOME/DADA2_nifH_pipeline/Example
+      cd ~/DADA2_nifH_pipeline/Example
    
 
 3. Gather the FASTQs into a directory hierarchy rooted at LinksToFastqs.  The
    hierarchy is organized according to the processing groups defined in
-   fastqMap.tsv.  You only need to do this step is once (and not each time you
-   run the pipeline).  See notes in fastqMap.tsv and help via
-   "organizeFastqs.R --help
+   fastqMap.tsv.  You only need to do this step once (not each time you run the
+   pipeline).  See notes in fastqMap.tsv and help via "organizeFastqs.R --help
 
       organizeFastqs.R fastqMap.tsv
 
@@ -64,6 +64,8 @@ Key outputs:
 
 5. DADA2 output.  For each size fraction and for the date you ran the pipeline,
    there is separate output.  E.g. Data.nobackup/Dada2PipeOutput/Filt_3/Out.2021Aug6/
+
+
    FIXME
      ASVs sequences and abundance tables are in TextData
      Plots include quality plots of forward and reverse reads, critical for

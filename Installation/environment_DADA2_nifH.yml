@@ -14,5 +14,6 @@ channels:
 dependencies:
   - cutadapt
   - hmmer
+  - fraggenescan
   - r-essentials=4.1
   - r-base=4.1

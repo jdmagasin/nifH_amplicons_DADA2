@@ -11,6 +11,17 @@ These instructions are for installing tools on thalassa (linux machine).  The
 overall process should be very similar if you want to set up to run on your
 laptop.  Feel free to ask Jonathan for help.
 
+Overview:
+  0. Get the pipeline and all documentation (in a tgz file).
+  1. Install Miniconda3, a package / environment manager.
+  2. Create the DADA2_nifH environment. This step downloads most of the external
+     tools and creates an environment in which they will be available when you
+     run the pipeline.
+  3. Install the DADA2 R package.
+  4. Add the pipeline scripts to your path
+  -- Installation completed! --
+  5. Try the example
+
 Below '%' is the unix shell prompt. Your's might differ.
 
 
@@ -19,10 +30,11 @@ Below '%' is the unix shell prompt. Your's might differ.
 --------------------------------------------------------------------------------
 
 The file you are now reading is included in the DADA2 nifH package so you
-probably already did this step.  If not, just do the following:
+probably already did this step.  If not, then do the following (for whichever
+DATESTAMP you like, probably the most recent):
 
   % cd $HOME
-  % tar xvfz /home/jmagasin/ToolsShared/NifH_amplicons/DADA2/DADA2_nifH_pipeline.tgz
+  % tar xvfz /home/jmagasin/ToolsShared/NifH_amplicons/DADA2/Shared/DADA2_nifH_pipeline.DATESTAMP.tgz
 
 This creates a local copy of the tools in your home directory under
 DADA2_nifH_pipeline.
@@ -88,8 +100,8 @@ to run the DADA2 nifH pipeline. This step will take awhile (~10 min):
 
   % conda env update -n DADA2_nifH --file $HOME/DADA2_nifH_pipeline/Installation/environment_DADA2_nifH.yml
 
-Install complete!  The remaining steps are to verify your installation.  First,
-activate the DADA2_nifH environment:
+Installation 99% complete!  Let's verify the conda DADA2_nifH environment.
+First, activate it:
 
   % conda activate DADA2_nifH
 
@@ -108,7 +120,7 @@ installed. (Example output shown for user "yourLoginHere".)
   (DADA2_nifH) % which hmmalign
   /home/yourLoginHere/miniconda3/envs/DADA2_nifH/bin/hmmalign
 
-You can deactivate the currently active environment with:
+Later, you can deactivate the environment with:
 
   (DADA2_nifH) % conda deactivate
 
@@ -120,17 +132,95 @@ You can now delete the Miniconda3Install directory
 
 
 --------------------------------------------------------------------------------
-# 2. Try the mini Arctic 2017 example
+# 3. Install the DADA2 R package
+--------------------------------------------------------------------------------
+
+We will use Bioconductor (an R package) to install DADA2 just as described at:
+    https://bioconductor.org/packages/release/bioc/html/dada2.html
+This is the standard way to install ~any package using Bioconductor.  Start
+R and in the R console paste the following lines:
+
+   ## Install Bioconductor if necessary.
+   if (!requireNamespace("BiocManager", quietly = TRUE))
+       install.packages("BiocManager")
+   ## Now use Bioconductor to install the latest dada2.  This takes a long time.
+   ## Check in periodically because at some point you will be asked if you want
+   ## to update all/some/none of several mysteriously named packages.  Choose
+   ## all.
+   BiocManager::install("dada2")
+
+The install takes around 30 min on thalassa because DADA2 uses many additional
+packages that must be downloaded and compiled.  At the end of a successful
+install, you should see a few successful test messages.  Additionally you can
+try loading dada2 yourself before exiting R:
+
+    library(dada2) # Better work!
+    quit()         # Hit 'n' when it asks if you want to save.
+
+
+Notes:
+  1. Step #2 above installed R v4.1 (specified in the .yml file) because that
+     version is required for DADA2 v3.13, which was the most recent DADA2 on
+     Aug. 12, 2021.  At some point, a new version of DADA2 might require a newer
+     version of R and I will have to change the .yml file.  If step #3 fails,
+     then perhaps we are at that poin!
+
+  2. The DADA2 package was installed with the R that is within the DADA2_nifH
+     environment.  You can only use it when DADA2_nifH is active.
+
+  3. There is a way to install DADA2 using conda, however it seems broken as
+     of Aug. 12, 2021.
+
+
+--------------------------------------------------------------------------------
+# 4. Add the pipeline scripts to your path
+--------------------------------------------------------------------------------
+
+The tools that you installed with conda will automatically be in your path when
+DADA2_nifH is active. However, my scripts are not a conda package and have to be
+added to your path in this separate step.  We will update the path using conda
+so that it is only in effect when DADA2_nifH is active.  
+
+The steps below assume you installed the pipeline in your home directory as
+described in step #0.  I.e. everything must be in "~/DADA2_nifH_pipeline".  If
+you installed elsewhere, just adjust added path components accordingly.
+
+First, determine if your shell is bash or tcsh because the syntax differs
+slightly depending on which:
+
+  (DADA2_nifH) % echo $0
+
+If bash, then do this, being careful that double and single quotes are exactly
+as shown (so use caution if you are e.g. pasting from a Word doc or email!):
+
+  (DADA2_nifH) % conda env config vars set PATH="$PATH"':~/DADA2_nifH_pipeline:~/DADA2_nifH_pipeline/scripts'
+
+If tcsh, do this (lower case path, spaces are critical):
+FIXME FIXME FIXME: The tcsch version might not work after all. (bash version is fine)
+
+  (DADA2_nifH) % conda env config vars set path="$path"' ~/DADA2_nifH_pipeline ~/DADA2_nifH_pipeline/scripts'
+
+Now reactivate the environment so the change takes effect, and then verify that
+the shell can now find the main pipeline script and organizeFastqs.R:
+
+  (DADA2_nifH) % conda activate DADA2_nifH
+  (DADA2_nifH) % which run_DADA2_pipeline.sh
+  (DADA2_nifH) % which organizeFastqs.R
+
+That's it!  You should now be able to run the pipeline on a small example.
+
+
+--------------------------------------------------------------------------------
+# 5. Try the mini Arctic 2017 example
 --------------------------------------------------------------------------------
 
 Please see the example:
 
   % cd $HOME/DADA2_nifH_pipeline/Example
 
-
-In my homedir, ToolsShared/NifH_amplicons/DADA2/Example/EXAMPLE.txt describes
-how to run the pipeline on a very small subset of the Arctic 2017 data.  (You
-can probably begin at step 2:)
+This is the same as /home/jmagasin/ToolsShared/NifH_amplicons/DADA2/Example.
+There are docs that describe how to run the pipeline on a very small subset of
+the Arctic 2017 data.  (You can probably begin at step 2:)
 
 
 -- END --

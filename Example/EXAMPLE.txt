@@ -46,6 +46,24 @@ few hours.
 
       run_DADA2_pipeline.sh params.example.csv > log.txt
 
+   The pipeline is now running.  It will take ~18 minutes to complete this
+   small example.
+
+   Suggestion: To get back control of the shell, enter control-Z.  This will
+   temporarily suspend the current job, which is the pipeline.  After control-Z,
+   do the following to see the pipeline job, then restart it as a background
+   process [so that you can continue to use the shell interactively], verify
+   that it is running in the background, and then look at the last 20 lines of
+   the log.
+
+       jobs
+       fg
+       jobs
+       tail -n 20 log.txt
+
+   You can do the tail command whenever you like to see how the pipeline is
+   progressing, or jobs to see if it is still running.
+
 
 Key outputs:
 

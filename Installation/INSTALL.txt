@@ -152,9 +152,11 @@ In the shell, with DADA2_nifH active, start R:
 
 and in the R console paste the following lines:
 
-   ## Install Bioconductor if necessary.
+   ## Install Bioconductor if necessary.  It takes just a few seconds.
+   ## When asked which CRAN mirror to use, "1" is good (0-Cloud [https]).
    if (!requireNamespace("BiocManager", quietly = TRUE))
        install.packages("BiocManager")
+
    ## Now use Bioconductor to install the latest dada2.  This takes a long time.
    ## Check in periodically because at some point you will be asked if you want
    ## to update all/some/none of several mysteriously named packages.  Choose
@@ -242,7 +244,7 @@ path setting command was appended to .bashrc.
 If tcsh, do this. The same cautions mentioned above apply here.
 
   (DADA2_nifH) % cp ~/.tcshrc ~/.tcshrc.OLD
-  (DADA2_nifH) % echo 'setenv PATH $PATH:~/DADA2_nifH_pipeline:~/DADA2_nifH_pipeline/scripts' >> ~/.tcshrc
+  (DADA2_nifH) % echo 'set path=($path $HOME/DADA2_nifH_pipeline $HOME/DADA2_nifH_pipeline/scripts)' >> ~/.tcshrc
   (DADA2_nifH) % tail ~/.tcshrc
 
 The path modifications will only become active when you next login (ssh) to
@@ -271,7 +273,7 @@ That's it!  You should now be able to run the pipeline on a small example.
 
 Please see the example:
 
-  % cd ~/DADA2_nifH_pipeline/Example/EXAMPLE.txt
+  % cd ~/DADA2_nifH_pipeline/Example
 
 You can probably begin at step 2.
 

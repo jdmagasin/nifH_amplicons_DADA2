@@ -5,7 +5,13 @@
 ## This script must be consistent with INSTALL.txt:
 ##   -- The path to the distributed tgz's
 ##   -- The extracted files must be within directory "DADA2_nifH_pipeline"
-##  
+##      because the path setting step assumes this.
+##
+## Some of the scripts needed by the DADA2 pipeline are general utilities that
+## will be used in other pipelines, e.g. extractFasta.pl. When making the tgz,
+## copy over such utilities to the scripts dir.  Installation of the DADA2
+## pipeline sets the path to include scripts.
+##
 
 STAMP=$(echo $(date) | awk -F' ' '{print $6 $2 $3}')
 OUTTGZ="Shared/DADA2_nifH_pipeline.$STAMP.tgz"
@@ -17,11 +23,14 @@ if [ -f "$OUTTGZ" ] ; then
     fi
 fi
 
+UDIR="$HOME/ToolsShared/Utils"
+UTILS="$UDIR/extractFasta.pl"
 NEEDED_STUFF="run_DADA2_pipeline.sh Installation/ Example/ scripts/"
 
 ## The files in the tgz must be below "DADA2_nifH_pipeline"
 echo "Tarring up $OUTTGZ ..."
-mkdir -p Shared/DADA2_nifH_pipeline && \
+mkdir -p Shared/DADA2_nifH_pipeline/scripts && \
+  cp -Rf `echo $UTILS` Shared/DADA2_nifH_pipeline/scripts/ && \
   cp -Rf `echo "$NEEDED_STUFF"` Shared/DADA2_nifH_pipeline/ && \
   tar cfz "$OUTTGZ" -C Shared DADA2_nifH_pipeline
 if [ "$?" -ne 0 ] ; then

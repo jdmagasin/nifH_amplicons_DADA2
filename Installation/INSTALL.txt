@@ -17,7 +17,7 @@ Overview:
   1. Install Miniconda3.
   2. Create the DADA2_nifH environment. This step downloads external tools and
      includes them in a new environment for running the pipeline.
-  3. Install the DADA2 R package.
+  3. Install the DADA2 R package, and two others.
   4. Add the pipeline scripts to your path.
   -- Installation completed! --
   5. Try the example
@@ -141,8 +141,14 @@ the DADA2_nifH environment.
 
 
 --------------------------------------------------------------------------------
-# 3. Install the DADA2 R package
+# 3. Install the DADA2 R package and a few others
 --------------------------------------------------------------------------------
+
+This step installs DADA2, vegan (with tons of support for ecological stats), abd
+ggrepel (minor ggplot addition for non-overlapping labels in plots).
+
+
+*** DADA2 R pacakge install ***
 
 We will use Bioconductor (an R package) to install DADA2 as described at:
     https://bioconductor.org/packages/release/bioc/html/dada2.html
@@ -153,7 +159,8 @@ In the shell, with DADA2_nifH active, start R:
 and in the R console paste the following lines:
 
    ## Install Bioconductor if necessary.  It takes just a few seconds.
-   ## When asked which CRAN mirror to use, "1" is good (0-Cloud [https]).
+   ## When asked which CRAN mirror to use, "0-Cloud [https]" is good, which
+   ## is probably choice "1".
    if (!requireNamespace("BiocManager", quietly = TRUE))
        install.packages("BiocManager")
 
@@ -189,10 +196,24 @@ Notes:
      however it seems broken as of Aug. 12, 2021.
 
 
+*** Install vegan and ggrepel ***
+
+While DADA2_nifH is the active environment, launch R.  Then do a CRAN install of
+vegan and ggrepel (since neither is in Bioconductor):
+
+    install.packages('vegan')   # You can choose the "0-Cloud" mirror again.
+                                # The install will take ~1 min.
+    install.packages('ggrepel') # This install takes ~10 sec.
+
+    quit()  # Hit 'n' when it asks if you want to save.
+
+You should now have all the required external software for running the DADA2
+nifH pipeline.
+
+
 --------------------------------------------------------------------------------
 # 4. Add the pipeline scripts to your path
 --------------------------------------------------------------------------------
-
 
 Short version (if you are very comfortable with unix shells):
 

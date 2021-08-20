@@ -30,15 +30,44 @@ the same whether you are using bash or tcsh shell, except for step #4.
 # 0. Get the DADA2 nifH pipeline, documents, etc.
 --------------------------------------------------------------------------------
 
+** First time install **
+
 The file you are now reading is included in the DADA2 nifH package so you
 probably already did this step.  If not, then do the following (for whichever
 DATESTAMP you like):
 
   % cd ~
+  % tar tvfz /home/jmagasin/ToolsShared/NifH_amplicons/DADA2/Shared/DADA2_nifH_pipeline.DATESTAMP.tgz
   % tar xvfz /home/jmagasin/ToolsShared/NifH_amplicons/DADA2/Shared/DADA2_nifH_pipeline.DATESTAMP.tgz
 
-This creates a local copy of the tools in your home directory under
-DADA2_nifH_pipeline.  This directory is only for the tools, not your analyses.
+The first tar command lists (t) the contents of the tgz.  You should see that
+all files are within directory DADA2_nifH_pipeline.  The second tar command
+extracts (x) a local copy of the copy of the tools in your home directory under
+DADA2_nifH_pipeline.  This directory is only for the tools, **not your
+analyses**.
+
+
+** Upgrading **
+
+Upgrading the pipeline will usually entail getting new versions of my scripts
+and documentation but not external packages.  Essentially, you just need to do
+the tar commands above. They will overwrite the old pipeline, so you should
+first verify the the new:
+
+  % cd ~
+  % mv DADA2_nifH_pipeline DADA2_nifH_pipeline.OLD
+  % tar tvfz /home/jmagasin/ToolsShared/NifH_amplicons/DADA2/Shared/DADA2_nifH_pipeline.NEWDATESTAMP.tgz
+  % tar xvfz /home/jmagasin/ToolsShared/NifH_amplicons/DADA2/Shared/DADA2_nifH_pipeline.NEWDATESTAMP.tgz
+  % which run_DADA2_pipeline.sh
+  % run_DADA2_pipeline.sh params.example.csv --help
+
+The 'which' command should show that the main script can be found by your shell,
+because you added DADA2_nifH_pipeline to your path when you first installed
+(step #4.)  You can re-run the Example too if you like.  Then you can delete the
+DADA2_nifH_pipeline.OLD directory.
+
+From time to time, upgrading will require new(er) conda or R packages (in
+particular DADA2).  I will provide instructions as needed.
 
 
 --------------------------------------------------------------------------------

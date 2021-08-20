@@ -93,8 +93,11 @@ if [ ! -f "$FastqList" ] || [ -z "$OutDir" ] ; then
     exit -1
 fi
 
-chackdir="/tmp/DADA2pipe_${USER}/cutadapthack"
-mkdir -p "$chackdir"
+chackdir=`mktemp -d --tmpdir "${USER}_cutadapthack_XXXXX"`
+if [ "$?" -ne 0 ] ; then
+    echo "Error:  Failed to create temporary directory for runCutadapt.sh."
+    exit -1
+fi
 
 while read r1 ; do
     if [ ! -z `echo "$r1" | grep _R2_` ] ; then

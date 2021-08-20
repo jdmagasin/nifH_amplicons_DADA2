@@ -49,20 +49,27 @@ few hours.
    The pipeline is now running.  It will take ~18 minutes to complete this
    small example.
 
-   Suggestion: To get back control of the shell, enter control-Z.  This will
-   temporarily suspend the current job, which is the pipeline.  After control-Z,
-   do the following to see the pipeline job, then restart it as a background
-   process [so that you can continue to use the shell interactively], verify
-   that it is running in the background, and then look at the last 20 lines of
-   the log.
+   Suggestion: Rather than wait 18 minutes before you can interact with the
+   shell, enter control-z to get back control.  Control-z will temporarily
+   suspend the current job, which is the pipeline.  After control-Z, do the
+   following steps to: see the pipeline job [jobs]; restart it as a background
+   process [bg]; verify that the pipeline is running in the background [jobs];
+   and then look at the last 20 lines of the log [tail].
 
        jobs
-       fg
+       bg
        jobs
        tail -n 20 log.txt
 
    You can do the tail command whenever you like to see how the pipeline is
    progressing, or jobs to see if it is still running.
+
+   In particular, you do *not* have to remain logged in to thalassa until the
+   job completes.  For long jobs, I usually log out of thalassa and ssh back in
+   every few hours to see how the job is going (using the 'ps' command [not 'jobs'] and
+   'tail' to see if there is a "Done!" message (or error) at the end of the log.
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
 Key outputs:
@@ -76,22 +83,32 @@ Key outputs:
 3. To get an idea of how many NifH-like sequences are in your data, see:
      ~/ToolsShared/NifH_amplicons/DADA2/Example/Data.nobackup/summary.NifH_prefilter.txt
    These are the reads that were used to create the error models used by DADA2.
+   You might also spot some samples that look problematic (very few nifH-like
+   reads) that could be dropped.
 
 4. Inspect the error model plots (.pdfs) Data.nobackup/ErrorModels (separate for
-   each size fraction).
+   each size fraction).  You will need some guidance from the DADA2 pages to
+   interpret these, or I can help.  If they look terrible, then we should try to
+   improve them before working the the ASVs. (Bad error models are likely to
+   cause rarer ASVs to not be inferred.)
 
 5. DADA2 output.  For each size fraction and for the date you ran the pipeline,
    there is separate output.  E.g. Data.nobackup/Dada2PipeOutput/Filt_3/Out.2021Aug6/
+   within which you should check out (fixme: breifly):
 
+     - The DADA2 log file has messages specific to DADA2 (stage 4 -- not the
+       top level log file).
 
-   FIXME
-     ASVs sequences and abundance tables are in TextData
-     Plots include quality plots of forward and reverse reads, critical for
-      assessing data quality and tuning parameters for DADA2
-     log file specifc to the DADA2 stage of the pipeline
-     readCountsDuringProcessing... plot that shows % of reads retained at
-      each stage of the pipeline. E.g. are reads dropped due to quality
-      or failure to overlap? Important quality assessment and parameter
-      tuning.
+     - TextData:  ASVs sequences and abundance tables.
+
+     - Plots: This directory includes quality plots of forward and reverse
+       reads, critical for assessing data quality and tuning parameters for
+       DADA2
+
+     - readCountsDuringProcessing.....png: This plot shows the percentage of
+       reads retained at each stage of the pipeline.  Use it to spot excessive
+       loss of reads ---> parameter adjustments.  E.g. are reads dropped due to
+       quality, or failure to overlap?
+
 
 -- END --

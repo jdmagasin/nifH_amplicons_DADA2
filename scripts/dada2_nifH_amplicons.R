@@ -540,7 +540,10 @@ if (!file.exists(mergedRdsFile)) {
     names(mergers) <- Fastq2Samp(names(mergers))
     saveRDS(mergers, mergedRdsFile)
 
-    cat("mergePairs() created", length(mergers),"ASVs.\n")
+    ## Make a list of unique ASV sequences by enumerating the df's in the list.
+    ## (Could skip -- see makeSequenceTable() below.)
+    numAsvs <- length(unique(unlist(lapply(mergers, function(v) v$sequence))))
+    cat("mergePairs() created",numAsvs,"ASVs in",length(mergers),"samples.\n")
     if (mergePairsParams$justConcatenate) {
         cat("mergePairs() was asked to concatenate, so each ASV will have a 5' part\n",
             "and a 3' part that are joined by 10 N's.  The 3' part will have been reverse\n",

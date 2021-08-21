@@ -171,13 +171,14 @@ if [ -d "$OUTDIR/Data.NifH_prefilter" ] ; then
     echo "Looks like you already did this step. Skipping."
 else
     cd "$OUTDIR"
-    ## Not necessary to use processing groups for cutadapt.
+    ## Not necessary to use processing groups.
     $SDIR/NifH_prefilter/run_NifH_prefilter.sh  Data.trimmed
     echo
     echo "Done. The NifH-like search results are in $OUTDIR/Data.NifH_prefilter."
     echo "Now summarizing how many R1 reads were processed, how many ORFs were predicted,"
     echo "and how many of the reads had NifH identified at cutoffs mentioned above."
-    printf "%-30s%15s%15s%15s%15s\n" Sample R1.reads Orfs OrfsTC R1.reads.NifH > summary.NifH_prefilter.txt
+    pfsum="Data.NifH_prefilter/summary.NifH_prefilter.txt"
+    printf "%-30s%15s%15s%15s%15s\n" Sample R1.reads Orfs OrfsTC R1.reads.NifH > "$pfsum"
     for lf in `find Data.NifH_prefilter -name log.nifScan.txt`; do
         ## Print just the matching text (only on any lines matched).
         samp=`echo $(basename $(dirname $lf))`
@@ -187,8 +188,7 @@ else
         ## Slow so just count the domtab lines -- assume an ORF only gets 1 table entry.
         hmmtc=`gunzip -c "$(dirname $lf)/hmmsearch.Fer_NifH.domtab.gz" | grep -vc '^#'`
         nread=`cat $lf | sed -n 's/^Identified \([0-9][0-9]*\) reads with NifH domains\./\1/p'`
-        printf "%-30s%15s%15s%15s%15s\n" $samp $nseq $norf $hmmtc $nread \
-          >> summary.NifH_prefilter.txt
+        printf "%-30s%15s%15s%15s%15s\n" $samp $nseq $norf $hmmtc $nread >> "$pfsum"
     done
     cd "$CWD"
 fi

@@ -81,7 +81,7 @@ Key outputs:
      ~/ToolsShared/NifH_amplicons/DADA2/Example/Data.nobackup/Data.trimmed/summary.cutadapt.txt
 
 3. To get an idea of how many NifH-like sequences are in your data, see:
-     ~/ToolsShared/NifH_amplicons/DADA2/Example/Data.nobackup/summary.NifH_prefilter.txt
+     ~/ToolsShared/NifH_amplicons/DADA2/Example/Data.nobackup/Data.NifH_prefilter/summary.NifH_prefilter.txt
    These are the reads that were used to create the error models used by DADA2.
    You might also spot some samples that look problematic (very few nifH-like
    reads) that could be dropped.

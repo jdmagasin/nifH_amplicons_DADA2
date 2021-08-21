@@ -234,7 +234,11 @@ while read pgrp; do
         echo "DADA2 output already exists for $pgrp ($logfile found). Skipping."
     else
         cd "$OUTDIR"
-        echo " -- Running DADA2 on processing group $pgrp"
+        echo ""
+        echo " #######################################################"
+        echo " ## Running DADA2 on processing group $pgrp"
+        echo " ##"
+        echo " ##"
         ## Shared results directory for this processing group.  Add a time stamp for
         ## the DADA2 outdir so different runs (e.g. parameter tweaks) can be stored
         ## alongside each other.
@@ -257,6 +261,10 @@ while read pgrp; do
         mv readCountsDuringProcessing.csv "$rcdp"
         mv readCountsDuringProcessing.png "$rcdpPng"
         mv "$rcdp" "$rcdpPng" "${dada2dir}/"
+        echo " ##"
+        echo " ## Finished DADA2 processing group $pgrp"
+        echo " #######################################################"
+        echo ""
         cd "$CWD"
     fi
 done < processingGroups.txt

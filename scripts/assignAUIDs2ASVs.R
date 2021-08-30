@@ -14,14 +14,22 @@ Usage:
 
 Pass a table (.tsv) of full paths to FASTA files such as ASVs from DADA2 (column
 1) and descriptive tags for each set (column 2). The tag can be anything but
-short is probably best and you can structure it, e.g. sample
-Arctic2017:DNA:Filt0.2.
+short is best and you can structure it, e.g. sample Arctic2017:DNA:Filt0.2.
 
-The script will assign AUIDs (ASV uniqu id's) to all sequences and output a
+The script will assign AUIDs (ASV unique id's) to all sequences and output a
 table (asv2auid.tsv) that includes the AUIDs, sequence md5's, the sequences
 themselves, the tags, and in which 'tags' the sequence was detected so that you
 can identify sequences found across locations, size fractions, etc. (depending
 on the information in your tags).
+
+Important difference between AUIDs and md5s:
+   AUIDs: Short and legible.  Uniquely assigned to each sequence **within a set
+          of FASTA files**.  Do not mix AUIDs from different invocations of this
+          script!
+
+   md5s: Long and illegible.  Unique* to each sequence. The md5s can be compared
+         across invocations of this script. (*It is _extremely_ unlikely that two
+         distinct sequences would have the same md5 checksum.)
 
 Options:
   -fasta: Write out a fasta file of the AUIDs with definition lines that
@@ -60,7 +68,7 @@ cat("Loading libraries...\n")
 suppressMessages(library(ShortRead))
 suppressMessages(library(digest))
 
-cat("Mapping ASVs to AUIs...\n")
+cat("Mapping ASVs to AUIDs...\n")
 asv2auid <- data.frame()
 for (i in 1:nrow(asvFastaPaths)) {
     seq <- readFasta(asvFastaPaths$Path[i])

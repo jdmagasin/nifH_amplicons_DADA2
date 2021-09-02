@@ -34,11 +34,12 @@ if [ -z "$PARAMS" ] || [ ! -z `echo $PARAMS | grep '\-h'` ] ; then
 	    e.g. path/to/output/DNA/Filter0.2_3.
 
 	 The main stages of this script are:
-	 1. Primer trimming using cutadapt.  Primers must be:
+	 1. Primer trimming using cutadapt.  The default primers are:
 	      forward:  5’ – TGY GAY CCN AAR GCN GA – 3’
 	      reverse:  5’ – ADN GCC ATC ATY TCN CC – 3’
-	    which are hard coded in the runCutadapt.sh script that does this stage.
-	    Trimmed FASTQs are placed in $OUTDIR/Data.trimmed
+	    but you can set 'forward' and 'reverse' in the parameters file.
+	    The script runCutadapt.sh does this state and puts the trimmed
+	    FASTQs in $OUTDIR/Data.trimmed
 
 	 2. Identification of reads that likely encode NifH. These are used in the
 	    next stage.  Output is stored in $OUTDIR/NifH_prefilter
@@ -147,7 +148,9 @@ else
     ## Not necessary to use processing groups for cutadapt.
     ## Note that runCutadapt output fastq paths have the same directory
     ## structure as their inputs execpt the first folder is renamed as directed.
-    $SDIR/runCutadapt.sh "$rflist" "$OUTDIR/Data.trimmed" 2>&1
+    fwd=`cat $PARAMS | grep "^forward" | cut -d, -f2 | tr -d [:space:]`
+    rev=`cat $PARAMS | grep "^reverse" | cut -d, -f2 | tr -d [:space:]`
+    $SDIR/runCutadapt.sh "$rflist" "$OUTDIR/Data.trimmed" "$fwd" "$rev" 2>&1
     ## One summary across all processing groups.
     casum="$OUTDIR/Data.trimmed/summary.cutadapt.txt"
     echo "Summarizing all of the cutadapt logs (all processing groups) in $casum"

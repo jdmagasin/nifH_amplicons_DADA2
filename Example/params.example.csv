@@ -20,6 +20,13 @@
 ##       Probably 1.85% is pessimistic -- and that is for one read pair, i.e.
 ##       before DADA2 "denoises" over many read pairs when inferring the ASVs.
 
+
+## You can specify primers that will be trimmed by cutadapt. Specify both from
+## 5' to 3'.  The default primers assumed by runCutadapt.sh are shown (and will
+## be used if you omit the next two lines).
+forward,TGYGAYCCNAARGCNGA
+reverse,ADNGCCATCATYTCNCC
+
 ## These are for filterAndTrim().
 truncQ,16
 maxEE.fwd,2

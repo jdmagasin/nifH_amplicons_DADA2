@@ -9,10 +9,6 @@
 ## A few motes:
 ##  -- Careful, will clobber previous output in the OutDir.
 ##
-##  -- Hack! For some reason I run into failed checksums (gzip.py) if I run this
-##     script on Kendra's fastq.gz's, but not on my own.  Perhaps we use
-##     different compression libraries. To work around, uncompress her files.
-##
 ##  -- Presumes fwd and rev nifH primers I got from Kendra.  These include some
 ##     wildcards. By default cutadapt does match IUPAC wildcards in "adapters"
 ##     (but you can tell it not to with --no-match-adapter-wildcards).
@@ -93,12 +89,6 @@ if [ ! -f "$FastqList" ] || [ -z "$OutDir" ] ; then
     exit -1
 fi
 
-chackdir=`mktemp -d --tmpdir "${USER}_cutadapthack_XXXXX"`
-if [ "$?" -ne 0 ] ; then
-    echo "Error:  Failed to create temporary directory for runCutadapt.sh."
-    exit -1
-fi
-
 while read r1 ; do
     if [ ! -z `echo "$r1" | grep _R2_` ] ; then
         ## We will handle the R2 when we see the R1.
@@ -119,19 +109,12 @@ while read r1 ; do
     out2="$odir/$(basename $r2 .fastq.gz).trimmed.fastq.gz"
     if [ -f "$out1" ] ; then echo "$out1 already exists. Will clobber."; fi
     if [ -f "$out2" ] ; then echo "$out2 already exists. Will clobber."; fi
-    ## Hack! Uncompress Kendra's fastq.gz to work around failed checksum
-    ## (gzip.py) probably due to she and I using different zlibs.
-    tr1="$chackdir/$(basename $r1 .gz)"
-    tr2="$chackdir/$(basename $r2 .gz)"
-    zcat $r1 > $tr1
-    zcat $r2 > $tr2
     ## As noted above, the primers are not anchored because there is Illumina
     ## adapter sequence up- and downstream of the primers.
     echo "### Working on $r1 and its R2 file." >> $odir/cutadapt.log
     cutadapt -a "${fwd}...${rcrev}"  -A "${rev}...${rcfwd}"  -m 1  --discard-untrimmed \
-             -o $out1  -p $out2  $tr1  $tr2 >> $odir/cutadapt.log
+             -o $out1  -p $out2  $r1  $r2 >> $odir/cutadapt.log
     echo -e "### Finished working on $r1 and its R2 file.\n\n" >> $odir/cutadapt.log
-    rm $tr1 $tr2
 done < $FastqList
 echo "Done!"
 exit -1

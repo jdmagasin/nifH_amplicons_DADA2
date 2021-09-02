@@ -25,7 +25,7 @@
 ##     were retained for each set.
 ##
 ##  -- Also drop empty reads by using -m 1.  This is only to avoid an error in
-##     plotting quality profiles from DADA2 -- chokes on empy reads.  Defer
+##     plotting quality profiles from DADA2 -- chokes on empty reads.  Defer
 ##     length-based filtering until after DADA2 merges paired reads (e.g.Kendra
 ##     uses PEAR to restrict to reads 300-400nt).
 ##
@@ -34,24 +34,17 @@
 ##     mismatch. (Note that cutadapt doesn't distinguish between primers and
 ##     adapters.)  And see first note about wildcards.  Also, any default
 ##     quality filtering apparently throws out very few reads.  That's fine,
-##     just leave it for DADA2 filter and trim step.
+##     just leave it for the DADA2 filter and trim step.
 ##
 
-FastqList=$1
-OutDir=$2
-
-## Primers Kendra provided are as follows, and note that they include IUPAC wildcards.
+## By default use Kendra's favorite primer. Note that they include IUPAC wildcards.
 fwd="TGYGAYCCNAARGCNGA"  #  nifH_up_inner_F:   5’ – TGY GAY CCN AAR GCN GA – 3’
 rev="ADNGCCATCATYTCNCC"  #  nifH_down_inner_R: 5’ – ADN GCC ATC ATY TCN CC – 3’
-
-## Their reverse complements (from dada2::rc() and checkd with www.reverse-complement.com).
-rcfwd="TCNGCYTTNGGRTCRCA"
-rcrev="GGNGARATGATGGCNHT"
 
 usage="
 Use cutadapt to trim nifH paired-end Illumina reads their primers.
 Usage:
-\trunCutadapt.sh  FastqList  OutDir
+\trunCutadapt.sh  FastqList  OutDir  [fwdPrimer] [revPrimer]
 
 Paired files in FastqList of this form:
    path/to/prefix_R1_suffix.fastq.gz
@@ -62,12 +55,21 @@ will be trimmed of their primers and stored in:
    OutDir/to/cutadapt.log
 Note that the first part of the file path is replaced with OutDir.
 
-The R1 and R2 fastqs should be for nifH sequences that have these primers:
-\tforward:  5' - $fwd - 3'
-\treverse:  5' - $rev - 3'
+By default these nifH primers are used:
+\tforward:  5' - $fwd - 3'  for the R1 fastqs
+\treverse:  5' - $rev - 3'  for the R2 fastqs
+You may specify your own primers 5' to 3' with IUPAC codes (upper or lower case).
+
 This script will discard read pairs that are missing one or both of the primers.
-You should be in a conda environment that includes cutadapt.
 "
+
+FastqList=$1
+OutDir=$2
+if [ ! -z "$3" ] ; then
+    fwd=`echo "$3" | tr [:lower:] [:upper:]`
+    rev=`echo "$4" | tr [:lower:] [:upper:]`
+    ## Check both defined below.
+fi
 
 ## Note on the cutadapt parameters used in the loop below:
 ## Pass params that will trim paired reads of their primers and discard pairs
@@ -79,15 +81,23 @@ You should be in a conda environment that includes cutadapt.
 ## primers).  You can change this e.g. to require that both primers were missing
 ## by also passing --pair-filter=both (rather than 'any' which is the default).
 
-if [ ! -x `which cutadapt` ] ; then
+if [ ! -f "$FastqList" ] || [ -z "$OutDir" ] ; then echo -e "$usage"; exit -1; fi
+if [ -z `which cutadapt 2> /dev/null` ] ; then
     echo "Error: Cannot find cutadapt. Are you in a conda environment that includes it?"
-    echo -e "$usage"
     exit -1
 fi
-if [ ! -f "$FastqList" ] || [ -z "$OutDir" ] ; then
-    echo -e "$usage"
-    exit -1
-fi
+if [ -z "$rev" ] ; then echo "Error: You may not specify only a forward primer."; exit -1; fi
+
+## Calculate reverse complements
+legalIUPAC="ACGTURYSWKMBDHVN"  # From https://www.bioinformatics.org/sms/iupac.html
+complIUPAC="TGCAAYRSWMKVHDBN"  # By hand and verified at www.reverse-complement.com
+bad=`echo $fwd | tr -d "$legalIUPAC"`
+if [ -n "$bad" ] ; then echo "Non IUPAC codes in your forward primer: $bad"; exit -1; fi
+bad=`echo $rev | tr -d "$legalIUPAC"`
+if [ -n "$bad" ] ; then echo "Non IUPAC codes in your reverse primer: $bad"; exit -1; fi
+
+rcfwd=`echo $fwd | rev | tr "$legalIUPAC" "$complIUPAC"`
+rcrev=`echo $rev | rev | tr "$legalIUPAC" "$complIUPAC"`
 
 while read r1 ; do
     if [ ! -z `echo "$r1" | grep _R2_` ] ; then
@@ -112,6 +122,10 @@ while read r1 ; do
     ## As noted above, the primers are not anchored because there is Illumina
     ## adapter sequence up- and downstream of the primers.
     echo "### Working on $r1 and its R2 file." >> $odir/cutadapt.log
+    echo "Will use these primers with cutadapt:" >> $odir/cutadapt.log
+    echo -e "\tforward:  5'- ${fwd} -3'  revcomp 5'- ${rcfwd} -3'" >> $odir/cutadapt.log
+    echo -e "\treverse:  5'- ${rev} -3'  revcomp 5'- ${rcrev} -3'" >> $odir/cutadapt.log
+    echo >> $odir/cutadapt.log
     cutadapt -a "${fwd}...${rcrev}"  -A "${rev}...${rcfwd}"  -m 1  --discard-untrimmed \
              -o $out1  -p $out2  $r1  $r2 >> $odir/cutadapt.log
     echo -e "### Finished working on $r1 and its R2 file.\n\n" >> $odir/cutadapt.log

@@ -12,7 +12,7 @@
 ##    https://benjjneb.github.io/dada2/bigdata.html
 ##
 ## Usage
-##    dada2_nifH_amplicons.R [dataDir] [outputDir] [precalcErrorModelsDir] [params]
+##    dada2_nifH_amplicons.R [dataDir] [outputDir] [params] [precalcErrorModelsDir]
 ##
 ## where dataDir defaults to Data and outputDir defaults to Dada2Out.  Note that
 ## non-biological sequences should already have been removed: barcodes,
@@ -20,15 +20,11 @@
 ## biological variability of nifH.)  See the script runCutadapt.sh which trims
 ## nifH primers (and thus adapters and barcodes) from paired-end Illumina reads.
 ##
-## This script works with DADA2 v1.16.0 and R v4.0.3 (at least) which I
-## recommend you install via conda.  (Thalassa is unlikely to have the most
-## current R version, and hummingbird might also be behind. ITS updated
-## hummingbird's R to v3.6.1 way back when I developed this script for an
-## earlier version of DADA2, for Ana's PacBio data.)
+## This script works with DADA2 v1.16.0 and R v4.0.3 (at least). I recommend
+## that you install both in a conda environment as described in the INSTALL.txt
+## document distributed with the DADA2 nifH pipeline.
 ##
 ## Fixmes:
-##  - Improve command line param handling so that e.g. you don't have to
-##    include 'precalcErrorModelsDir' if you just want 'params'
 ##  - Fix NMDS plot. If many samples, legend takes the whole canvas.
 ##    Would be cool if this script read in a sample metadata file and used
 ##    any info on "Depth", "Station", etc. (preferable to sample names).
@@ -38,6 +34,7 @@
 ##  2021 Mar 12      Initial version.
 ##  2021 Apr  5      Optionally use a pre-specified error model.
 ##  2021 Jun         Take a parameters file
+##  2021 Sep  2      Allow params file, error model, or both.
 ##
 ################################################################################
 
@@ -77,24 +74,30 @@ cat("Starting on", date(),"\n")
 ## Assume have this many columns for tables printed to stdout
 options(width = 110)
 
-
-## dataDir will be searched recursively for fastq's
+## Params:
+##  - dataDir will be searched recursively for fastq's
+##  - dataDir and data2Outdir must be specified if other params are.
+##  - params or error models or both can be present.
+##
 args <- commandArgs(trailingOnly=T)
-dataDir     = 'Data';     if (length(args) >= 1) { dataDir     = args[1] }
-dada2OutDir = 'Dada2Out'; if (length(args) >= 2) { dada2OutDir = args[2] }
-preCalculatedErrorModel = NA
-if (length(args) >= 3) {
-    ## Optionally use a pre-calculated error model. (.RDS file)
-    preCalculatedErrorModel = args[3]
-    stopifnot(file.exists(preCalculatedErrorModel))
+stopifnot(length(args) <= 4)
+dataDir     = ifelse(!is.na(args[1]), args[1], 'Data')
+dada2OutDir = ifelse(!is.na(args[2]), args[2], 'Dada2OutDir')
+paramsFile  = args[3] # NA if unspecified
+preCalculatedErrorModel = args[4]
+if (is.na(preCalculatedErrorModel) && grepl('\\.rds$',paramsFile,ignore.case=T)) {
+    ## Fixup: There was no params file, just an error models file.
+    preCalculatedErrorModel <- args[3]
+    paramsFile <- NA
 }
-if (length(args) >= 4) {
+
+if (!is.na(paramsFile)) {
     ## Parameters file. Tabular. Very simple for now.
-    stopifnot(file.exists(args[4]))
-    ptab <-read.csv(args[4], header=F, row.names=1, comment.char = "#")
+    stopifnot(file.exists(paramsFile))
+    ptab <-read.csv(paramsFile, header=F, row.names=1, comment.char = "#")
     p <- union(names(filterAndTrimParams), names(mergePairsParams))
     plist <- intersect(p, rownames(ptab))
-    cat("Will use parameters file",args[1],"for",paste(plist,collapse=','),"\n")
+    cat("Will use parameters file",paramsFile,"for",paste(plist,collapse=','),"\n")
     for (p in plist) {
         if (p %in% names(filterAndTrimParams)) {
             filterAndTrimParams[[p]] <- as.integer(ptab[p,1])
@@ -107,6 +110,7 @@ if (length(args) >= 4) {
     }
     rm(ptab,plist,p)
 }
+stopifnot(is.na(preCalculatedErrorModel) | file.exists(preCalculatedErrorModel))
 
 ################################################################################
 
@@ -600,6 +604,7 @@ write(paste0('>',as.character(asvSeq2Id),"\n",names(asvSeq2Id)), file=asvsFastaT
 df <- df[,which(apply(df, 2, function(v) !all(v==0)))]   # remove empty cols
 df <- df[which(apply(df,  1, function(v) !all(v==0))),]  # remove empty rows
 ## Normalize to 100K nifH per sample
+## fixme: Why the 'rep?' And could use vegan's decostand('total')
 df <- as.data.frame(scale(df,center=F,scale=colSums(df)/rep(1E5,ncol(df))))
 dmeth <- 'bray'  # euclidean, canberra, jaccard, gower, ...
 nmds <- isoMDS(vegdist(t(df), method=dmeth), k=2)

@@ -37,9 +37,9 @@ if [ -z "$PARAMS" ] || [ ! -z `echo $PARAMS | grep '\-h'` ] ; then
 	 1. Primer trimming using cutadapt.  The default primers are:
 	      forward:  5’ – TGY GAY CCN AAR GCN GA – 3’
 	      reverse:  5’ – ADN GCC ATC ATY TCN CC – 3’
-	    but you can set 'forward' and 'reverse' in the parameters file.
-	    The script runCutadapt.sh does this state and puts the trimmed
-	    FASTQs in $OUTDIR/Data.trimmed
+	    but you can specify other primers by setting 'forward' and 'reverse'
+	    in the parameters file.  The script runCutadapt.sh uses the specified
+	    primers and puts the trimmed FASTQs in $OUTDIR/Data.trimmed
 
 	 2. Identification of reads that likely encode NifH. These are used in the
 	    next stage.  Output is stored in $OUTDIR/NifH_prefilter
@@ -250,7 +250,7 @@ while read pgrp; do
         dada2dir="Dada2PipeOutput/$pgrp/Out.${STAMP}"
         echo "For this DADA2 run the output will be in $dada2dir"
         Rscript "$SDIR/dada2_nifH_amplicons.R" "$trimdir" "$dada2dir"  \
-                "ErrorModels/$pgrp/errorModel.rds" "../$PARAMS" \
+                "../$PARAMS" "ErrorModels/$pgrp/errorModel.rds" \
           2> "$logfile"
         mv "$logfile" "${dada2dir}/"
         ## Tally reads retained at stage.  The first arg is the raw reads dir

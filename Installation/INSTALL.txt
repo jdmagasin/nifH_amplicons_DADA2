@@ -23,7 +23,7 @@ Overview:
   5. Try the example
 
 Below '%' is the unix shell prompt. Your's might differ.  The instructions are
-the same whether you are using bash or tcsh shell, except for step #4.
+the same whether you are using bash or tcsh shell (with exceptions noted).
 
 
 --------------------------------------------------------------------------------
@@ -74,7 +74,19 @@ particular DADA2).  I will provide instructions as needed.
 # 1. Install Miniconda3
 --------------------------------------------------------------------------------
 
-In your home directory, create a temporary directory for installing miniconda3.
+We will use a bash shell to install Miniconda3 because I have run into some
+problems installing from tcsh, the default shell on thalassa. Start a bash
+shell as follows:
+
+  % bash
+
+The prompt might change from '%' but I will continue to use '%' in the
+instructions below.  You can verify that you are in bash with the command
+"echo $0".  Later you can use the "exit" command to exit the bash shell
+and return to tcsh.
+
+Now that you are in bahs, go to your home directory and create a temporary
+directory for installing miniconda3.
 
   % cd ~
   % mkdir Miniconda3Install
@@ -84,45 +96,83 @@ The instructions below are all executed within Miniconda3Install.
 
 
 For background, check out the Miniconda3 installation guide (but below are the
-few steps you need for installing):
+few, slightly modified steps you need for installing):
     https://conda.io/projects/conda/en/latest/user-guide/install/index.html
-For thalassa we want to do a linux installation:
+For thalassa we want to do 64-bit linux installation:
     https://docs.conda.io/projects/conda/en/latest/user-guide/install/linux.html
-The following will download the latest Miniconda3 installer for 64-bit linux and
-calculate its SHA256 hash:
+We will download an older version of the Miniconda3 installer (from 2020-12-21)
+and then update to the latest Miniconda3.
+   Why this hassle?  Thalassa has an older version of glibc (2.12) that will
+   make installation of recent Miniconda3s fail. We workaround this by
+   installing an older Miniconda3 and then using Miniconda3 itself to update
+   Miniconda3 and to get a recent glibc (your own local copy).
 
-  % wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
-  % sha256sum Miniconda3-latest-Linux-x86_64.sh
+  % wget https://repo.anaconda.com/miniconda/Miniconda3-py39_4.9.2-Linux-x86_64.sh
+  % md5sum Miniconda3-py39_4.9.2-Linux-x86_64.sh
 
-Check that installer has not been corrupted or compromised by verifying
-that the hash reported above matches the one you see at:
-    https://docs.conda.io/en/latest/miniconda.html#latest-miniconda-installer-links
-(If it does not, let me know!!)  In the table at the link you will see that the
-latest Conda version is something >= 4.10.3.
+You should see the same md5 checksum for the installer:
+  b4e46fcc8029e2cfa731b788f25b1d36
+that appears on the bottom of the web page https://repo.anaconda.com/miniconda/
+If you do not then the installer has been compromised or corrupted and you
+should not use it. Let me know!
 
-Now to install Miniconda3:
 
-  % bash Miniconda3-latest-Linux-x86_64.sh -b -p $HOME/miniconda3
+Now install Miniconda3. Even though you are already in a bash shell,
+explicitly run the script with bash as shown:
 
-The install script will guide you. When it asks for permission to do various
-things, in general just accept whatever it suggests:) Do say "yes" when it asks
-"Do you wish the installer to initialize Miniconda3 by running conda init?"
-This makes it possible to run miniconda3 commands from the shell by simply
-typing "conda" rather than the full path to conda ($HOME/miniconda3/bin/conda).
-[Detail: "yes" gives permission to the installer to change your shell startup
-script (.bashrc or .tchsrc) to add miniconda3 to your path.]
+  % bash Miniconda3-py39_4.9.2-Linux-x86_64.sh -b -p $HOME/miniconda3
 
-If the installer reports success, then the following two commands should
-succeed.
+The installer will identify all the packages it installs and complete with
+"installation finished" after ~10 sec.  If you do not see that, something is
+wrong -- please let me know.
 
-  % which conda
-  % conda --help
+Otherwise do the following two commands. The first starts conda (and the prompt
+will change to include "(base)".  The second initializes conda so that whenever
+you start a bash shell 'conda' will be in your path and the base environment
+will be activated.  (Newer installers automate these two steps.)
 
-You can now delete the directory Miniconda3Install.
+  % source $HOME/miniconda3/bin/activate
+  (base) % conda init
+
+You can also verify that you just installed conda 4.9.2:
+
+  (base) % conda -V
+
+Now we update to the latest version of conda.
+
+  (base) % conda update -n base -c defaults conda
+
+You will be shown a list of packages that will be updated and asked if you want
+to proceed.  The installation takes ~10 sec.  You can verify that your conda
+version is now 4.10.3 or later with "conda -V".
+
+The 'conda' command will now work whenever you are in a bash shell.  If you want
+conda also to work in tcsh (the default shell for thalassa), then you should add
+a line to your tcsh initialization file (.tcshrc). Do the following so that
+conda initialization will be done automatically whenever you start a new tcsh
+shell.  (You can do this while still in the bash shell you started way above. Or
+you can first "exit" the bash shell which will return you to the tcsh shell.)
 
   % cd ~
-  % rm Miniconda3Install/Miniconda3-latest-Linux-x86_64.sh
+  % cp .tcshrc .tcshrc.OLD
+  % echo "source $HOME/miniconda3/etc/profile.d/conda.csh" >> .tcshrc
+
+Let's verify that conda works for tcsh. Log off of thalassa, then ssh back in.
+You are now in a tcsh shell. Try the following.
+
+  % which conda
+  % conda -V
+  % conda --help
+
+If everything above went well, you are free to delete the Miniconda3Install
+directory (and .tcshrc.OLD).
+
+  % cd ~
+  % rm Miniconda3Install/Miniconda3-py39_4.9.2-Linux-x86_64.sh
   % rmdir Miniconda3Install
+
+The remaining sections can be done from tcsh or bash (with some caveats in
+section #4).
 
 
 --------------------------------------------------------------------------------
@@ -132,7 +182,7 @@ You can now delete the directory Miniconda3Install.
 Create a conda environment called "DADA2_nifH" that includes nearly everything
 needed to run the DADA2 nifH pipeline. This step will take awhile (~10 min):
 
-  % conda env update -n DADA2_nifH --file ~/DADA2_nifH_pipeline/Installation/environment_DADA2_nifH.yml
+  % conda env create -n DADA2_nifH --file ~/DADA2_nifH_pipeline/Installation/environment_DADA2_nifH.yml
 
 Installation 98% complete!  Let's verify the conda DADA2_nifH environment.
 First, activate it:
@@ -291,7 +341,7 @@ path setting command was appended to .bashrc.
   (DADA2_nifH) % echo 'export PATH=$PATH:~/DADA2_nifH_pipeline:~/DADA2_nifH_pipeline/scripts' >> ~/.bashrc
   (DADA2_nifH) % tail ~/.bashrc
 
-If tcsh, do this. The same cautions mentioned above apply here.
+If tcsh, do this. The same cautions mentioned above apply.
 
   (DADA2_nifH) % cp ~/.tcshrc ~/.tcshrc.OLD
   (DADA2_nifH) % echo 'set path=($path $HOME/DADA2_nifH_pipeline $HOME/DADA2_nifH_pipeline/scripts)' >> ~/.tcshrc

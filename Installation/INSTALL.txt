@@ -102,10 +102,11 @@ For thalassa we want to do 64-bit linux installation:
     https://docs.conda.io/projects/conda/en/latest/user-guide/install/linux.html
 We will download an older version of the Miniconda3 installer (from 2020-12-21)
 and then update to the latest Miniconda3.
-   Why this hassle?  Thalassa has an older version of glibc (2.12) that will
-   make installation of recent Miniconda3s fail. We workaround this by
-   installing an older Miniconda3 and then using Miniconda3 itself to update
-   Miniconda3 and to get a recent glibc (your own local copy).
+
+   Why this hassle?  Thalassa has an older versions of glibc (2.12) and python
+   (2.6.6) that will make installation of recent Miniconda3s fail. We workaround
+   this by installing an older Miniconda3 and then using Miniconda3 itself to
+   update Miniconda3.
 
   % wget https://repo.anaconda.com/miniconda/Miniconda3-py39_4.9.2-Linux-x86_64.sh
   % md5sum Miniconda3-py39_4.9.2-Linux-x86_64.sh
@@ -138,13 +139,15 @@ You can also verify that you just installed conda 4.9.2:
 
   (base) % conda -V
 
-Now we update to the latest version of conda.
+Now we update to the latest version of conda:
 
-  (base) % conda update -n base -c defaults conda
+  (base) % conda update conda
 
 You will be shown a list of packages that will be updated and asked if you want
-to proceed.  The installation takes ~10 sec.  You can verify that your conda
-version is now 4.10.3 or later with "conda -V".
+to proceed.  (conda might warn you about out of date packages and suggest that
+you update conda using a slightly different form of the command above. Please
+use the form above.) The installation takes ~10 sec.  You can verify that your
+conda version is now 4.10.3 or later with "conda -V".
 
 The 'conda' command will now work whenever you are in a bash shell.  If you want
 conda also to work in tcsh (the default shell for thalassa), then you should add

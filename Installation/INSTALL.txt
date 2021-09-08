@@ -139,7 +139,23 @@ You can also verify that you just installed conda 4.9.2:
 
   (base) % conda -V
 
-Now we update to the latest version of conda:
+Next change your conda configuration (recorded in the hidden file ~/.condarc) to
+specify what channel(s) conda should use when searching for and installing
+packages.  The next two commands tell conda to use channel "conda-forge", which
+has tons of packages, and to strictly use that channel before the "defaults"
+channel.
+
+  (base) % conda config --add channels conda-forge
+  (base) % conda config --set channel_priority strict
+
+You can verify that conda-forge will be searched first in two ways:
+
+  (base) % cat ~/.condarc
+  (base) % conda info
+
+
+Now we update to the latest version of conda, which will be obtained from
+conda-forge:
 
   (base) % conda update conda
 

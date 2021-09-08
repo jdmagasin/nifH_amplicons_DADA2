@@ -341,7 +341,7 @@ Word document could change the quotes.  The 'tail' command just shows that the
 path setting command was appended to .bashrc.
 
   (DADA2_nifH) % cp ~/.bashrc ~/.bashrc.OLD
-  (DADA2_nifH) % echo 'export PATH=$PATH:~/DADA2_nifH_pipeline:~/DADA2_nifH_pipeline/scripts' >> ~/.bashrc
+  (DADA2_nifH) % echo 'export PATH="$PATH:~/DADA2_nifH_pipeline:~/DADA2_nifH_pipeline/scripts"' >> ~/.bashrc
   (DADA2_nifH) % tail ~/.bashrc
 
 If tcsh, do this. The same cautions mentioned above apply.

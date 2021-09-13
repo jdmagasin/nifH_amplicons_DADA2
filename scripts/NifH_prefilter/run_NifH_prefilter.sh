@@ -10,8 +10,13 @@
 DATATRIMMEDDIR=$1
 if [ ! -d "$DATATRIMMEDDIR" ] ; then
     echo "Pass the path to the root directory that holds the trimmed fastq files for R1."
+    echo "Optionally also pass in the min number of residues and then the min bit score"
+    echo "at which predicted ORFs must align to NifH."
     exit -1
 fi
+
+MINLEN=$2
+MINBITS=$3
 
 ## Expect findReadsWithNifHDomain.sh to be in the same directory as this script.
 ## From https://stackoverflow.com/questions/59895/how-can-i-get-the-source-directory-of-a-bash-script-from-within-the-script-itsel
@@ -25,7 +30,7 @@ for FQ in `find -L "$DATATRIMMEDDIR" -name '*_R1_*.fastq.gz'`; do
           ## ~Ugly but the script outputs are to the current directory
           ## and moved at completion. Save the log to cwd too (since the
           ## script expects the outdir not to exist).
-        $SDIR/findReadsWithNifHDomain.sh  "$FQ"  "$OUTDIR" \
+        $SDIR/findReadsWithNifHDomain.sh  "$FQ"  "$OUTDIR" "$MINLEN" "$MINBITS" \
             > log.nifScan.txt 2>&1
         mv log.nifScan.txt "$OUTDIR"
     else

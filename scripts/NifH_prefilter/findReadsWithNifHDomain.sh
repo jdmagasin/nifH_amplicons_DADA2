@@ -4,16 +4,20 @@
 ## readsExtracted.fastq.gz
 
 usage="Usage:
-    findReadsWithNifHDomain.sh  fastq  outdir
-The fastq may be gzip'd.  The outdir must not exist.
-The script runs in the current directory but moves everything to outdir
-when complete.
+    findReadsWithNifHDomain.sh  fastq  outdir  [minLen] [minBitScore]
+The fastq may be gzip'd.  The outdir must not exist.  The script runs in the
+current directory but moves everything to outdir when complete.  Reads that
+align to the NifH PFAM model PF00142 at trusted cutoffs (encoded in PF00142) are
+retained by HMMER and post-filtered for a minLen residues (default >33) and
+minBitScore (default >150).
 "
 
 SDIR="$(dirname $0)"
 
 FASTQGZ=$1
 OUTDIR=$2
+MINLEN=$3
+MINBITS=$4
 if [ ! -f "$FASTQGZ" ] ; then
     echo "Fastq does not exist."
     echo "$usage"
@@ -23,6 +27,12 @@ if [ -d "$OUTDIR" ] ; then
     echo "Outdir exists already."
     echo "$usage"
     exit -1
+fi
+if [ -z "$MINLEN" ] ; then
+    MINLEN=33
+fi
+if [ -z "$MINBITS" ] ; then
+    MINBITS=150
 fi
 echo "Runnning on $FASTQGZ.  Results will be in $OUTDIR when script completes."
 mkdir -p $OUTDIR
@@ -59,11 +69,14 @@ echo "done searching for PF00142."
 echo
 
 
-## This magic retains the reads with bit score >150 and hmm coords taht span > 33 residues.
+## This magic retains the reads with bit score >MINBITS and hmm coords that
+## span >MINLEN residues.
 echo -n "Identifying reads that have Fer4_NifH with bit score > 150 and > 33 residues aligned..."
 cat hmmsearch.Fer_NifH.domtab.gz | gunzip \
   | grep -v '^#' | tr -s " " "\t" | cut -f1,8,16-19 \
-  | awk -F"\t" '{if ($2>150 && $4-$3+1 > 33) print $1}' | sed 's/_[^_]*_[^_]*_[+-]$//' \
+  | awk -F"\t" -v minBits="$MINBITS" -v minLen="$MINLEN" \
+        '{if ($2 > minBits  &&  $4-$3+1 > minLen) print $1}' \
+  | sed 's/_[^_]*_[^_]*_[+-]$//' \
   | gzip \
   > readsWithNifH.ids.gz
 echo "done."

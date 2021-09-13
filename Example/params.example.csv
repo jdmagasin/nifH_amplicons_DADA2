@@ -21,6 +21,16 @@
 ##       before DADA2 "denoises" over many read pairs when inferring the ASVs.
 
 
+## Parameters that impact DADA2 error models:  Only R1 reads that appear NifH-like
+## are used to create DADA2 error models. These reads are identified before
+## the main DADA2 stage runs, using several scripts that invoke HMMER and filter
+## the results. Filtering includes accepting only ORFs/reads with alignments
+## longer than the min length specified here, and similar for bit score. (The
+## default values are shown here, so the lines can be commented out.)
+#NifH_minLen,  33
+#NifH_minBits,150
+
+
 ## You can specify primers that will be trimmed by cutadapt. Specify both from
 ## 5' to 3'.  The default primers assumed by runCutadapt.sh are shown (and will
 ## be used if you omit the next two lines).

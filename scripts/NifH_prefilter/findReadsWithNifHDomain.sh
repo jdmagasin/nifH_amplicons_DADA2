@@ -71,7 +71,7 @@ echo
 
 ## This magic retains the reads with bit score >MINBITS and hmm coords that
 ## span >MINLEN residues.
-echo -n "Identifying reads that have Fer4_NifH with bit score > 150 and > 33 residues aligned..."
+echo -n "Identifying reads that have Fer4_NifH with bit score > ${MINBITS} and > ${MINLEN} residues aligned..."
 cat hmmsearch.Fer_NifH.domtab.gz | gunzip \
   | grep -v '^#' | tr -s " " "\t" | cut -f1,8,16-19 \
   | awk -F"\t" -v minBits="$MINBITS" -v minLen="$MINLEN" \

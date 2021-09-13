@@ -177,8 +177,8 @@ else
     cd "$OUTDIR"
     NIFH_MINLEN=`cat $PARAMS | grep "^NifH_minLen" | cut -d, -f2 | tr -d [:space:]`
     NIFH_MINBITS=`cat $PARAMS | grep "^NifH_minBits" | cut -d, -f2 | tr -d [:space:]`
-    if [ -z "$NIFH_MINLEN"]  ; then echo "  - Will use default length cut off."   ; fi
-    if [ -z "$NIFH_MINBITS"] ; then echo "  - Will use default bit score cut off."; fi
+    if [ -z "$NIFH_MINLEN" ]  ; then echo "  - Will use default length cut off."   ; fi
+    if [ -z "$NIFH_MINBITS" ] ; then echo "  - Will use default bit score cut off."; fi
     ## Not necessary to use processing groups.
     $SDIR/NifH_prefilter/run_NifH_prefilter.sh  Data.trimmed  "$NIFH_MINLEN"  "$NIFH_MINBITS"
     echo

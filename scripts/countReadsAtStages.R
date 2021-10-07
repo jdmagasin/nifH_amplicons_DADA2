@@ -165,7 +165,7 @@ dat$Stage <- factor(dat$Stage, levels = rev(names(stages)), labels = rev(stages)
 library(ggplot2)
 cap <- paste0('Retained MiSeq reads at each stage. Two counts per read pair.  ',
        numSamps,' samples.\n',
-       'On average ',round(mean(pctRetained),1),'% of the reads are retained to final ASVs.')
+       'On average 2x',round(mean(pctRetained),1),'% of the initial reads are merged into final ASVs.')
 g <- ggplot(dat,aes(y=Reads, fill=Stage, x=Stage)) + geom_boxplot() + 
      theme_bw() + labs(x='', y='Amplicon sequences', caption=cap) +
      coord_flip()

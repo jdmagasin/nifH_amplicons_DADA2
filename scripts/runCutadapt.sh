@@ -47,11 +47,11 @@ Usage:
 \trunCutadapt.sh  FastqList  OutDir  [fwdPrimer] [revPrimer]
 
 Paired files in FastqList of this form:
-   path/to/prefix_R1_suffix.fastq.gz
-   path/to/prefix_R2_suffix.fastq.gz
+   path/to/prefix_R1{_suffix}.fastq.gz
+   path/to/prefix_R2{_suffix}.fastq.gz
 will be trimmed of their primers and stored in:
-   OutDir/to/prefix_R1_suffix.trimmed.fastq.gz
-   OutDir/to/prefix_R2_suffix.trimmed.fastq.gz
+   OutDir/to/prefix_R1{_suffix}.trimmed.fastq.gz
+   OutDir/to/prefix_R2{_suffix}.trimmed.fastq.gz
    OutDir/to/cutadapt.log
 Note that the first part of the file path is replaced with OutDir.
 
@@ -61,6 +61,7 @@ By default these nifH primers are used:
 You may specify your own primers 5' to 3' with IUPAC codes (upper or lower case).
 
 This script will discard read pairs that are missing one or both of the primers.
+Mismatches in the primer are tolerated (up to 10% of the bases) but indels are not.
 "
 
 FastqList=$1
@@ -100,7 +101,7 @@ rcfwd=`echo $fwd | rev | tr "$legalIUPAC" "$complIUPAC"`
 rcrev=`echo $rev | rev | tr "$legalIUPAC" "$complIUPAC"`
 
 while read r1 ; do
-    if [ ! -z `echo "$r1" | grep _R2_` ] ; then
+    if [ ! -z `echo "$r1" | grep _R2[._]` ] ; then
         ## We will handle the R2 when we see the R1.
         continue
     fi
@@ -109,7 +110,7 @@ while read r1 ; do
     odir=`echo $(dirname "$r1") | sed -e 's:^\/::' -e 's:[^\/]*\/::'`
     odir="$OutDir/$odir"
     echo "Working on $r1 and its R2 file..."
-    r2=`echo $r1 | sed 's/_R1_/_R2_/'`  # Not robust but ~okay.
+    r2=`echo $r1 | sed 's/_R1\([._]\)/_R2\1/'`  # Not robust but ~okay.
     if [ ! -f "$r2" ] ; then
 	echo "No R2 file for $r1"
 	exit -1
@@ -126,7 +127,7 @@ while read r1 ; do
     echo -e "\tforward:  5'- ${fwd} -3'  revcomp 5'- ${rcfwd} -3'" >> $odir/cutadapt.log
     echo -e "\treverse:  5'- ${rev} -3'  revcomp 5'- ${rcrev} -3'" >> $odir/cutadapt.log
     echo >> $odir/cutadapt.log
-    cutadapt -a "${fwd}...${rcrev}"  -A "${rev}...${rcfwd}"  -m 1  --discard-untrimmed \
+    cutadapt -a "${fwd}...${rcrev}"  -A "${rev}...${rcfwd}"  --no-indels  -m 1  --discard-untrimmed \
              -o $out1  -p $out2  $r1  $r2 >> $odir/cutadapt.log
     echo -e "### Finished working on $r1 and its R2 file.\n\n" >> $odir/cutadapt.log
 done < $FastqList

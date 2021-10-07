@@ -312,7 +312,7 @@ if (!all(file.exists(filteredFastqs))) {
                            maxEE  = c(filterAndTrimParams$maxEE.fwd,
                                       filterAndTrimParams$maxEE.rev),
                            minLen = filterAndTrimParams$minLen,
-                           matchIDs = TRUE,   # only output reads that are paired.
+                           matchIDs = TRUE,   # only output reads that are paired.  FIXME FIXME FIXME: Ids do not match for Danish straits data.  Need a flexible solution...
                            multithread=TRUE)  # Set F if errors occur (see Details)
     cat("Here are the numbers of reads input and retained:\n")
     print( data.frame(track,

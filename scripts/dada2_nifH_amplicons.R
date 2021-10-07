@@ -118,19 +118,24 @@ cat("Fastq files expected in ", dataDir, "\n")
 cat("Output directory will be ", dada2OutDir, "\n")
 
 
-## Non-portable function that extracts the sample from a fastq file name.
-## Presumes names are structured like this: {Samp}_{stuff1}_R{1,2}{stuff2}.fastq.gz
-## where stuff1 probably indicates the sequencing lane (L001).
+## Extract the sample identity that is encoded at the start of a fastq file name.
+## Presumes names are structured like this: {Samp}{_stuff1_}R{1,2}{stuff2}.fastq.gz
+## where:
+##   - Samp can have any character other than "_".
+##   - stuff1, if present, can have any character but must be flanked by "_"
+##     Usually stuff1 will be/include the sequencing lane (L001).  stuff1 is
+##     not interesting to the study and is dropped.
+##   - stuff2 can be anything, or absent
+##   - The .fastq.gz could be absent, but that would be bad style.
 Fastq2Samp <- function(fq) {
     fq <- basename(fq)
-    
-    x <- gsub('\\.fastq\\.gz', '',    fq)        # drop fastq.gz if any
-    gsub('^(.+)_[^_]+_R[0-9]+.*$',    '\\1', x)  # keep just the {Samp} part
+    x <- gsub('\\.fastq\\.gz',    '',    fq)        # drop fastq.gz if any
+    gsub('^([^_]+).*_R[0-9]+.*$', '\\1', x)         # keep just {Samp}
 }
 Fastq2Index <- function(fq) {
     fq <- basename(fq)
-    x <- gsub('\\.fastq\\.gz','',fq)                      # drop fastq.gz if any
-    as.numeric(gsub('^.+_[^_]+_R([0-9]+).*$', '\\1', x))  # keep just index
+    x <- gsub('\\.fastq\\.gz',          '',    fq)  # drop fastq.gz if any
+    as.numeric(gsub('^.+_R([0-9]+).*$', '\\1', x))  # keep just the direction index
 }
 
 

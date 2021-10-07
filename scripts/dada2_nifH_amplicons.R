@@ -24,17 +24,14 @@
 ## that you install both in a conda environment as described in the INSTALL.txt
 ## document distributed with the DADA2 nifH pipeline.
 ##
-## Fixmes:
-##  - Fix NMDS plot. If many samples, legend takes the whole canvas.
-##    Would be cool if this script read in a sample metadata file and used
-##    any info on "Depth", "Station", etc. (preferable to sample names).
-##
 ## History
 ## -------
 ##  2021 Mar 12      Initial version.
 ##  2021 Apr  5      Optionally use a pre-specified error model.
 ##  2021 Jun         Take a parameters file
 ##  2021 Sep  2      Allow params file, error model, or both.
+##  2021 Oct  7      NMDS now with metaMDS and only color if <=15 samples.
+##                   More flexible fastq name expectations (Fastq2Samp).
 ##
 ################################################################################
 
@@ -598,30 +595,35 @@ cat("Before removing chimeras, the sequence table has", ncol(sequenceTab),
 
 cat("Saving ASV abundances (", asvsAbundTxt,") ",
     "and fasta file (", asvsFastaTxt, ")\n")
-df = data.frame(t(sequenceTab))         # rows are now ASV sequences
-rownames(df) = as.character(asvSeq2Id[rownames(df)])  # and now they are ASV ID's
-colnames(df) <- rownames(sequenceTab) # insist on original (non-R friendly) sample names
+df = data.frame(t(sequenceTab))                       # Make rows the ASV ID's
+rownames(df) = as.character(asvSeq2Id[rownames(df)])
+colnames(df) <- rownames(sequenceTab)                 # Use original (R-unfriendly) sample names
 write.table(df, file=asvsAbundTxt, sep="\t", quote=F)
 write(paste0('>',as.character(asvSeq2Id),"\n",names(asvSeq2Id)), file=asvsFastaTxt)
 
 ## NMDS of samples by their ASV profiles.
-##nmds <- isoMDS(dist(t(df), method='canberra'), k=2)
-df <- df[,which(apply(df, 2, function(v) !all(v==0)))]   # remove empty cols
-df <- df[which(apply(df,  1, function(v) !all(v==0))),]  # remove empty rows
-## Normalize to 100K nifH per sample
-## fixme: Why the 'rep?' And could use vegan's decostand('total')
-df <- as.data.frame(scale(df,center=F,scale=colSums(df)/rep(1E5,ncol(df))))
+df <- df[,which(apply(df, 2, function(v) !all(v==0)))]   # remove empty samples
+df <- df[which(apply(df,  1, function(v) !all(v==0))),]  # remove empty ASVs
+## Normalize sequencing depths. At least need to if we use Bray-Curtis dissimilarities
+## because B-C is affected by sampling sizes.
+df <- decostand(t(df), method='total')
 dmeth <- 'bray'  # euclidean, canberra, jaccard, gower, ...
-nmds <- isoMDS(vegdist(t(df), method=dmeth), k=2)
-stress = round(nmds$stress/100, 2)
+nmds <- metaMDS(df, dmeth, k=2, autotransform=F)         # autotransform=F b/c used decostand()
+stress = round(nmds$stress,3)
 cat("NMDS of",dmeth,"distances between sample ASV abundances had stress", stress, "\n")
 df = data.frame(nmds$points, rownames(nmds$points))
 colnames(df) = c('x','y','Sample')
-ggplot(df, aes(x,y,color=Sample)) + geom_point(size=3) + coord_fixed(ratio=1) +
+if (length(unique(df$Sample)) <= 15) {
+    ## Not so many samples that the legend will explode.
+    g <- ggplot(df, aes(x,y,color=Sample))
+} else {
+    g <- ggplot(df, aes(x,y))
+}
+g <- g + geom_point(size=3) + coord_fixed(ratio=1) +
     labs(title = "Samples represented by ASV abundances",
          caption = paste("NMDS on",dmeth,"distances; stress =", stress),
          x=NULL, y=NULL) +
-    ##geom_text_repel(aes(label=Sample), size=3) +  # FIXME: Crashes here with viewport of 0 dimensions.
+    ##geom_text_repel(aes(label=Sample), size=3) +  # FIXME: Can crash here with viewport of 0 dimensions.
     theme(legend.position="none") + theme_bw()
 ggsave(file.path(plotsDir,'asvsNMDS.pdf'), width=4.5, height=4.5, units='in')
 rm(df, nmds, dmeth)

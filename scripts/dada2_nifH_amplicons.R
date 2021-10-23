@@ -712,7 +712,7 @@ if (exists('taxa') && !is.null(taxa)) {
 }
 
 cat("Throwing out chimeric ASVs\n")  # Not sure why Callahan did not.
-sequenceTab <- sequenceTab[,!bims]
+sequenceTab <- sequenceTab[,!bims,drop=F]
 cat("After removing chimeras, the sequence table has", ncol(sequenceTab),
     "ASV's and", nrow(sequenceTab), "samples. Saving to",seqTabNoChimRdsFile,"\n")
 saveRDS(sequenceTab, file=seqTabNoChimRdsFile)

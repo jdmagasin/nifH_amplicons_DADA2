@@ -151,6 +151,10 @@ else
     fwd=`cat $PARAMS | grep "^forward" | cut -d, -f2 | tr -d [:space:]`
     rev=`cat $PARAMS | grep "^reverse" | cut -d, -f2 | tr -d [:space:]`
     $SDIR/runCutadapt.sh "$rflist" "$OUTDIR/Data.trimmed" "$fwd" "$rev" 2>&1
+    if [ "$?" -ne 0 ] ; then
+        echo "runCutadapt.sh failed. Aborting pipeline."
+        exit -1
+    fi
     ## One summary across all processing groups.
     casum="$OUTDIR/Data.trimmed/summary.cutadapt.txt"
     echo "Summarizing all of the cutadapt logs (all processing groups) in $casum"
@@ -181,6 +185,10 @@ else
     cd "$OUTDIR"
     ## Not necessary to use processing groups.
     $SDIR/NifH_prefilter/run_NifH_prefilter.sh  Data.trimmed  "$NIFH_MINLEN"  "$NIFH_MINBITS"
+    if [ "$?" -ne 0 ] ; then
+        echo "run_NifH_prefilter.sh failed. Aborting pipeline."
+        exit -1
+    fi
     echo
     echo "Done. The NifH-like search results are in $OUTDIR/Data.NifH_prefilter."
     echo "Now summarizing how many R1 reads were processed, how many ORFs were predicted,"
@@ -216,6 +224,10 @@ while read pgrp; do
         echo " -- Working on error models for processing group $pgrp"
         ## pgrp encodes the path for the processing group.
         Rscript "${SDIR}/learnErrorsFromFastq.R"  "Data.NifH_prefilter/$pgrp" > "$logfile"
+        if [ "$?" -ne 0 ] ; then
+            echo "learnErrorsFromFastq.R exited abnormally. Aborting pipeline."
+            exit -1
+        fi
         mkdir -p "ErrorModels/$pgrp"
         mv errorModel.rds errorModel.pdf "$logfile" "ErrorModels/$pgrp"
         cd "$CWD"
@@ -257,12 +269,20 @@ while read pgrp; do
         Rscript "$SDIR/dada2_nifH_amplicons.R" "$trimdir" "$dada2dir"  \
                 "../$PARAMS" "ErrorModels/$pgrp/errorModel.rds" \
           2> "$logfile"
+        if [ "$?" -ne 0 ] ; then
+            echo "dada2_nifH_amplicons.R exited abnormally. Aborting pipeline."
+            exit -1
+        fi
         mv "$logfile" "${dada2dir}/"
         ## Tally reads retained at stage.  The first arg is the raw reads dir
         ## for this pgroup and takes awhile to load. Although the script caches
         ## the counts for subsequent runs, it uses a hard-coded cache name which
         ## would have collisions across pgroups. So delete the cache.
         $SDIR/countReadsAtStages.R "$CWD/$FQDIR/$pgrp" "$trimdir" "$dada2dir"
+        if [ "$?" -ne 0 ] ; then
+            echo "countReadsAtStages.R exited abnormally. Aborting pipeline."
+            exit -1
+        fi
         rm -f readCountsCacheForScript_countReadsAtStages.RData
         rcdp="readCountsDuringProcessing.${pdesc}.${STAMP}.csv"
         rcdpPng="readCountsDuringProcessing.${pdesc}.${STAMP}.png"

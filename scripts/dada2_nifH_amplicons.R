@@ -542,6 +542,12 @@ if (!file.exists(mergedRdsFile)) {
                           maxMismatch     = mergePairsParams$maxMismatch,
                           justConcatenate = mergePairsParams$justConcatenate,
                           verbose=T)
+    ## Convert mergers to a list of data.frames if necessary (b/c just 1 seq run).
+    if (is.data.frame(mergers)) {
+        stopifnot(length(fidx)==1)
+        mergers <- list(mergers)
+        names(mergers) <- names(dds)[1]
+    }
     ## Make the names not mention R1.  (Currently they are the R1 fastq paths.)
     names(mergers) <- Fastq2Samp(names(mergers))
     saveRDS(mergers, mergedRdsFile)
@@ -560,9 +566,10 @@ if (!file.exists(mergedRdsFile)) {
             "forward and reverse sequences.  Below for each sample are stats for the numbers\n",
             "of matches, mismatches, and indels in the overlapping regions for the top 10 merged\n",
             "sequences in each sample.\n")
-        for (i in length(mergers)) {
+        for (i in 1:length(mergers)) {
             cat("\nSample",names(mergers)[i],"\n")
             print(head(mergers[[i]][,-1], n=10))
+            cat("\n")
         }
         cat("\n\n")
     }

@@ -132,4 +132,4 @@ while read r1 ; do
     echo -e "### Finished working on $r1 and its R2 file.\n\n" >> $odir/cutadapt.log
 done < $FastqList
 echo "Done!"
-exit -1
+exit 0

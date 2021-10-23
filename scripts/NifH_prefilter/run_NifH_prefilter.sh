@@ -37,3 +37,4 @@ for FQ in `find -L "$DATATRIMMEDDIR" -name '*_R1_*.fastq.gz'`; do
         echo "Already have $OUTDIR"
     fi
 done
+exit 0

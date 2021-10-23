@@ -608,32 +608,37 @@ colnames(df) <- rownames(sequenceTab)                 # Use original (R-unfriend
 write.table(df, file=asvsAbundTxt, sep="\t", quote=F)
 write(paste0('>',as.character(asvSeq2Id),"\n",names(asvSeq2Id)), file=asvsFastaTxt)
 
-## NMDS of samples by their ASV profiles.
-df <- df[,which(apply(df, 2, function(v) !all(v==0)))]   # remove empty samples
-df <- df[which(apply(df,  1, function(v) !all(v==0))),]  # remove empty ASVs
-## Normalize sequencing depths. At least need to if we use Bray-Curtis dissimilarities
-## because B-C is affected by sampling sizes.
-df <- decostand(t(df), method='total')
-dmeth <- 'bray'  # euclidean, canberra, jaccard, gower, ...
-nmds <- metaMDS(df, dmeth, k=2, autotransform=F)         # autotransform=F b/c used decostand()
-stress = round(nmds$stress,3)
-cat("NMDS of",dmeth,"distances between sample ASV abundances had stress", stress, "\n")
-df = data.frame(nmds$points, rownames(nmds$points))
-colnames(df) = c('x','y','Sample')
-if (length(unique(df$Sample)) <= 15) {
-    ## Not so many samples that the legend will explode.
-    g <- ggplot(df, aes(x,y,color=Sample))
+if (nrow(df) < 5 || ncol(df) <= 1) {
+    cat("Not doing NMDS. Too few ASVs and/or samples.\n")
 } else {
-    g <- ggplot(df, aes(x,y))
+    ## NMDS of samples by their ASV profiles.
+    df <- df[,which(apply(df, 2, function(v) !all(v==0)))]   # remove empty samples
+    df <- df[which(apply(df,  1, function(v) !all(v==0))),]  # remove empty ASVs
+    ## Normalize sequencing depths. At least need to if we use Bray-Curtis dissimilarities
+    ## because B-C is affected by sampling sizes.
+    df <- decostand(t(df), method='total')
+    dmeth <- 'bray'  # euclidean, canberra, jaccard, gower, ...
+    nmds <- metaMDS(df, dmeth, k=2, autotransform=F)         # autotransform=F b/c used decostand()
+    stress = round(nmds$stress,3)
+    cat("NMDS of",dmeth,"distances between sample ASV abundances had stress", stress, "\n")
+    df = data.frame(nmds$points, rownames(nmds$points))
+    colnames(df) = c('x','y','Sample')
+    if (length(unique(df$Sample)) <= 15) {
+        ## Not so many samples that the legend will explode.
+        g <- ggplot(df, aes(x,y,color=Sample))
+    } else {
+        g <- ggplot(df, aes(x,y))
+    }
+    g <- g + geom_point(size=3) + coord_fixed(ratio=1) +
+        labs(title = "Samples represented by ASV abundances",
+             caption = paste("NMDS on",dmeth,"distances; stress =", stress),
+             x=NULL, y=NULL) +
+        ##geom_text_repel(aes(label=Sample), size=3) +  # FIXME: Can crash here with viewport of 0 dimensions.
+        theme(legend.position="none") + theme_bw()
+    ggsave(file.path(plotsDir,'asvsNMDS.pdf'), width=4.5, height=4.5, units='in')
+    rm(nmds, dmeth)
 }
-g <- g + geom_point(size=3) + coord_fixed(ratio=1) +
-    labs(title = "Samples represented by ASV abundances",
-         caption = paste("NMDS on",dmeth,"distances; stress =", stress),
-         x=NULL, y=NULL) +
-    ##geom_text_repel(aes(label=Sample), size=3) +  # FIXME: Can crash here with viewport of 0 dimensions.
-    theme(legend.position="none") + theme_bw()
-ggsave(file.path(plotsDir,'asvsNMDS.pdf'), width=4.5, height=4.5, units='in')
-rm(df, nmds, dmeth)
+rm(df)
 
 ## Info for the most abundant ASV's in each sample
 asvTab = t(sequenceTab)
@@ -652,13 +657,17 @@ data.frame(ASV.id=maxAsvId, Abund=maxAsv, Pct=maxAsvPct)
 
 ## Pretty density plot of ASV log abundances
 df = read.table(asvsAbundTxt, sep="\t")
-df = melt(df, id=NULL)
-colnames(df) = c('Sample','Abundance')
-df = df[df$Abundance > 100,]
-ggplot(df, aes(x=Abundance, color=Sample)) + geom_density() + # aes(alpha=0.15)
-  scale_x_continuous(trans='log10') + ggtitle('ASV abundances') +
-  xlab('Abundance for ASVs with >100 amplicons')
-ggsave(file.path(plotsDir,'asvsDensity.pdf'), width=7.5, height=5, units='in')
+if (nrow(df) < 5) {
+    cat("Skipping ASV density plot. Too few ASVs.\n")
+} else {
+    df = melt(df, id=NULL)
+    colnames(df) = c('Sample','Abundance')
+    df = df[df$Abundance > 100,]
+    ggplot(df, aes(x=Abundance, color=Sample)) + geom_density() + # aes(alpha=0.15)
+      scale_x_continuous(trans='log10') + ggtitle('ASV abundances') +
+      xlab('Abundance for ASVs with >100 amplicons')
+    ggsave(file.path(plotsDir,'asvsDensity.pdf'), width=7.5, height=5, units='in')
+}
 rm(df)
 
 

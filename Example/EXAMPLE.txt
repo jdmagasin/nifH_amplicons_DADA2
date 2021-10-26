@@ -34,7 +34,9 @@ few hours.
 3. Gather the FASTQs into a directory hierarchy rooted at LinksToFastqs.  The
    hierarchy is organized according to the processing groups defined in
    fastqMap.tsv.  You only need to do this step once (not each time you run the
-   pipeline).  See notes in fastqMap.tsv and help via "organizeFastqs.R --help
+   pipeline).  See notes in fastqMap.tsv and help via "organizeFastqs.R --help"
+   Also note the required FASTQ name format described in the help for
+   organizeFastqs.R.
 
       organizeFastqs.R fastqMap.tsv
 

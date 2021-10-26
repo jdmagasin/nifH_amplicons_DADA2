@@ -62,10 +62,10 @@ and multiple size fractions and want to reorganize first by sample type
 (DNA, mRNA) and then by size fraction.  The following fastqMap.tsv (tabs
 separate columns) will do that.
 
-     some/path/to/MyMiSeqRun100_65647-43208182/MyMiSeqRun100-65647_S100_L001_R1_001.fastq.gz  DNA  Frac02  MyMiSeqRun100-65647
-     some/path/to/MyMiSeqRun100_65647-43208182/MyMiSeqRun100-65647_S100_L001_R2_001.fastq.gz  DNA  Frac02  MyMiSeqRun100-65647
-     some/path/to/MyMiSeqRun101_65647-43208888/MyMiSeqRun101-65647_S101_L001_R1_001.fastq.gz  RNA  Frac02  MyMiSeqRun101-65647
-     some/path/to/MyMiSeqRun101_65647-43208888/MyMiSeqRun101-65647_S101_L001_R2_001.fastq.gz  RNA  Frac02  MyMiSeqRun101-65647
+     some/path/to/MyMiSeqRun100_65647-43208182/MyMiSeqRun100-65647-S100_L001_R1_001.fastq.gz  DNA  Frac02  MyMiSeqRun100-65647
+     some/path/to/MyMiSeqRun100_65647-43208182/MyMiSeqRun100-65647-S100_L001_R2_001.fastq.gz  DNA  Frac02  MyMiSeqRun100-65647
+     some/path/to/MyMiSeqRun101_65647-43208888/MyMiSeqRun101-65647-S101_L001_R1_001.fastq.gz  RNA  Frac02  MyMiSeqRun101-65647
+     some/path/to/MyMiSeqRun101_65647-43208888/MyMiSeqRun101-65647-S101_L001_R2_001.fastq.gz  RNA  Frac02  MyMiSeqRun101-65647
      ...
  
   In the current directory this script will create top directory LinksToFASTQs
@@ -74,17 +74,42 @@ separate columns) will do that.
       +--DNA
           +--Frac02
               +--MyMiSeqRun100-65647
-                  +--[link to MyMiSeqRun100-65647_S100_L001_R1_001.fastq.gz]
-                  +--[link to MyMiSeqRun100-65647_S100_L001_R2_001.fastq.gz]
+                  +--[link to MyMiSeqRun100-65647-S100_L001_R1_001.fastq.gz]
+                  +--[link to MyMiSeqRun100-65647-S100_L001_R2_001.fastq.gz]
       +--RNA
           +--Frac02
               +--MyMiSeqRun101-65647
-                  +--[link to MyMiSeqRun100-65647_S101_L001_R1_001.fastq.gz]
-                  +--[link to MyMiSeqRun100-65647_S101_L001_R2_001.fastq.gz]
+                  +--[link to MyMiSeqRun100-65647-S101_L001_R1_001.fastq.gz]
+                  +--[link to MyMiSeqRun100-65647-S101_L001_R2_001.fastq.gz]
 
   This example also simplifies the names of the folders that contain the paired
   FASTQs since we do not care about the \"43208182\" attached by the sequencing
   center.
+
+
+** FASTQ naming conventions **
+
+The DADA2 nifH pipeline must be able to extract sample names and sequencing read
+direction ('R1' or 'R2') from the FASTQ file names.  FASTQ names should follow
+this format:
+
+    {Samp}{_stuff1_}R{1,2}{stuff2}{.fastq.gz}
+
+where:
+   - Samp can have any character other than '_'.  Do not use '_' to delimit
+     parts of your sample names because those parts will not appear e.g. in the
+     sample names in the ASV abundance table.
+
+   - stuff1, if present, can have any character but must be flanked by '_'
+     Usually stuff1 will be the sequencing lane e.g. L001 in the examples above.
+
+   - stuff2 can be anything, or absent. Most likely it will begin with '_' as in
+     the examples.
+
+   - The .fastq.gz could be absent, but that would be bad style.
+
+Sometimes you must write a small script to change your FASTQ names to follow
+the format, usually to convert '_' in the sample name.
 
 "
 

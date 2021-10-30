@@ -22,7 +22,7 @@ MINBITS=$3
 ## From https://stackoverflow.com/questions/59895/how-can-i-get-the-source-directory-of-a-bash-script-from-within-the-script-itsel
 SDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
-for FQ in `find -L "$DATATRIMMEDDIR" -name '*_R1_*.fastq.gz'`; do
+for FQ in `find -L "$DATATRIMMEDDIR" -name '*_R1*.fastq.gz'`; do
     OUTDIR=`echo $(dirname $FQ) | sed -e "s:$DATATRIMMEDDIR::" -e 's:\/$::'`
     OUTDIR="Data.NifH_prefilter/$OUTDIR"
     if [ ! -d "$OUTDIR" ] ; then

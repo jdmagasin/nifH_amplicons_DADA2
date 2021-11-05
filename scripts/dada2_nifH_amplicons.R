@@ -32,6 +32,9 @@
 ##  2021 Sep  2      Allow params file, error model, or both.
 ##  2021 Oct  7      NMDS now with metaMDS and only color if <=15 samples.
 ##                   More flexible fastq name expectations (Fastq2Samp).
+##  2021 Oct 26      Support ASVs that are based only on the R1 reads.  Use
+##                   if the R2s are poor quality (not uncommon) & won't merge.
+##  2021 Oct 30      Support truncLen parameter for filterAndTrim()
 ##
 ################################################################################
 
@@ -48,19 +51,33 @@ NBASES_FOR_LEARNING_ERRORS = 1e+08  # This is the default number of bases that
 ## Parameters for filtering and trimming. (Many we leave as default.)  One value
 ## means use that value for forward and reverse strands; two values are for
 ## forward and reverse (resp).
-## truncQ = Truncate read at 1st position with Q <= truncQ
-## maxEE  = Max allowed (expected) errors in final read
-## minLen = Final read must be at least this long. Empirically 162 produces ASVs >= 300nt
+## truncQ   = Truncate read at 1st position with Q <= truncQ
 ##
-## This combination retains >92% of reads, which might be good for error
-## models. It will also lead to lots of short ASVs that are probably not nifH.
-## We can deal with that later rather than try to tweak params to arrive at only
-## nifH ASV's.
-filterAndTrimParams <- list(truncQ = 10, maxEE.fwd = 3, maxEE.rev=5, minLen = 20)
+## truncLen = Truncate reads at a specified bp which you should select based on
+##            quality profiles such as from FastQC. 0 by default means do not
+##            truncate. This parameter treats all reads the same (ignoring
+##            quality for the specific read).  It should make reads tend toward
+##            the same length (if truncQ is low)) and thus could be set so that
+##            dada2 sees more examples of basecalls at later positions in the
+##            reads which might improve ASV inference (vs. more variable read
+##            lengths if one chops each based on truncQ).  I suggest running the
+##            pipeline using different approaches and checking which ASVs
+##            persist.
+## maxEE    = Max allowed (expected) errors in final read
+##
+## minLen   = Final read must be at least this long. Empirically 162 produces
+##            ASVs >= 300nt
+##
+filterAndTrimParams <- list(truncQ = 2, maxEE.fwd = 3, maxEE.rev = 5, minLen = 20,
+                            truncLen.fwd = 0, truncLen.rev = 0)
 
 ## These are the default values.  Allow overriding in the params file.
 mergePairsParams <- list(minOverlap=12, maxMismatch=0, justConcatenate=F)
 
+## Special parameters:
+specialParams <- list(useOnlyR1Reads = FALSE)   # Base ASVs only on the R1 reads.
+                                                # Ignore R2's at filterAndTrim and
+                                                # do not mergePairs.
 
 ################################################################################
 ##
@@ -93,6 +110,7 @@ if (!is.na(paramsFile)) {
     stopifnot(file.exists(paramsFile))
     ptab <-read.csv(paramsFile, header=F, row.names=1, comment.char = "#")
     p <- union(names(filterAndTrimParams), names(mergePairsParams))
+    p <- union(p, names(specialParams))
     plist <- intersect(p, rownames(ptab))
     cat("Will use parameters file",paramsFile,"for",paste(plist,collapse=','),"\n")
     for (p in plist) {
@@ -103,6 +121,11 @@ if (!is.na(paramsFile)) {
             mergePairsParams[[p]] <- ifelse(ptab[p,1]=='TRUE',TRUE,FALSE)
         } else if (p %in% names(mergePairsParams)) {
             mergePairsParams[[p]] <- as.integer(ptab[p,1])
+        }
+        if (p == 'useOnlyR1Reads') {
+            ## Impacts filterAndTrim and skips mergePairs.
+            cat("NOTE!  You have asked for ASVs to be based just on the R1 reads.\n")
+            specialParams$useOnlyR1Reads <- ifelse(ptab[p,1]=='TRUE',TRUE,FALSE)
         }
     }
     rm(ptab,plist,p)
@@ -201,6 +224,13 @@ CheckFastq(fastqs)
 FwdFastqIdx <- function(fastqs) { seq(1,length(fastqs),2) }
 RevFastqIdx <- function(fastqs) { seq(1,length(fastqs),2)+1 }
 
+if (specialParams$useOnlyR1Reads) {
+    ## If using only the R1s, remove the R2s.  Will propagate to filteredFastqs.
+    fastqs <- sort(list.files(dataDir, pattern=".*_R1.*fastq.gz", full.names=TRUE, recursive=TRUE))
+    ## Also redefine Fwd/RevFastqIdx.
+    FwdFastqIdx <- function(fastqs) { 1:length(fastqs) }
+    RevFastqIdx <- function(fastqs) { NULL }
+}
 
 filteredFastqs <- file.path(dada2OutDir, "filtered", basename(fastqs))
 stopifnot(length(filteredFastqs) >= 1)
@@ -293,29 +323,58 @@ rm(qpdir,i,samp,plotFile)
 ##     readLen  =  nmatch + (asvLen - nmatch)/2
 ##
 if (!all(file.exists(filteredFastqs))) {
-    cat("Filtering the forward and reverse reads. Will truncate reads at the first position",
-        "with a quality score Q <=",filterAndTrimParams$truncQ,
-        "Will drop reads with more than", filterAndTrimParams$maxEE.fwd, "or",
-        filterAndTrimParams$maxEE.rev, "expected errors on the forward or reverse",
-        "reads (resp.), or that have any uncalled bases.",
-        "Will drop reads with <",filterAndTrimParams$minLen,"nt.\n")
+    ## Missing some filtered fastqs (whether R1 or R2 -- see above).
+    cat("Quality filtering the reads. Will truncate reads at the first position",
+        "with a quality score Q <=",filterAndTrimParams$truncQ,".\n")
+    cat("Will drop reads that have any uncalled bases or that have fewer than",
+        filterAndTrimParams$minLen,"nt.\n")
+    cat("Will drop reads with more than", filterAndTrimParams$maxEE.fwd,
+        "expected errors in the forward read.\n")
+    if (filterAndTrimParams$truncLen.fwd > 0) {
+        cat("Will chop forward reads at position",
+            filterAndTrimParams$truncLen.fwd, "\n")
+    }
+    if (!specialParams$useOnlyR1Reads) {
+        cat("Will drop reads with more than", filterAndTrimParams$maxEE.rev,
+            "expected errors in the reverse read.\n",
+            "Note that both reads are rejected if either the forward or",
+            "reverse is rejected.\n")
+        if (filterAndTrimParams$truncLen.rev > 0) {
+            cat("Will chop reverse reads at position",
+                filterAndTrimParams$truncLen.rev, "\n")
+        }
+    }
     fwdIdx <- FwdFastqIdx(filteredFastqs)
-    revIdx <- RevFastqIdx(filteredFastqs)
-    ## Note param orient.fwd might be useful for getting all the amplicons to be
-    ## on the + strand.  But what sequence to use, the fwd primer?  I already
-    ## removed that, and it has ambiguous base at position 3 so probably can't
-    ## help.
-    filtFs <- filteredFastqs[fwdIdx]; names(filtFs) <- Fastq2Samp(filtFs)
-    filtRs <- filteredFastqs[revIdx]; names(filtRs) <- Fastq2Samp(filtRs)
-    track <- filterAndTrim(fwd = fastqs[fwdIdx], filt     = filtFs,
-                           rev = fastqs[revIdx], filt.rev = filtRs,
-                           truncQ = filterAndTrimParams$truncQ,
-                           maxN   = 0,        # Default. Tolerate no uncalled positions.
-                           maxEE  = c(filterAndTrimParams$maxEE.fwd,
-                                      filterAndTrimParams$maxEE.rev),
-                           minLen = filterAndTrimParams$minLen,
-                           matchIDs = TRUE,   # only output reads that are paired.  FIXME FIXME FIXME: Ids do not match for Danish straits data.  Need a flexible solution...
-                           multithread=TRUE)  # Set F if errors occur (see Details)
+    filtFs <- filteredFastqs[fwdIdx]
+    names(filtFs) <- Fastq2Samp(filtFs)
+    if (!specialParams$useOnlyR1Reads) {
+        ## Use the forward and reverse reads.
+        revIdx <- RevFastqIdx(filteredFastqs)
+        filtRs <- filteredFastqs[revIdx]
+        names(filtRs) <- Fastq2Samp(filtRs)
+        track <- filterAndTrim(fwd = fastqs[fwdIdx], filt     = filtFs,
+                               rev = fastqs[revIdx], filt.rev = filtRs,
+                               truncQ = filterAndTrimParams$truncQ,
+                               truncLen = c(filterAndTrimParams$truncLen.fwd,
+                                          filterAndTrimParams$truncLen.rev),
+                               maxN   = 0,        # Default. Tolerate no uncalled positions.
+                               maxEE  = c(filterAndTrimParams$maxEE.fwd,
+                                          filterAndTrimParams$maxEE.rev),
+                               minLen = filterAndTrimParams$minLen,
+                               matchIDs = TRUE,   # only output reads that are paired.  FIXME FIXME FIXME: Ids do not match for Danish straits data.  Need a flexible solution...
+                               multithread=TRUE)  # Set F if errors occur (see Details)
+    } else {
+        ## Only filter based on the forward reads.
+        track <- filterAndTrim(fwd      = fastqs[fwdIdx],
+                               filt     = filtFs,
+                               truncQ   = filterAndTrimParams$truncQ,
+                               truncLen = filterAndTrimParams$truncLen.fwd,
+                               maxN     = 0,
+                               maxEE    = filterAndTrimParams$maxEE.fwd,
+                               minLen   = filterAndTrimParams$minLen,
+                               multithread=TRUE)
+    }
+
     cat("Here are the numbers of reads input and retained:\n")
     print( data.frame(track,
                       PctRetained = round(100*track[,'reads.out']/track[,'reads.in'],1)) )
@@ -529,62 +588,78 @@ ggsave(file.path(plotsDir,'readsProcessed.pdf'), width=7.5, height=5, units='in'
 ################################################################################
 BigStep("Merging denoised paired reads")
 
-## The names of dds are the file faths to the filtered reads.
-fidx <- FwdFastqIdx(names(dds))
-ridx <- RevFastqIdx(names(dds))
-## Verify correspondence.
-stopifnot(Fastq2Samp(names(dds)[fidx]) == Fastq2Samp(names(dds)[ridx]))
-stopifnot(Fastq2Index(names(dds)[fidx])+1 == Fastq2Index(names(dds)[ridx]))
-if (!file.exists(mergedRdsFile)) {
-    mergers <- mergePairs(dds[fidx], names(dds)[fidx],
-                          dds[ridx], names(dds)[ridx],
-                          minOverlap      = mergePairsParams$minOverlap,
-                          maxMismatch     = mergePairsParams$maxMismatch,
-                          justConcatenate = mergePairsParams$justConcatenate,
-                          verbose=T)
-    ## Convert mergers to a list of data.frames if necessary (b/c just 1 seq run).
-    if (is.data.frame(mergers)) {
-        stopifnot(length(fidx)==1)
-        mergers <- list(mergers)
-        names(mergers) <- names(dds)[1]
-    }
-    ## Make the names not mention R1.  (Currently they are the R1 fastq paths.)
-    names(mergers) <- Fastq2Samp(names(mergers))
-    saveRDS(mergers, mergedRdsFile)
-
-    ## Make a list of unique ASV sequences by enumerating the df's in the list.
-    ## (Could skip -- see makeSequenceTable() below.)
-    numAsvs <- length(unique(unlist(lapply(mergers, function(v) v$sequence))))
-    cat("mergePairs() created",numAsvs,"ASVs in",length(mergers),"samples.\n")
-    if (mergePairsParams$justConcatenate) {
-        cat("mergePairs() was asked to concatenate, so each ASV will have a 5' part\n",
-            "and a 3' part that are joined by 10 N's.  The 3' part will have been reverse\n",
-            "complemented and it might or might not share sequence with the 5' part.\n\n")
-    } else {
-        ## Provide some stats on the merge.
-        cat("The merge tolerated at most",mergePairsParams$maxMismatch,"mismatches between the\n",
-            "forward and reverse sequences.  Below for each sample are stats for the numbers\n",
-            "of matches, mismatches, and indels in the overlapping regions for the top 10 merged\n",
-            "sequences in each sample.\n")
-        for (i in 1:length(mergers)) {
-            cat("\nSample",names(mergers)[i],"\n")
-            print(head(mergers[[i]][,-1], n=10))
-            cat("\n")
-        }
-        cat("\n\n")
-    }
+if (specialParams$useOnlyR1Reads) {
+    cat("Skipping read merging because useOnlyR1Reads is TRUE.\n")
 } else {
-    mergers <- readRDS(mergedRdsFile)
-    cat("Already had merged reads.\n")    
+    ## The names of dds are the file faths to the filtered reads.
+    fidx <- FwdFastqIdx(names(dds))
+    ridx <- RevFastqIdx(names(dds))
+    ## Verify correspondence.
+    stopifnot(Fastq2Samp(names(dds)[fidx]) == Fastq2Samp(names(dds)[ridx]))
+    stopifnot(Fastq2Index(names(dds)[fidx])+1 == Fastq2Index(names(dds)[ridx]))
+    if (!file.exists(mergedRdsFile)) {
+        mergers <- mergePairs(dds[fidx], names(dds)[fidx],
+                              dds[ridx], names(dds)[ridx],
+                              minOverlap      = mergePairsParams$minOverlap,
+                              maxMismatch     = mergePairsParams$maxMismatch,
+                              justConcatenate = mergePairsParams$justConcatenate,
+                              verbose=T)
+        ## Convert mergers to a list of data.frames if necessary (b/c just 1 seq run).
+        if (is.data.frame(mergers)) {
+            stopifnot(length(fidx)==1)
+            mergers <- list(mergers)
+            names(mergers) <- names(dds)[1]
+        }
+        ## Make the names not mention R1.  (Currently they are the R1 fastq paths.)
+        names(mergers) <- Fastq2Samp(names(mergers))
+        saveRDS(mergers, mergedRdsFile)
+
+        ## Make a list of unique ASV sequences by enumerating the df's in the list.
+        ## (Could skip -- see makeSequenceTable() below.)
+        numAsvs <- length(unique(unlist(lapply(mergers, function(v) v$sequence))))
+        cat("mergePairs() created",numAsvs,"ASVs in",length(mergers),"samples.\n")
+        if (mergePairsParams$justConcatenate) {
+            cat("mergePairs() was asked to concatenate, so each ASV will have a 5' part\n",
+                "and a 3' part that are joined by 10 N's.  The 3' part will have been reverse\n",
+                "complemented and it might or might not share sequence with the 5' part.\n\n")
+        } else {
+            ## Provide some stats on the merge.
+            pre  <- sum(sapply(mergers, function(v) sum(v[,'abundance'])))
+            post <- sum(sapply(1:length(dds), function(i) sum(dds[[i]][['denoised']])))
+            cat("The merge tolerated at most",mergePairsParams$maxMismatch,"mismatches between\n",
+                "the forward and reverse ASVs.  In total", post, "read pairs correspond to\n",
+                "post-merge ASVs compared to", post, "reads (fwd and rev separate) in pre-merge\n",
+                "ASVs.\n")
+            cat("Below for each sample are stats for the top 10 post-merge ASVs:\n",
+                "  Num reads (abundance), and num matches, mismatches, and indels in\n",
+                "  the overlapping regions.\n")
+            for (i in 1:length(mergers)) {
+                cat("\nSample",names(mergers)[i],"\n")
+                print(head(mergers[[i]][,-1], n=10))
+                cat("\n")
+            }
+            cat("\n\n")
+        }
+    } else {
+        mergers <- readRDS(mergedRdsFile)
+        cat("Already had merged reads.\n")    
+    }
+    rm(fidx,ridx)
 }
-rm(fidx,ridx)
 
 
 ################################################################################
 BigStep("Making sequence table") # used to be part of denoising
 
 cat("Making sequence table.  Here are the dimensions (samples X ASVs)\n")
-sequenceTab <- makeSequenceTable(mergers)
+if (!specialParams$useOnlyR1Reads) {
+    sequenceTab <- makeSequenceTable(mergers)
+} else {
+    ## There was no merge so make the sequence table from the dds.
+    ## As in the merge step, simplify the sample names (but afterwards).
+    sequenceTab <- makeSequenceTable(dds)
+    rownames(sequenceTab) <- Fastq2Samp(rownames(sequenceTab))
+}
 dim(sequenceTab)
 saveRDS(sequenceTab, file=seqTabRdsFile)
 

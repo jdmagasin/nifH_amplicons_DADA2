@@ -77,9 +77,15 @@ if (!file.exists(cachedCountFile)) {
 
 cat("Counting merged reads ...\n")
 fp <- file.path(dada2OutDir,'RObjects','merged.rds')
-merged <- readRDS(fp)
-mergedReads <- lapply(merged, function(df) { sum(df[which(df$accept),'abundance']) })
-mergedReads <- mergedReads[order(names(mergedReads))]
+if (!file.exists(fp)) {
+    cat("There is no merged reads file. Will assume you ran the pipeline\n",
+        "using only the R1 reads and so there was no read pair merging.\n")
+    mergedReads <- NULL
+} else {
+    merged <- readRDS(fp)
+    mergedReads <- lapply(merged, function(df) { sum(df[which(df$accept),'abundance']) })
+    mergedReads <- mergedReads[order(names(mergedReads))]
+}
 
 
 cat("Counting reads in ASVs before chimera detection...\n")
@@ -121,7 +127,9 @@ l2df <- function(lst, stage) {
 dat <- l2df(initReads,'Initial')
 dat <- rbind(dat, l2df(trimReads,'Trimmed'))
 dat <- rbind(dat, l2df(filtReads,'Filtered'))
-dat <- rbind(dat, l2df(mergedReads,'Merged'))
+if (!is.null(mergedReads)) {
+    dat <- rbind(dat, l2df(mergedReads,'Merged'))
+}
 dat <- rbind(dat, l2df(asvReads,'InASVs'))
 dat <- rbind(dat, l2df(asvNoChimReads,'InNonChimericASVs'))
 if (length(asvWithNifH) > 0) {
@@ -150,14 +158,19 @@ for (s in as.character(subset(dat, Stage=='InNonChimericASVs')$Sample)) {
 }
 rm(s,x,v)
 
-## For a given sample, Merged and InASVs have identical numbers [checked below]
-## regardless of whether I concatenated or actually merged, because my dada2
-## script makes the sequence table (corresponds to InASVs) from 'mergers' right
-## after mergePairs().  So show just one.
-stopifnot( subset(dat, Stage=='Merged')$Reads == subset(dat, Stage=='InASVs')$Reads )
-
-stages <- c(Initial='Initial', Trimmed='Primers trimmed', Filtered='Quality filtered',
-            Merged='In ASVs (merged)', InNonChimericASVs='In non-chimeric ASVs')
+if (!is.null(mergedReads)) {
+    ## For a given sample, Merged and InASVs have identical numbers [checked below]
+    ## regardless of whether I concatenated or actually merged, because my dada2
+    ## script makes the sequence table (corresponds to InASVs) from 'mergers' right
+    ## after mergePairs().  So show just one.
+    stopifnot( subset(dat, Stage=='Merged')$Reads == subset(dat, Stage=='InASVs')$Reads )
+    stages <- c(Initial='Initial', Trimmed='Primers trimmed', Filtered='Quality filtered',
+                Merged='In ASVs (merged)', InNonChimericASVs='In non-chimeric ASVs')
+} else {
+    ## Reads were not merged -- just used the R1's.
+    stages <- c(Initial='Initial', Trimmed='Primers trimmed', Filtered='Quality filtered',
+                InNonChimericASVs='In non-chimeric ASVs')
+}
 dat <- subset(dat, Stage %in% names(stages))
 
 dat$Stage <- factor(dat$Stage, levels = rev(names(stages)), labels = rev(stages), ordered=T)

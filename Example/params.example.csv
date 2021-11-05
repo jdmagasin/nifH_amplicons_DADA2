@@ -37,11 +37,39 @@
 forward,TGYGAYCCNAARGCNGA
 reverse,ADNGCCATCATYTCNCC
 
-## These are for filterAndTrim().
+## These are for filterAndTrim().  Here you can decide between two strategies
+## for trimming the reads.
+##
+##  (A) You can rely only on truncQ so that each forward and each reverse read
+##      will be trimmed at the first base to to drop below the specified Phred
+##      score.
+##  (B) You can set fixed trim lengths for the forward and reverse reads
+##      (truncLen.fwd and truncLen.rev) based on inspection of average quality
+##      of the reads in e.g. FastQC reports.
+##
+## "B" is more commonly used, indeed DADA2's default filterAndTrim() by default
+## uses a very low score for truncQ (Phred = 2).  Perhaps there are cases where
+## "A" is useful for aggressively quality filtering reads, but at the cost of
+## throwing out much of the data and making diversity analysis impossible.  In
+## practice I have found that option "A" with a high truncQ throws out much data
+## and yields fewer ASVs, while option "A" with a lower truncQ (e.g. 9)
+## encourages reads to overlap which leads to DADA2 finding many of the same
+## ASVs it would if you just used approach "B."
 truncQ,16
+##truncLen.fwd,XXX  <-- replace based on your R1 qualities
+##truncLen.rev,YYY  <-- replace based on your R2 qualities
 maxEE.fwd,2
 maxEE.rev,4
 minLen,20
+
+## Two other options:
+## -- You can also use just the R1 reads for your ASVs if the R2's are very low quality.
+##useOnlyR1Reads,TRUE
+## -- You can tell DADA2 to generate ASVs that do not merge the left and right
+##    sequences. (The "sequences" are actually left and right ASVs, not reads.)
+##    Instead you will get ASVS the left and right parts separated by 10 N's.
+##justConcatenate,TRUE
+
 
 ## These are for mergePairs(). minOverlap 12 is the default. maxMismatch default
 ## is 0 but I prefer 1 as described above.

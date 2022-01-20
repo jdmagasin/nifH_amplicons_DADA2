@@ -77,6 +77,7 @@ cat hmmsearch.Fer_NifH.domtab.gz | gunzip \
   | awk -F"\t" -v minBits="$MINBITS" -v minLen="$MINLEN" \
         '{if ($2 > minBits  &&  $4-$3+1 > minLen) print $1}' \
   | sed 's/_[^_]*_[^_]*_[+-]$//' \
+  | sort | uniq \
   | gzip \
   > readsWithNifH.ids.gz
 echo "done."

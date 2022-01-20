@@ -6,7 +6,7 @@ idsFile   <- args[1]
 fastqFile <- args[2]
 
 fastq <- readFastq(fastqFile)
-ids <- read.table(idsFile)[,1]
+ids   <- unique(read.table(idsFile)[,1])
 
 ## Snip fastq read id's at whitespace. Garr.  This script is ~general, but also
 ## must snip so I can use the FragGeneScan results. (Unless I grep...)

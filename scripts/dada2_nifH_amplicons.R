@@ -64,7 +64,8 @@ NBASES_FOR_LEARNING_ERRORS = 1e+08  # This is the default number of bases that
 ##            lengths if one chops each based on truncQ).  I suggest running the
 ##            pipeline using different approaches and checking which ASVs
 ##            persist.
-## maxEE    = Max allowed (expected) errors in final read
+## maxEE    = Max allowed (expected) errors in final read. Defalts to Inf just
+##            like DADA2.
 ##
 ## minLen   = Final read must be at least this long. Empirically 162 produces
 ##            ASVs >= 300nt
@@ -80,8 +81,11 @@ NBASES_FOR_LEARNING_ERRORS = 1e+08  # This is the default number of bases that
 ##            ** in the fastq id string".  matcIDs should still function if
 ##            ** you have to set id.field.
 ##
-filterAndTrimParams <- list(truncQ = 2, maxEE.fwd = 3, maxEE.rev = 5, minLen = 20,
+filterAndTrimParams <- list(truncQ = 2, maxEE.fwd = Inf, maxEE.rev = Inf, minLen = 20,
                             truncLen.fwd = 0, truncLen.rev = 0, id.field = NULL)
+filterAndTrimParams.ints <- c('truncQ', paste0('maxEE.',    c('fwd','rev')),
+                              'minLen', paste0('truncLen.', c('fwd','rev')))
+stopifnot(filterAndTrimParams.ints %in% names(filterAndTrimParams))
 
 ## These are the default values.  Allow overriding in the params file.
 mergePairsParams <- list(minOverlap=12, maxMismatch=0, justConcatenate=F)
@@ -126,8 +130,11 @@ if (!is.na(paramsFile)) {
     plist <- intersect(p, rownames(ptab))
     cat("Will use parameters file",paramsFile,"for",paste(plist,collapse=','),"\n")
     for (p in plist) {
-        if (p %in% names(filterAndTrimParams)) {
+        if (p %in% filterAndTrimParams.ints) {
             filterAndTrimParams[[p]] <- as.integer(ptab[p,1])
+            ## "Inf" triggers next check. Inf is the default maxEE so it does
+            ## not need to be passed in. Will not special-case for Inf.
+            stopifnot(!is.na(filterAndTrimParams[[p]]))
         }
         if (p == 'justConcatenate') {
             mergePairsParams[[p]] <- ifelse(ptab[p,1]=='TRUE',TRUE,FALSE)
@@ -378,7 +385,7 @@ if (!all(file.exists(filteredFastqs))) {
                                           filterAndTrimParams$maxEE.rev),
                                minLen = filterAndTrimParams$minLen,
                                id.field = filterAndTrimParams$id.field,
-                               matchIDs = TRUE,   # only output reads that are paired.  FIXME FIXME FIXME: Ids do not match for Danish straits data.  Need a flexible solution...
+                               matchIDs = TRUE,   # only output reads that are paired.
                                multithread=TRUE)  # Set F if errors occur (see Details)
     } else {
         ## Only filter based on the forward reads.

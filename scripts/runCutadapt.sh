@@ -44,7 +44,7 @@ rev="ADNGCCATCATYTCNCC"  #  nifH_down_inner_R: 5’ – ADN GCC ATC ATY TCN CC �
 usage="
 Use cutadapt to trim nifH paired-end Illumina reads their primers.
 Usage:
-\trunCutadapt.sh  FastqList  OutDir  [fwdPrimer] [revPrimer]
+\trunCutadapt.sh  FastqList  OutDir  [fwdPrimer] [revPrimer]  [allowMissingPrimers]
 
 Paired files in FastqList of this form:
    path/to/prefix_R1{_suffix}.fastq.gz
@@ -60,7 +60,12 @@ By default these nifH primers are used:
 \treverse:  5' - $rev - 3'  for the R2 fastqs
 You may specify your own primers 5' to 3' with IUPAC codes (upper or lower case).
 
-This script will discard read pairs that are missing one or both of the primers.
+This script will discard read pairs that are missing one or both of the primers,
+unless you pass TRUE for final parameter (usually not passed at all).
+allowMissingPrimers let's you run the script on data that already had primers
+removed as sometimes gets uploaded to the NCBI SRA.  It is still a good idea to
+run cutadapt e.g. to verify absence of primers.
+
 Mismatches in the primer are tolerated (up to 10% of the bases) but indels are not.
 "
 
@@ -72,12 +77,17 @@ if [ ! -z "$3" ] ; then
     ## Check both defined below.
 fi
 
+## By default, discard read pairs if either is missing a primer.
+discardUntrimmed="--discard-untrimmed"
+if [ "$5" == "TRUE" ] ; then discardUntrimmed=""; fi
+
+
 ## Note on the cutadapt parameters used in the loop below:
 ## Pass params that will trim paired reads of their primers and discard pairs
 ## that do not contain primers.  Described at:
 ##   https://cutadapt.readthedocs.io/en/stable/recipes.html#trimming-amplicon-primers-from-both-ends-of-paired-end-reads
 ## The options below (in particular --discard-untrimmed) will cause a pair of
-## reads to be discardedd if the R1 read lacks the forward primer or the R2 read
+## reads to be discarded if the R1 read lacks the forward primer or the R2 read
 ## lacks the reverse primer (i.e. both reads must have their respective 5'
 ## primers).  You can change this e.g. to require that both primers were missing
 ## by also passing --pair-filter=both (rather than 'any' which is the default).
@@ -126,8 +136,11 @@ while read r1 ; do
     echo "Will use these primers with cutadapt:" >> $odir/cutadapt.log
     echo -e "\tforward:  5'- ${fwd} -3'  revcomp 5'- ${rcfwd} -3'" >> $odir/cutadapt.log
     echo -e "\treverse:  5'- ${rev} -3'  revcomp 5'- ${rcrev} -3'" >> $odir/cutadapt.log
+    if [ -z "$discardUntrimmed" ] ; then
+        echo "Reads will be retained even if missing primers." >> $odir/cutadapt.log
+    fi
     echo >> $odir/cutadapt.log
-    cutadapt -a "${fwd}...${rcrev}"  -A "${rev}...${rcfwd}"  --no-indels  -m 1  --discard-untrimmed \
+    cutadapt -a "${fwd}...${rcrev}"  -A "${rev}...${rcfwd}"  --no-indels  -m 1  $discardUntrimmed \
              -o $out1  -p $out2  $r1  $r2 >> $odir/cutadapt.log
     echo -e "### Finished working on $r1 and its R2 file.\n\n" >> $odir/cutadapt.log
 done < $FastqList

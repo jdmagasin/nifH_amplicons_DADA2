@@ -150,7 +150,8 @@ else
     ## structure as their inputs execpt the first folder is renamed as directed.
     fwd=`cat $PARAMS | grep "^forward" | cut -d, -f2 | tr -d [:space:]`
     rev=`cat $PARAMS | grep "^reverse" | cut -d, -f2 | tr -d [:space:]`
-    $SDIR/runCutadapt.sh "$rflist" "$OUTDIR/Data.trimmed" "$fwd" "$rev" 2>&1
+    anp=`cat $PARAMS | grep ^"allowMissingPrimers" | cut -d, -f2 | tr -d [:space:]`
+    $SDIR/runCutadapt.sh "$rflist" "$OUTDIR/Data.trimmed" "$fwd" "$rev" "$anp" 2>&1
     if [ "$?" -ne 0 ] ; then
         echo "runCutadapt.sh failed. Aborting pipeline."
         exit -1

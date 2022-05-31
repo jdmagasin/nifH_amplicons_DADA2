@@ -70,15 +70,15 @@ NBASES_FOR_LEARNING_ERRORS = 1e+08  # This is the default number of bases that
 ## minLen   = Final read must be at least this long. Empirically 162 produces
 ##            ASVs >= 300nt
 ##
-## id.field = If NULL, then filterAndTrim() assumes Illumina formatted IDs with
-##            in CASAVA format (either new 1.8+ or old <=1.7).  Otherwise, by
+## id.field = If NULL, then filterAndTrim() assumes Illumina formatted IDs in
+##            CASAVA format (either new 1.8+ or old <=1.7).  Otherwise, by
 ##            looking at the fAT() source, I see that it is the index of the
 ##            field to use for read IDs. Fields in the ID line are by default
 ##            separated by ws, otherwise by id.sep.
 ##            ** So if you have old data that does not follow CASAVA format,
 ##            ** then probably setting id.field to 1 will avoid an error about
 ##            ** failure "to automatically detect the sequence identifier field
-##            ** in the fastq id string".  matcIDs should still function if
+##            ** in the fastq id string".  matchIDs should still function if
 ##            ** you have to set id.field.
 ##
 filterAndTrimParams <- list(truncQ = 2, maxEE.fwd = Inf, maxEE.rev = Inf, minLen = 20,
@@ -145,6 +145,11 @@ if (!is.na(paramsFile)) {
             ## Impacts filterAndTrim and skips mergePairs.
             cat("NOTE!  You have asked for ASVs to be based just on the R1 reads.\n")
             specialParams$useOnlyR1Reads <- ifelse(ptab[p,1]=='TRUE',TRUE,FALSE)
+        }
+        if (p == 'id.field' && ptab[p,1] != "NULL") {
+            ## Cannot use 'ints' case above because id.field can be NULL.
+            filterAndTrimParams[[p]] <- as.integer(ptab[p,1])
+            stopifnot(!is.na(filterAndTrimParams[[p]]))
         }
     }
     rm(ptab,plist,p)

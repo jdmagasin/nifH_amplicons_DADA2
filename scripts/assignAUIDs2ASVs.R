@@ -72,6 +72,7 @@ cat("Mapping ASVs to AUIDs...\n")
 asv2auid <- data.frame()
 for (i in 1:nrow(asvFastaPaths)) {
     seq <- readFasta(asvFastaPaths$Path[i])
+    if (length(seq) == 0) { stop(asvFastaPaths$Path[i]," has no sequences.") }
     ## The MD5's are the values. Names are the ASV sequences.
     md5s <- sapply(as.character(sread(seq)), digest, algo='md5')
     aids <- as.character(id(seq))  # same order as md5s

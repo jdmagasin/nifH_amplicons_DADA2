@@ -120,6 +120,37 @@ if [ ! -f "$rflist" ] ; then
 else
     echo "$rflist already exists."
 fi
+
+## Check whether that FASTQs names are structured as expected by the pipeline,
+## so that we don't have to wait until that stage only to get a crash (in
+## Fastq2Samp() which defines the convention encoded right here).
+echo
+echo "Checking if FASTQ names follow format: {Samp}{_stuff1_}R{1,2}{stuff2}.fastq.gz"
+basename -a `cat "$rflist"` | grep 'R1' \
+    | sed -e 's/\.fastq\.gz$//'  -e 's/R1.*$//'  -e 's/_.*$//' \
+    | sort | uniq -c \
+  > checkSampleNamesImpliedByFastqNames.tmp
+numDupSamps=`cat checkSampleNamesImpliedByFastqNames.tmp | grep -c -v "  1"`
+if [ "$numDupSamps" -ge 1 ] ; then
+    echo "It looks like you have used invalid FASTQ file names because they start with"
+    echo "sample names that are duplicated.  FASTQ names must be structured like this:"
+    echo "    {Samp}{_stuff1_}R{1,2}{stuff2}.fastq.gz"
+    echo "where:"
+    echo "   - Samp can have any character other than \"_\"."
+    echo "   - stuff1, if present, can have any character but must be flanked by \"_\""
+    echo "     Usually stuff1 will be/include the sequencing lane (L001).  stuff1 is"
+    echo "     not interesting to the study and is excluded from column names in the"
+    echo "     in the final abundance table."
+    echo "   - stuff2 can be anything, or absent"
+    echo "   - The .fastq.gz could be absent, but that would be bad style."
+    echo "Your FASTQ names imply the following $numDupSamps duplicated sample names,"
+    echo "each preceded by the number of FASTQ pairs that share the sample name."
+    cat checkSampleNamesImpliedByFastqNames.tmp
+    exit -1
+fi
+rm checkSampleNamesImpliedByFastqNames.tmp
+echo "FASTQ names seem okay -- at least they do not imply duplicated sample names."
+echo
 echo "There are "`cat "$rflist" | wc -l`" FASTQ files in $rflist."
 
 ## Processing groups are defined as the distinct pathways up to but excluding

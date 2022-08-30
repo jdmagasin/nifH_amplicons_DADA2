@@ -69,9 +69,9 @@ MapOneAsvTable <- function(tsv, tag, useMd5=F, verbose=T)
 	    sum(!is.na(idx)), "of the ASVs were previously mapped by assignAUIDs2ASVs.R to AUIDs",
 	        "and will be included in the new AUID count table.\n")
     }
-    asvTab <- asvTab[!is.na(idx),,drop=F]                           # Throw out unmapped ASVs
+    asvTab <- asvTab[!is.na(idx),,drop=F]                  # Throw out unmapped ASVs
     newLab <- c('AUID','md5')[useMd5+1]
-    rownames(asvTab) <- auidSS[ idx[!is.na(idx)], newLab, drop=F ]  # Relabel using the AUIDs
+    rownames(asvTab) <- auidSS[ idx[!is.na(idx)], newLab]  # Relabel using the AUIDs
     asvTab
 }
 

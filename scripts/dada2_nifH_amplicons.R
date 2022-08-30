@@ -724,7 +724,7 @@ colnames(df) <- rownames(sequenceTab)                 # Use original (R-unfriend
 write.table(df, file=asvsAbundTxt, sep="\t", quote=F)
 write(paste0('>',as.character(asvSeq2Id),"\n",names(asvSeq2Id)), file=asvsFastaTxt)
 
-if (nrow(df) < 5 || ncol(df) <= 1) {
+if (nrow(df) < 5 || ncol(df) <= 2) {
     cat("Not doing NMDS. Too few ASVs and/or samples.\n")
 } else {
     ## NMDS of samples by their ASV profiles.

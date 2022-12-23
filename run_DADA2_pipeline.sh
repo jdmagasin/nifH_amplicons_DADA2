@@ -207,7 +207,12 @@ echo "using HMMER and trusted cutoffs for the domain (defined in the hmm). Will"
 echo "then filter for predicted domains that have sufficient length and bit score"
 echo "as specified in the params file (or default values will be used). Only the R1"
 echo "reads are used in this stage."
-if [ -d "$OUTDIR/Data.NifH_prefilter" ] ; then
+## This is to support 16S runs.  Forces run_DADA2_pipeline.sh to create models rather
+## than precomputed from nifH-like R1 reads.
+SKIP_NIFH_ERROR_MODELS=`cat $PARAMS | grep -i ^skipNifHErrorModels | grep -i 'true'`
+if [ ! -z "$SKIP_NIFH_ERROR_MODELS" ] ; then
+    echo "Skipping this step because you asked not to use precomputed error models." ;
+elif [ -d "$OUTDIR/Data.NifH_prefilter" ] ; then
     echo "Looks like you already did this step. Skipping."
 else
     NIFH_MINLEN=`cat $PARAMS | grep "^NifH_minLen" | cut -d, -f2 | tr -d [:space:]`
@@ -246,25 +251,29 @@ echo
 echo "##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### #####"
 echo "Building error models from the forward reads that appeared to have NifH domains."
 echo "Separate models will be built for each processing group."
-while read pgrp; do
-    pdesc=`echo "$pgrp" | tr '/' '.'`
-    logfile="log.learnErrors.${pdesc}.txt"
-    if [ -f "$OUTDIR/ErrorModels/$pgrp/${logfile}" ] ; then
-        echo "Error models already exist for $pgrp ($logfile found). Skipping."
-    else
-        cd "$OUTDIR"
-        echo " -- Working on error models for processing group $pgrp"
-        ## pgrp encodes the path for the processing group.
-        Rscript "${SDIR}/learnErrorsFromFastq.R"  "Data.NifH_prefilter/$pgrp" > "$logfile"
-        if [ "$?" -ne 0 ] ; then
-            echo "learnErrorsFromFastq.R exited abnormally. Aborting pipeline."
-            exit -1
+if [ ! -z "$SKIP_NIFH_ERROR_MODELS" ] ; then
+    echo "Skipping precomputed error models based on NifH-like reads." ;
+else
+    while read pgrp; do
+        pdesc=`echo "$pgrp" | tr '/' '.'`
+        logfile="log.learnErrors.${pdesc}.txt"
+        if [ -f "$OUTDIR/ErrorModels/$pgrp/${logfile}" ] ; then
+            echo "Error models already exist for $pgrp ($logfile found). Skipping."
+        else
+            cd "$OUTDIR"
+            echo " -- Working on error models for processing group $pgrp"
+            ## pgrp encodes the path for the processing group.
+            Rscript "${SDIR}/learnErrorsFromFastq.R"  "Data.NifH_prefilter/$pgrp" > "$logfile"
+            if [ "$?" -ne 0 ] ; then
+                echo "learnErrorsFromFastq.R exited abnormally. Aborting pipeline."
+                exit -1
+            fi
+            mkdir -p "ErrorModels/$pgrp"
+            mv errorModel.rds errorModel.pdf "$logfile" "ErrorModels/$pgrp"
+            cd "$CWD"
         fi
-        mkdir -p "ErrorModels/$pgrp"
-        mv errorModel.rds errorModel.pdf "$logfile" "ErrorModels/$pgrp"
-        cd "$CWD"
-    fi
-done < processingGroups.txt
+    done < processingGroups.txt
+fi
 
 
 echo
@@ -298,9 +307,12 @@ while read pgrp; do
         trimdir="Data.trimmed/$pgrp"
         dada2dir="Dada2PipeOutput/$pgrp/Out.${STAMP}"
         echo "For this DADA2 run the output will be in $dada2dir"
+        if [ -z "$SKIP_NIFH_ERROR_MODELS" ] ; then
+            EMPARAM="ErrorModels/$pgrp/errorModel.rds"
+        fi
         Rscript "$SDIR/dada2_nifH_amplicons.R" "$trimdir" "$dada2dir"  \
-                "../$PARAMS" "ErrorModels/$pgrp/errorModel.rds" \
-          2> "$logfile"
+                "../$PARAMS" $EMPARAM \
+            2> "$logfile"
         if [ "$?" -ne 0 ] ; then
             echo "dada2_nifH_amplicons.R exited abnormally. Aborting pipeline."
             exit -1

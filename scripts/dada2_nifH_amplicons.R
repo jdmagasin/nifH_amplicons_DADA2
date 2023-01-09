@@ -253,7 +253,9 @@ CheckFastq <- function(fastqs)
     }
     cat("*Assuming* that reads in paired FASTQ are in the same order.\n")
 }
-CheckFastq(fastqs)
+if (!specialParams$useOnlyR1Reads) {
+    CheckFastq(fastqs)
+}
 
 ## Helpers to get the forward (R1) and the reverse (R2) fastqs.
 FwdFastqIdx <- function(fastqs) { seq(1,length(fastqs),2) }

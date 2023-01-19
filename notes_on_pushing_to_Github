@@ -11,7 +11,7 @@ This file should not be on github.  See .gitignore.
 ##     line) will fatal error b/c there are independent histories.
 ##  -- Also, use my private access token (which expires Feb 18).  This avoids an authentication
 ##     failure.  (Even though I'm prompted for my username and password.)
-git remote add origin https://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@github.com/jdmagasin/nifH_amplicons_DADA2.git
+git remote add origin https://<ACCESSTOKENHERE>@github.com/jdmagasin/nifH_amplicons_DADA2.git
 ## Check that it's there
 git remote -v
 ## If you screw up:  git remote remove origin
@@ -51,9 +51,16 @@ Follow steps above to recreate nifH_amplicons_DADA2.  'origin' is still correct
 even though this is a totally new (but same named) repo so will not redo the
 'git remote add <URL>' step.
 
+Had to delete / recreate the repo a bunch of times b/c a deleted miniconda
+(~60MB) was in the history and giving the full path in .gitignore did not work.
+Then authentication problems started so I made a new token.
 
 
-https://github.com/jdmagasin/nifH_amplicons_DADA2.git
+git remote add origin https://<ACCESSTOKENHERE>@github.com/jdmagasin/nifH_amplicons_DADA2.git
+git remote -v
+git branch -M master
+git push -u origin master
+
 
 
 FIXME:

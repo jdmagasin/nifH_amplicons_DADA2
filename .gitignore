@@ -10,6 +10,8 @@ makePackage.sh
 notes_on_pushing_to_Github
 Shared/
 
-## Yikes, don't want to supply miniconda either which used to be part of
-## the package.
-Installation/Miniconda3-latest-Linux-x86_64.sh
+## Yikes, don't want to supply miniconda either which used to be part of the
+## package.  This file used to be in Installation/ but if I give the full path
+## then the file still gets pushed.  So give just the name, which should ignore
+## this file anywhere it (the pattern) is seen.
+Miniconda3-latest-Linux-x86_64.sh

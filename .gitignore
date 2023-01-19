@@ -1,0 +1,12 @@
+## Long ago I deleted Kendra's Arctic 2017 fastqs, but they are still tracked.
+## I do not want them pushed to Github, so add the following:
+Example/Arctic2017_Data/
+
+## This doesn't need to be on Github.  One can instead use GitHub to get
+## the pipeline as of a particular date.
+makePackage.sh
+
+## These also don't belong on Github. They are not tracked, but no harm adding
+## them here for clarity.
+Shared/
+NOTES_ON_PUTTING_PIPELINE_ON_GITHUB

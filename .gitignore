@@ -6,7 +6,10 @@ Example/Arctic2017_Data/
 ## the pipeline as of a particular date.
 makePackage.sh
 
-## These also don't belong on Github. They are not tracked, but no harm adding
-## them here for clarity.
+## These also stay here.  Shared/ is not even tracked but to be clear list it.
+notes_on_pushing_to_Github
 Shared/
-NOTES_ON_PUTTING_PIPELINE_ON_GITHUB
+
+## Yikes, don't want to supply miniconda either which used to be part of
+## the package.
+Installation/Miniconda3-latest-Linux-x86_64.sh

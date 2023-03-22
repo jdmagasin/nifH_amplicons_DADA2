@@ -1,11 +1,14 @@
-## This is the minimal environment description to run the DADA2 pipeline, except
-## that DADA2 itself is installed in a separate step (see INSTALL.txt).  Below
-## note that R version 4.1 is specified because that is named on the dada2
-## Bioconductor page
+## This is the minimal environment description to run the DADA2 pipeline, except that DADA2 itself
+## is installed in a separate step using R (see INSTALL.txt).  Below I specify R version 4.1 because
+## I have used v4.1 the most with the pipeline and it is the most recent version that installed
+## successfully using the directions in INSTALL.txt (last verified March 21, 2023).
+##
+## Version information is available from the Bioconductor DADA2 installation page (currently v4.2):
 ##    https://bioconductor.org/packages/release/bioc/html/dada2.html
-## for dada2 v3.13.  This page seems more current than Ben's DADA2 instructions:
+## Also helpful is Benjamin Callahan's DADA2 installation page:
 ##    https://benjjneb.github.io/dada2/dada-installation.html
-## for dada2 v3.11, which requires R v.4.0.
+## However, it is at v3.11 for DADA2 and v4.0 for R.
+##
 name: DADA2_nifH
 channels:
   - conda-forge
@@ -16,4 +19,3 @@ dependencies:
   - hmmer
   - fraggenescan
   - r-essentials=4.1
-  - r-base=4.1

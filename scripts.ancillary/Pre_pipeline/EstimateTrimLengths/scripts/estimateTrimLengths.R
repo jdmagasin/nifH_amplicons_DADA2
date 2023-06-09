@@ -35,9 +35,9 @@ Inputs:
 
   -- Directory to search recursively for paired FASTQs.  Paired FASTQs must have
      identical names except for their suffixes which must end in "_R1.fastq" and
-     "_R2.fastq", or "_R1_num.fastq" and "_R2_num.fastq". ("num" has only digits
-     and is ignored.) Optionally the FASTQs can be compressed and the names can
-     end with ".fastq.gz".
+     "_R2.fastq", or "_R1_stuff.fastq" and "_R2_stuff.fastq".  "stuff" can be
+     anything.  The "R" before the "1" or "2" can be absent. Optionally the
+     FASTQs can be compressed and the names can end with ".fastq.gz".
 
   -- Number of paired reads to randomly sample when estimating overlaps.
      Default 1000.
@@ -65,7 +65,7 @@ sampSizeParam <- args[4]
 if (is.na(sampSizeParam)) { sampSizeParam <- 1000 }
 cat("Estimates will be based on",sampSizeParam,"reads randomly picked from each sample.\n")
 
-suffixPat <- '_R{0,1}[1,2](_[0-9]+|)\\.fastq(\\.gz|)$'
+suffixPat <- '_R{0,1}[1,2](_.*|)\\.fastq(\\.gz|)$'
 fastqList <- list.files(fastqDir, pattern=paste0("*",suffixPat), recursive=T, full.names=T)
 ## fastqList should have R1's in the odd slots and R2's in the evens.
 n <- length(fastqList)

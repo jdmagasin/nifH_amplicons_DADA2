@@ -1,0 +1,7 @@
+Estimate trim lengths for foward and reverse reads to use with DADA2::filterAndTrim() for a toy nifH
+amplicon data set with FASTQs in Data:
+
+    ../scripts/estimateTrimLengths.R  TGYGAYCCNAARGCNGA  ADNGCCATCATYTCNCC  Data
+
+The FASTQs duplicate the example data (taken from Sato et al. 2021) for the Pre_pipeline/FastQC
+tool: The A, B, C, D FASTQS are all the same but it does not matter for illustrating this tool.

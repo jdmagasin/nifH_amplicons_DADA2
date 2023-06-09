@@ -1,0 +1,5 @@
+The following will check a small set of nifH ASVs for similarity (96% amino
+identity) to known contaminants.  The final output blast.96id.out will contain
+one ASV that was >96%aid to a contaminant reported in Farnelid et al. 2009.
+
+../scripts/check_nifH_contaminants.sh asvs.fasta 96

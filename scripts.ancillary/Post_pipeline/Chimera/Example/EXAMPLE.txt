@@ -1,0 +1,9 @@
+The following will run uchime3_denovo on nifH ASVs identified by our DADA2
+pipeline in amplicon data from Shiozaki et al. 2018 (Chukchi Sea).  No chimera
+will be detected.
+
+../scripts/check_chimera_denovo.sh asvs.noChimera.Shiozaki2018.tsv asvs.noChimera.Shiozaki2018.fasta
+
+If the above fails, then perhaps you have not installed vsearch and the R
+ShortRead package, described briefly if you run check_chimera_denovo.sh with no
+arguments.

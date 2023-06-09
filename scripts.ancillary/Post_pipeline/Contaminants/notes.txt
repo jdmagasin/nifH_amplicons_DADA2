@@ -1,0 +1,88 @@
+Some notes below on how I gathered confirmed contaminant nifH sequences.  My "database" is not
+complete!!  Several of the papers below mention more contaminant sequences than I can find in the
+papers/suppmats/NCBI.  But some of the papers report on reagent / primer contaminants from years
+ago.  Who knows if the suppliers have the same contaminants, or the labs themselves, ... Negative
+controls for the particular study really will be key for identifying contaminants (as Hanna has done
+in her several papers below).
+
+
+In Hanna's 2011 PLOS ONE paper:
+   Nitrogenase Gene Amplicons from Global Marine Surface Waters Are Dominated by Genes of
+   Non-Cyanobacteria
+
+She removed nifH contaminants:
+
+  sequences of >96% amino acid identity (determined using NCBI Blast) to putative contam- inant nifH
+  sequences from this study and all known previous reports [21–25] were removed from the dataset.
+
+with contaminants in "this study" based on negative controls (amplified samples that had no DNA
+extracts), and 21-25 the 5 papers below (which report contaminants in PCR reagents and primers, at
+least):
+
+         - Goto M, Ando S, Hachisuka Y, Yoneyama T (2005) Contamination of diverse nifH and
+           nifH-like DNA into commercial PCR primers. FEMS Microbiol Lett 246: 33–38
+
+         - Zehr JP, Crumbliss LL, Church MJ, Omoregie EO, Jenkins BD (2003) Nitrogenase genes in PCR
+           and RT-PCR reagents: implications for studies of diversity of functional genes. Bio
+           Techniques 35: 996–1005.
+
+         - Bostro ̈m KH, Riemann L, Zweifel UL, Hagstro ̈m A ̊ (2007) Nodularia sp. nifH gene
+           transcripts in the Baltic Sea proper. J Plankton Res 29: 391–399.
+
+         - Farnelid H, O ̈ berg T, Riemann L (2009) Identity and dynamics of putative N2- fixing
+           picoplankton in the Baltic Sea proper suggest complex patterns of regulation. Env
+           Microbiol Rep 1: 145–154.
+
+         - Farnelid H, Tarangkoon W, Hansen G, Hansen PJ, Riemann L (2010) Putative N2-fixing
+           heterotrophic bacteria associated with dinoflagellate-Cyanobacteria consortia in the
+           low-nitrogen Indian Ocean. Aquat Microb Ecol 61: 105–117.
+    
+Let's gather the contaminants reported in these works in fastas under Data.
+
+1. goto2005.fasta: Gathered from NCBI the 9 contaminant sequences in Fig 2.  But dropped
+   AY225105–AY225107 because they are in zehr2003.fasta.
+
+2. zehr2003.fasta: Paper says "The amplification products were cloned and sequenced. Sequences have
+   been submitted to GenBank® under acces- sion nos.  AY225105–AY225107 and AY333089–AY33310."  The
+   second range final value probably should be AY333100, but this range is all 16S anyway.
+
+3. Bostrom: Cannot find the contaminant nifH sequences. No mention of upload. NCBI only has one
+   sequence from the paper: DQ291144
+
+4. farnelid2009.fasta: There is not enough information in the paper / suppmats to get the
+   contaminant sequences (aka "negative control" b/c amplified from samples w/o template) fromthe
+   443 at NCBI.  Fig S1 shows a few emboldened neg ctrls which are in farnelid2009.fasta.  However,
+   Fig. S1 is only for group 1 so I can't use it in combination with Table S1 to infer the 43
+   negative control sequences.  The main text also mentions these contaminant sequences:
+      bal19mayC48, bal30junG27 and bal30junG60
+   The latter two I think should be 'jul' since no 'jun' versions exist.  All three sequences are in
+   farnelid2009.fasta.  Also added balntcK9 based on next note.
+
+5. XXX farnelid2010.fasta: The 10 negative control sequences are not given in the paper.  They have
+   a shared node in Fig. 3. No suppmats to track them down in. All I can determine is a previously
+   seen contaminant with accession EU916706 which happens to be balntcK9 from #4, so I added it to
+   farnelid2009.fasta.
+
+
+Also get 8 contaminants mentioned in Turk et al 2011:
+   https://www.nature.com/articles/ismej2010205/figures/1
+Use just the confirmed contaminants which are asterisk'ed (as well as underlined) in Fig. 1.
+(Kendra's tree draws from the 5 studies above but only EU916368.1 is in her tree and in my .fasta.)
+
+Do not use the suspected (underlined but not asterisk'ed) sequences:
+   In the 2011 PLOS ONE paper, Hanna uses 96%aid to search for contaminants.  Kendra's tree
+   underlines suspected contaminants, some of which are >96%aid to ASVs found in the prelim analysis
+   for Mo's OSM abstract, including a P.stutzieri-like ASV (AUID.2) that is 100%id to this one in
+   Kendra's tree:
+     AF117978.1 Pseudomonas stutzeri CMT.9.A NifH (nifH) gene, partial cds
+   The ASV was observed in nearly all studies, and happens to be identical to GU196945 which Hanna
+   reported as an NCD epibiont to the dinoflagellate Ornithocerus magnificus.  I don't want our
+   contaminant filters to throw out this or other potentially interesting stuff.  Better to check
+   ASVs like that manually when they draw attention during the analysis.
+
+
+To make a tiny DB with contaminant nifH protein sequences, go into
+Development/NifHContaminantDB and run make_nifHContamDB.sh.
+
+Test/test.sh does a simple search of the ASVs from Mo's 2021 OSM abstract against the contaminants
+DB.

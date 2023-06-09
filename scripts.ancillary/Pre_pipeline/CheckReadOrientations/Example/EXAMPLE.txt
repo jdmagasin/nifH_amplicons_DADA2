@@ -1,0 +1,10 @@
+The following command will run checkReadOrientations.R on a tiny set of reads extracted from a North
+Pacific nifH data set from Shiozaki, including 4 backwards reads in the R1 and 3 in the R2.
+Specifically:
+  -- In an R1 FASTQ we expect the forward nifH primer (5'-TGYGAYCCNAARGCNGA-3') in its 5' to 3'
+     direction.  If instead we see the reverse nifH primer (5'-ADNGCCATCATYTCNCC-3') in its 5' to 3'
+     direction, then we reverse complement the read (and reverse the order of the quality scores).
+  -- Similarly for the R2 FASTQ but expect the reverse primer and flip if instead the forward is
+     detected.
+
+  ../scripts/checkReadOrientations.R  TGYGAYCCNAARGCNGA  ADNGCCATCATYTCNCC  NPacExamples

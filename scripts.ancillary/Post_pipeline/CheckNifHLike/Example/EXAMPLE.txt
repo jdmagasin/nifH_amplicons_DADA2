@@ -1,0 +1,18 @@
+To run the example:
+    ../classifyNifH.sh nifH_asvs.fasta
+
+The sequences in the fasta will be classified as nifH or not (or unsure) based
+on the relative strengths of their best hits to positive versus negative
+examples of NifH proteins. The positive and negative examples are taken from a
+run of ARBitrator in May 2020. Positive/negative are from ARBitrator's
+"specificity phase" where it classifies, with extremely low false positive and
+false negative rates (based on the publication), thousands of NifH-like sequences
+at NCBI. (Heller et al. 2014)
+
+Outputs:
+  posHits.tab    - top 10 blastx hits to the positive NifH examples
+  negHits.tab    - top 10 blastx hits to the negative NifH examples
+  positives.ids  - subset of the ASVs for which the best positive hit was >10X
+                   better than the best negative hit. (E-value was 10x smaller.)
+  negatives.ids  - analogous but the negative hit was 10X better
+  unsure.ids     - no clearly better positive or negative hit for these sequences

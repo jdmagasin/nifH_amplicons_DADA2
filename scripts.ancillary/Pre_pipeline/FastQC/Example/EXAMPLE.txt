@@ -1,0 +1,9 @@
+The following command will run FastQC on the two example FASTQ files (abridged)
+from the Sea of Japan:
+
+  ../scripts/do_fastqc.sh Data
+
+The two FASTQs are from this study:
+   Sato, T., Shiozaki, T., Taniuchi, Y., Kasai, H., & Takahashi, K. (2021). Nitrogen fixation
+     and diazotroph community in the subarctic Sea of Japan and Sea of Okhotsk. Journal of
+     Geophysical Research: Oceans, 126, e2020JC017071. https://doi.org/10.1029/2020JC017071

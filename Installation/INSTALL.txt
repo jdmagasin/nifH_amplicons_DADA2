@@ -63,16 +63,16 @@ suggestions in case you experience problems:
   1. Install from a bash shell.
      
   2. If you get errors about outdated libraries:
-       (a) Your system administrator could install newer libraries.
-           Benefits/risks of impacts to other users.
+       (a) Ask your system administrator to install newer libraries.  A
+           system-wide upgrade impacts everyone, so your sysadmin will assess
+           the risk of breaking software that depend on the older libraries.
 	   
-       (b) You could install an older version of conda that works with the old
-           libraries.  Then do "conda update conda" to get the latest
-           Miniconda. This will automatically get the newer libraries as local
-           copies.  (No impact to other users.)
+       (b) You could install an older version of conda that works with your
+           system's older libraries, and then do "conda update conda" to get the
+           latest Miniconda. This will automatically get the newer libraries as
+           local copies.  (No impact to other users.)
 	   
-     Option "b" might be simpler and less risky.  I used "b" to resolve an
-     outdated glibc on an old CentOS 7 workstation.
+     I used "b" to resolve an outdated glibc on an old CentOS 7 workstation.
 
 If you successfully installed miniconda (or mamba) then your shell prompt should
 change to show that "base" is the name of the active conda environment:
@@ -80,15 +80,15 @@ change to show that "base" is the name of the active conda environment:
   (base) %
 
 If not, try starting a new terminal/shell.  The installation should have added
-some code to the end of your shell startup script** that will start conda (and
-activate the "base" environment) whenever you start a new shell.
+some code to the end of your shell startup script** that will launch conda and
+activate the "base" environment whenever you start a new shell.
   ** For bash shells the code added to the .bashrc startup script works. I have
      run into problems for tcsh shells and had to update the .tcshrc startup
      script manually.
      
-Now tell conda to use channel "conda-forge", which has many useful packages, and
-to use conda-forge strictly before the "defaults" channel.  The third command
-will show conda-forge listed as the first channel.
+Now tell conda to use the channel "conda-forge", which has many useful packages,
+and to search conda-forge strictly before the "defaults" channel.  Use the third
+command to verify that conda-forge will be the first channel searched:
 
   (base) % conda config --add channels conda-forge
   (base) % conda config --set channel_priority strict
@@ -112,8 +112,8 @@ the prompt changes:
   (base) % conda activate DADA2_nifH
   (DADA2_nifH) %
 
-Now use the following commands to verify that seeral required tools are now
-available within the DADA2_nifH environment.
+Now use the following commands to verify that several required tools are
+available from the DADA2_nifH environment:
 
   (DADA2_nifH) % which R
   /home/you/miniconda3/envs/DADA2_nifH/bin/R
@@ -133,7 +133,7 @@ Later, you can deactivate the environment with:
 
 After deactivation, the 'which' commands above will either report errors or will
 find default versions of the tools on your system.  (E.g. R will probably be
-from /usr/bin/R and might be a different version than v4.1.3.)
+found in /usr/bin/R and could be a different version.)
 
 ** Whenever you want to use the DADA2 nifH pipeline, you must first "activate"
 the DADA2_nifH environment as described above. **
@@ -143,8 +143,9 @@ the DADA2_nifH environment as described above. **
 # 3. Install the DADA2 R package and a few others
 --------------------------------------------------------------------------------
 
-This step installs DADA2, vegan (with tons of support for ecological stats), and
-ggrepel (minor ggplot addition for non-overlapping labels in plots).
+This step installs DADA2, vegan (with tons of support for ecological
+statistics), and ggrepel (minor ggplot addition for non-overlapping labels in
+plots).
 
 
 *** DADA2 R package install ***
@@ -158,8 +159,7 @@ In the shell with DADA2_nifH active, start R:
 Then in the R console do the following lines to install Bioconductor and DADA2:
 
    ## Install Bioconductor if necessary.  It takes just a few seconds.  When
-   ## asked which CRAN mirror to use, "0-Cloud [https]" is good, which is
-   ## probably choice "1".
+   ## asked which CRAN mirror to use, "0-Cloud [https]" is good.
    if (!requireNamespace("BiocManager", quietly = TRUE))
        install.packages("BiocManager")
 
@@ -169,28 +169,30 @@ Then in the R console do the following lines to install Bioconductor and DADA2:
    ## all.
    BiocManager::install("dada2")
 
-The install takes around 30 min on our workstation because DADA2 uses many additional
+The install takes around 30 min on our workstation because DADA2 uses many
 packages that must be downloaded and compiled.  At the end of a successful
-install, you should see a few messages about tests that worked. Additionally you
-can verify that dada2 was installed by loading it (and then you can exit R).
+installation, you should see a few messages about tests that worked.  You can
+verify that dada2 was installed by loading it (and then you can exit R).
 
     library(dada2) # Better work!
     quit()         # Hit 'n' when it asks if you want to save.
 
 
 Notes:
-  1. The DADA2 R package will be available only when DADA2_nifH is active.
-     (miniconda3 does not manage the R packages. However, the R package files
-     are stored alongside the R that installed them, in this case
-       ~/miniconda3/envs/DADA2_nifH/lib/R/library/dada2
-     Keep this in mind when installing other R packages while using conda.)
+  1. The DADA2 will be available only when DADA2_nifH is active.
+     miniconda3 manages the R (and other tools) that were installed to
+     DADA2_nifH. However, R itself must manage packages installed with R.  For
+     example, the dada2 package you just installed will be stored in:
+            ~/miniconda3/envs/DADA2_nifH/lib/R/library/dada2
+     This makes it possible to have different conda environments with different
+     versions of R and R packages.
 
   2. We installed R v4.1 (specified in the .yml file).  At some point, a new
      version of DADA2 might require a newer version of R and the .yml file will
      have to be updated.
 
   3. There is a way to install DADA2 using conda (rather than Bioconductor),
-     however it seems broken as of Aug. 12, 2021.  It is also possible to
+     however I could not get it to work as of Aug. 12, 2021.
 
 
 *** Install vegan and ggrepel ***
@@ -225,24 +227,25 @@ Long version:
 
 When you login remotely to your server or launch a terminal on your laptop, your
 shell will be initialized by running a few scripts that set up various
-preferences, including your 'path'.  When you type a command, the shell uses the
-path to locate the program that runs the command.  This saves you much typing,
-e.g. you can simply run "R" rather than "/usr/bin/R" (and you don't have to
-remember where R is).  When you activate the DADA2_nifH environment, miniconda3
-temporarily modifies your path to find the needed tools, which are often
-specific versions such as R v4.1 mentioned above.
+preferences, including your 'path'.  The path helps the shell locate programs
+that run any commands you type into the shell, without you having to type in the
+full path to the command.  For example, you can simply run "R" rather than
+"/usr/bin/R" (and you don't have to remember where R is).  When you activate the
+DADA2_nifH environment, miniconda3 temporarily modifies your path to find the
+needed tools, such as R v4.1 mentioned above.  (The old path is restored once
+you deactivate DADA2_nifH.)
 
-The scripts that comprise the DADA2 nifH pipeline are not in a conda package.
-So we have to modify the path ourselves so the pipeline scripts will be found.
-For convenience we will modify the shell initialization script so that every
-time you login the DADA2 pipeline scripts will be added to your path.
+We must modify the path so that the shell can find the scripts in the DADA2 nifH
+pipeline.  (The pipeline is not a conda package.)  For convenience we will
+modify the shell initialization script so that every time you login the DADA2
+pipeline scripts will be added to your path.
 
 Note that:
   1. This section assumes you installed the pipeline in ~/DADA2_nifH_pipeline as
      described above in step #0.  If you installed elsewhere, just adjust path
      components accordingly.
   2. The commands below do not *use* the pipeline.  So it does not matter if
-     DADA2_nifH is active (as implied by the prompt) or not.
+     DADA2_nifH is active or not.
 
 First, determine what your shell is.  Different shells use slightly different
 syntaxes in their scripts.  Below I explain for bash and tcsh only.
@@ -250,7 +253,7 @@ syntaxes in their scripts.  Below I explain for bash and tcsh only.
   (DADA2_nifH) % echo $0
 
 If your shell is bash, then do this.  Be *very* careful to use the *double*
-angle brackets >> so that the path setting command is *appended* to .bashrc.
+angle brackets >> so that the path-setting command is *appended* to .bashrc.
 [First we will make a backup of .bashrc just in case.] Also be careful that you
 type everything exactly as shown in this ASCII text document.  Cut-and-paste
 from an email or Word document could change the quotes.  The 'tail' command just
@@ -260,7 +263,7 @@ shows that the path setting command was appended to .bashrc.
   (DADA2_nifH) % echo 'export PATH="$PATH:~/DADA2_nifH_pipeline:~/DADA2_nifH_pipeline/scripts"' >> ~/.bashrc
   (DADA2_nifH) % tail ~/.bashrc
 
-If your shell is tcsh, then do this. The same cautions mentioned above apply.
+If your shell is tcsh, then do this. The cautions mentioned above apply.
 
   (DADA2_nifH) % cp ~/.tcshrc ~/.tcshrc.OLD
   (DADA2_nifH) % echo 'set path=($path $HOME/DADA2_nifH_pipeline $HOME/DADA2_nifH_pipeline/scripts)' >> ~/.tcshrc
@@ -278,8 +281,8 @@ Now verify that the shell can find these two main pipeline scripts:
   % which organizeFastqs.R
   /home/you/DADA2_nifH_pipeline/scripts/organizeFastqs.R
 
-Although the shell can find the scripts, of course you have to first activate
-DADA2_nifH for them to work.
+Although the shell can find the scripts, you must first activate DADA2_nifH for
+them to work.
 
   % conda activate DADA2_nifH
 

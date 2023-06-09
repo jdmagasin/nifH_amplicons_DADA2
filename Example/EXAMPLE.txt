@@ -8,8 +8,8 @@ samples from Arctic 2017, four from the 0.2-3um size fraction and four from
 
 Execute each of the steps 1-4 from the command line in your unix shell, which
 can be whatever you like (bash, tcsh, etc.). The DADA2 pipeline (step 4) takes
-18 minutes to run on thalassa.  Full data sets with a few hundred samples take a
-few hours.
+18 minutes to run on our workstation.  Full data sets with a few hundred samples
+take a few hours.
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

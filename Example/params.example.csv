@@ -1,62 +1,66 @@
-## Parameters file for the DADA2 pipeline. Currently this is only used to
-## forward a few parameters to DADA2's filterAndTrim() (called by
-## dada2_nifH_amplicons.R). You can adjust the parameters to try to balance:
-##   1. % reads retained during quality filtering. You want a high % so
-##      that relative abundnaces can be analyzed.
-##   2. Erroneous bases in the ASVs. Your tolerance for errors will depend
-##      on how you use the data.  E.g. coarse taxonomic assignments vs.
+## Parameters file for the DADA2 pipeline. Most parameters control DADA2's
+## filterAndTrim(). You can adjust the parameters to try to balance:
+##
+##   1. Maximizing the % reads retained during quality filtering so that
+##      relative abundances can be analyzed.
+##
+##   2. Minimizing erroneous bases in the ASVs. Your tolerance for errors will
+##      depend on how you use the data.  E.g. coarse taxonomic assignments vs.
 ##      precise sequences for rare ASVs.
 ##
-## The parameters in this example are expected NOT to cause aggressive
-## truncation of reads (maxEE will tolerate up to 6 errors). Instead they rely
-## on mergePairs() to drop read pairs if they have >1 mismatch in their
-## overlapping 3' regions (which should be much longer than the 12 nt
-## minOverlap!). For the 1 tolerated mismatch, let mergePairs() determine which
-## read is correct based on quality and abundance.
-##    -- Note that 6 errors in a 325 nt merged read for nifH would be 1.85%
-##       errors.  These errors would seem ulikely in the overlapping region
-##       (>150nt in the few data sets I've worked with) and also unlikely in the
-##       non-overlapping, more 5' regions because they are higher quality.
-##       Probably 1.85% is pessimistic -- and that is for one read pair, i.e.
-##       before DADA2 "denoises" over many read pairs when inferring the ASVs.
+## The parameters in this example do NOT filter/trim reads aggressively, but
+## this is balanced by a very low tolerance for mismatches when sequences are
+## merged.
+##
 
 
-## Parameters that impact DADA2 error models:  Only R1 reads that appear NifH-like
-## are used to create DADA2 error models. These reads are identified before
-## the main DADA2 stage runs, using several scripts that invoke HMMER and filter
+## Parameters that impact DADA2 error models
+##
+## Only R1 reads that appear NifH-like are used to identify read pairs that will
+## be used to create DADA2 error models. These reads are identified before the
+## main DADA2 stage runs, using several scripts that invoke HMMER3 and filter
 ## the results. Filtering includes accepting only ORFs/reads with alignments
-## have length and bit score greater than that specified with the next two
-## parameters.  The default values are shown here to illustrate syntax. (If
-## you deleted or commented out the next two lines, these values would still
-## be used.)
+## that have length and bit score greater than that specified with the next two
+## parameters.  The default values are shown here to illustrate syntax. (If you
+## deleted or commented out the next two lines, these values would still be
+## used.)
 NifH_minLen,  33
 NifH_minBits,100
 
 
-## You can specify primers that will be trimmed by cutadapt. Specify both from
-## 5' to 3'.  The default primers assumed by runCutadapt.sh are shown (and will
-## be used if you omit the next two lines).
+## Primers used by cutadapt
+##
+## Specify primers from 5' to 3' using the syntax illustrated below. By default
+## runCutadapt.sh will use the nifH2 (forward) and nifH1 (reverse) from Zehr and
+## McReynolds, 1989).  They are shown here to illustrate syntax but will be used
+## if the next two lines are ommitted.
 forward,TGYGAYCCNAARGCNGA
 reverse,ADNGCCATCATYTCNCC
 
-## These are for filterAndTrim().  Here you can decide between two strategies
-## for trimming the reads.
+## Tell cutadapt not to throw out read pairs that are missing primers. This is
+## useful for data sets lacking primers e.g. if uploaded to the SRA.  We still
+## run cutadapt (1) to remove any ovelooked primers (2) because it is simpler to
+## have outputs and directory strucutre from all stages of the pipeline.
+allowMissingPrimers,TRUE
+
+
+## Parameters forwarded to dada2::filterAndTrim()
 ##
-##  (A) You can rely only on truncQ so that each forward and each reverse read
-##      will be trimmed at the first base to to drop below the specified Phred
-##      score.
-##  (B) You can set fixed trim lengths for the forward and reverse reads
-##      (truncLen.fwd and truncLen.rev) based on inspection of average quality
-##      of the reads in e.g. FastQC reports.
+## Here you can decide between two strategies for trimming the reads.
 ##
-## "B" is more commonly used, indeed DADA2's default filterAndTrim() by default
-## uses a very low score for truncQ (Phred = 2).  Perhaps there are cases where
-## "A" is useful for aggressively quality filtering reads, but at the cost of
-## throwing out much of the data and making diversity analysis impossible.  In
-## practice I have found that option "A" with a high truncQ throws out much data
-## and yields fewer ASVs, while option "A" with a lower truncQ (e.g. 9)
-## encourages reads to overlap which leads to DADA2 finding many of the same
-## ASVs it would if you just used approach "B."
+##  (A) Rely only on truncQ so that each forward and each reverse read will be
+##      trimmed at the first base to to drop below the specified Phred score.
+##  (B) Trim using fixed lengths for the forward reads (truncLen.fwd) and
+##      reverse reads (truncLen.rev) determined in advance based on quality
+##      profiles e.g. from FastQC.
+##
+## "B" is more commonly used.  "A" could be used to aggressively quality filter
+## the reads, but at the cost of throwing out much of the data and making
+## diversity analysis impossible.  In practice I have found that (i) option "A"
+## with a high truncQ throws out much data and yields fewer ASVs; (ii) a lower
+## truncQ (e.g. 9) encourages reads to overlap which causes DADA2 to find many
+## of the same ASVs as approach "B."
+##
 truncQ,16
 ##truncLen.fwd,XXX  <-- replace based on your R1 qualities
 ##truncLen.rev,YYY  <-- replace based on your R2 qualities
@@ -64,24 +68,31 @@ maxEE.fwd,2
 maxEE.rev,4
 minLen,20
 
-## Two other options:
-## -- You can also use just the R1 reads for your ASVs if the R2's are very low quality.
-##useOnlyR1Reads,TRUE
-## -- You can tell DADA2 to generate ASVs that do not merge the left and right
-##    sequences. (The "sequences" are actually left and right ASVs, not reads.)
-##    Instead you will get ASVS the left and right parts separated by 10 N's.
-##justConcatenate,TRUE
+## Several other filter/trim  options that are sometimes useful:
 
-## Another filterAndTrim() option:  id.field.
-## Old data sets can have read IDs that do not follow modern Illumina multi-field
-## formats (CASAVA versions to 1.7, or from 1.8 forwards).  E.g. your reads might
-## have ID lines like this: "@SRR12345678.1 1 length 250", in which case you
-## want the first field "SRR12345678" to be used. To do so you would set id.field
-## to 1 like so:
+## If your R2 reads are very low quality, then you can tell the pipeline to make
+## ASVs using only the R1 reads.
+##useOnlyR1Reads,TRUE
+
+## Some data sets have read IDs that do not follow modern Illumina multi-field
+## formats (CASAVA versions to 1.7, or from 1.8 onward), for example data sets
+## at the NCBI Short Read Archive with ID lines like this:
+##    @SRR12345678.1 1 length 250
+## In this case the first field ("SRR12345678") has the read ID.  You can
+## specify this with the following line:
 ##id.field,1
 
 
-## These are for mergePairs(). minOverlap 12 is the default. maxMismatch default
-## is 0 but I prefer 1 as described above.
+## Parameters that impact merging (dada2::mergePairs())
+##
+## By default dada2::mergePairs() uses minOverlap = 12 and maxMismatch = 0.  I
+## prefer to use 1 and let mergePairs() resolve the mismatch using the higher
+## quality sequence (forward or reverse).
 minOverlap,12
 maxMismatch,1
+
+## You can tell DADA2 not to merge the left and right sequences when generating
+## ASVs.  Instead the ASVs will have the left and right parts separated by 10
+## N's.  This option is useful if reads cannot be merged due to quality
+## degrading before the overlapping region.
+##justConcatenate,TRUE

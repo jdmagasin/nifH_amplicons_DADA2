@@ -9,7 +9,7 @@ if [ -z "$PARAMS" ] || [ ! -z `echo $PARAMS | grep '\-h'` ] ; then
 	 variants (ASVs) in paired MiSeq data sets.
 
 	 Usage:
-            run_DADA2_pipeline.sh params.tsv > log.date.txt
+            run_DADA2_pipeline.sh params.csv > log.date.txt
 
 	Will run the pipeline using the specified parameters, most of which specify
 	how DADA2 should filter reads for quality. Saving output in the log file is

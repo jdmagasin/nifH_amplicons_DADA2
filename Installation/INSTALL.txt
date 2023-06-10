@@ -19,6 +19,7 @@ Overview:
   4. Add the pipeline scripts to your path.
   -- Installation completed! --
   5. Try the example
+  6. Install packages needed for ancillary tools [optional]
 
 Below '%' is the unix shell prompt.  Your's might differ.  Although these
 instructions should work for any unix shell, we prefer bash.  You can check your
@@ -299,5 +300,16 @@ Please see the example:
 
 You can probably begin at step 2.
 
+
+--------------------------------------------------------------------------------
+# 6. Install packages needed for ancillary tools [optional]
+--------------------------------------------------------------------------------
+
+The github repository includes additional tools that you might find helfpul when
+preparing to run the pipeline (e.g. for selecting read trimming lengths) or for
+evaluating ASVs.  These are provided in the scripts.ancillary directory.  Some
+of these tools require additional bioinformatics tools which can be installed
+using conda.  Instructions for adding the additional tools are described in
+INSTALL_ancillary.txt.
 
 -- END --

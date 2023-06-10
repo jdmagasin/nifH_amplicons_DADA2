@@ -1,0 +1,30 @@
+################################################################################
+########## Installation of ancillary tools for the DADA2 nifH pipeline #########
+################################################################################
+
+If you wish to use the ancillary tools in ../scripts.ancillary, then you must
+make sure that several additional bioinformatics tools are available.  All of
+them can be installed using conda (or mamba).  I suggest that you install the
+additional packages within your "DADA2_nifH" conda environment (which you
+created as described in INSTALL.txt).  To do this you can activate DADA2_nifH:
+   conda activate DADA2_nifH
+and then install as described below.
+
+You only must install packages that are missing.  For example, your system might
+already have BLAST+.  If so then it is not necessary to install an additional
+version within DADA2_nifH.  However, you are free to do so.  The conda-installed
+BLAST+ will override your system BLAST+ while DADA2_nifH is activated.
+
+** Pre_pipeline **
+  EstimateTrimLengths:     [no additional packages required]
+  FastQC:                  conda install -c bioconda fastqc    # ver 0.12.1 is okay
+  CheckReadOrientations:   [no additional packages required]
+
+** Post_pipeline **
+  Chimera:                 conda install -c bioconda vsearch   # ver 2.22.1 is okay
+  Contaminants:            conda install -c bioconda blast     # ver 2.14.0 is okay
+  CheckNifHLike:           [no additional packages required]
+
+
+Package versions above are okay (have tested).  More recent versions should be
+fine too.  Slightly older versions probably are fine as well.

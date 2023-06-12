@@ -1,0 +1,1 @@
+../scripts.ancillary/Pre_pipeline/CheckReadOrientations/scripts/checkReadOrientations.R

@@ -1,0 +1,1 @@
+../scripts.ancillary/Pre_pipeline/FastQC/scripts/do_fastqc.sh

@@ -28,3 +28,8 @@ BLAST+ will override your system BLAST+ while DADA2_nifH is activated.
 
 Package versions above are okay (have tested).  More recent versions should be
 fine too.  Slightly older versions probably are fine as well.
+
+
+Note that all ancillary scripts should already be available from the command line
+because there are links to them within the 'bin' directory, and you added 'bin'
+to your path in step #4 on INSTALL.txt.

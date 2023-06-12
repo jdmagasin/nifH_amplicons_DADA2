@@ -217,11 +217,9 @@ nifH pipeline.
 
 Short version (if you are very comfortable with unix shells):
 
-Modify your path to include these two components:
-  ~/DADA2_nifH_pipeline
-  ~/DADA2_nifH_pipeline/scripts
-The first will enable run_DADA2_pipeline.sh to be found. The second is mainly
-for organizeFastqs.R.
+Modify your path to include:  ~/DADA2_nifH_pipeline/bin
+The bin directory includes symbolic links to all of the pipeline scripts (in
+'scripts') as well as ancillary scripts (hierarchy in 'scripts.ancillary').
 
 
 Long version:
@@ -229,9 +227,9 @@ Long version:
 When you login remotely to your server or launch a terminal on your laptop, your
 shell will be initialized by running a few scripts that set up various
 preferences, including your 'path'.  The path helps the shell locate programs
-that run any commands you type into the shell, without you having to type in the
-full path to the command.  For example, you can simply run "R" rather than
-"/usr/bin/R" (and you don't have to remember where R is).  When you activate the
+that run any commands you type into the shell, so that you do not have to type
+in the full path to the command.  For example, you can simply run "R" rather
+than "/usr/bin/R" (if you can remember where R is!).  When you activate the
 DADA2_nifH environment, miniconda3 temporarily modifies your path to find the
 needed tools, such as R v4.1 mentioned above.  (The old path is restored once
 you deactivate DADA2_nifH.)
@@ -261,13 +259,13 @@ from an email or Word document could change the quotes.  The 'tail' command just
 shows that the path setting command was appended to .bashrc.
 
   (DADA2_nifH) % cp ~/.bashrc ~/.bashrc.OLD
-  (DADA2_nifH) % echo 'export PATH="$PATH:~/DADA2_nifH_pipeline:~/DADA2_nifH_pipeline/scripts"' >> ~/.bashrc
+  (DADA2_nifH) % echo 'export PATH="$PATH:~/DADA2_nifH_pipeline/bin"' >> ~/.bashrc
   (DADA2_nifH) % tail ~/.bashrc
 
 If your shell is tcsh, then do this. The cautions mentioned above apply.
 
   (DADA2_nifH) % cp ~/.tcshrc ~/.tcshrc.OLD
-  (DADA2_nifH) % echo 'set path=($path $HOME/DADA2_nifH_pipeline $HOME/DADA2_nifH_pipeline/scripts)' >> ~/.tcshrc
+  (DADA2_nifH) % echo 'set path=($path $HOME/DADA2_nifH_pipeline/bin)' >> ~/.tcshrc
   (DADA2_nifH) % tail ~/.tcshrc
 
 The path modifications will only become active when you next login.  Log off

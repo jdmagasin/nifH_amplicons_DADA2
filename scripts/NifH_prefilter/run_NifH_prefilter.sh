@@ -18,9 +18,8 @@ fi
 MINLEN=$2
 MINBITS=$3
 
-## Expect findReadsWithNifHDomain.sh to be in the same directory as this script.
-## From https://stackoverflow.com/questions/59895/how-can-i-get-the-source-directory-of-a-bash-script-from-within-the-script-itsel
-SDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+SDIR="$(dirname $(realpath "${BASH_SOURCE[0]}"))"
+if [ ! -d "$SDIR" ] ; then echo "Cannot determine directory of $0"; exit -1 ; fi
 
 for FQ in `find -L "$DATATRIMMEDDIR" -name '*_R1*.fastq.gz'`; do
     OUTDIR=`echo $(dirname $FQ) | sed -e "s:$DATATRIMMEDDIR::" -e 's:\/$::'`

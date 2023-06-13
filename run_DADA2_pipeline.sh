@@ -80,7 +80,8 @@ fi
 
 
 ## Absolute path of the scripts dir. 'scripts' must be next to run_DADA2_pipeline.sh.
-SDIR="$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)/scripts"
+SDIR="$(dirname $(realpath "${BASH_SOURCE[0]}"))/scripts"
+if [ ! -d "$SDIR" ] ; then echo "Cannot find pipeline scripts directory."; exit -1 ; fi
 CWD=`pwd`
 
 echo "##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### #####"

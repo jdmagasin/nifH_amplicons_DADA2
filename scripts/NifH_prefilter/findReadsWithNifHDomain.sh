@@ -12,7 +12,8 @@ retained by HMMER and post-filtered for a minLen residues (default >33) and
 minBitScore (default >150).
 "
 
-SDIR="$(dirname $0)"
+SDIR="$(dirname $(realpath "${BASH_SOURCE[0]}"))"
+if [ ! -d "$SDIR" ] ; then echo "Cannot determine directory of $0"; exit -1 ; fi
 
 FASTQGZ=$1
 OUTDIR=$2

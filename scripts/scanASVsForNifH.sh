@@ -8,8 +8,8 @@
 ASVFASTA=$1
 OUTDIR=$2
 
-SDIR="$(dirname $0)"
-SEARCHPF00142=`readlink -f "$SDIR/NifH_prefilter/searchOrfsForPF00142.sh"`
+SDIR="$(dirname $(realpath "${BASH_SOURCE[0]}"))"
+SEARCHPF00142=`realpath "$SDIR/NifH_prefilter/searchOrfsForPF00142.sh"`
 if [ ! -x "$SEARCHPF00142" ] ; then
     echo "Hmmm, I cannot find searchOrfsForPF00142.sh"
     exit -1

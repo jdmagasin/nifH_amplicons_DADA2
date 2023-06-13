@@ -40,7 +40,8 @@ if [ ! -f "$asvAbundances" ] || [ ! -f "$asvFasta" ] ; then
     exit -1
 fi
 
-SDIR="$(dirname $0)"
+SDIR="$(dirname $(realpath "${BASH_SOURCE[0]}"))"
+if [ ! -d "$SDIR" ] ; then echo "Cannot get directory for $0"; exit -1; fi
 "$SDIR/prepareFastaForUchime3_denonovo.R" "$asvAbundances" "$asvFasta" u3d.fasta
 
 CMD="vsearch --uchime3_denovo u3d.fasta --nonchimeras nonchimera.fasta --chimera chimera.fasta --uchimeout chimera.out --uchimeout5"

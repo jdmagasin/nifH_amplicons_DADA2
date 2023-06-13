@@ -13,7 +13,7 @@ if [ ! -f "$NUCLFASTA" ] ; then
 fi
 
 ## Make sure the positive and negative NifH databases exist alongside this script.
-SDIR="$(dirname $0)"
+SDIR="$(dirname $(realpath "${BASH_SOURCE[0]}"))"
 DBDIR=`readlink -f $SDIR/DBs`
 if [ ! -f "$DBDIR/NifH.pos.pdb" ] || [ ! -f "$DBDIR/NifH.neg.pdb" ] ; then
     echo "The positive and/or negative NifH example databases do not exist"

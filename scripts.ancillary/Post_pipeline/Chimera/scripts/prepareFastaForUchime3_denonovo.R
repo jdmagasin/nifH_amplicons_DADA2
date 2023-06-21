@@ -10,8 +10,8 @@
 args <- commandArgs(trailingOnly=T)
 if (!file.exists(args[1:2]) || file.exists(args[3])) {
     stop("Need an ASV abundance table, a FASTA file, and a name ",
-         "or the output FASTA file which does not yet exist.",
-         "The FASTA can hvae more sequences than are in the table",
+         "for the output FASTA file which does not yet exist.",
+         "The FASTA can have more sequences than are in the table",
          "but IDs in the table will be used for the output FASTA.")
 }
 

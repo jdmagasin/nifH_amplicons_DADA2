@@ -1,5 +1,9 @@
 #!/bin/bash
 
+## This script was created before there was a github repo for
+## distributing the DADA2 nifH pipeline.  It is defunct.  E.g.  it
+## makes assumptions about the directory structure that are now false.
+
 ## Make a distribution of the DADA2 nifH pipeline.
 ## Creates a temp directory, copies needed files there, and tar's them.
 ## This script must be consistent with INSTALL.txt:

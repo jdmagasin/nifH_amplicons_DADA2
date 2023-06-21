@@ -32,11 +32,11 @@ primers from the following studies:
    - Farnelid et al. 2009     [11 sequences, fewer than reported in the pub]
    - Turk-Kubo et al. 2011    [6 confirmed contaminants in Fig. 1]
 
-This script requires FragGeneScan and the BLAST suite. One way to install them
-is to create a miniconda environment for example:
-    conda create -n DADA2_nifH_postFilter blast fraggenescan
-More information on setting up miniconda is online and in the installation
-docs for the nifH DADA2 pipeline.
+Dependencies: This script requires FragGeneScan and the BLAST suite.
+FragGeneScan should already be available as part of installing the
+DADA2 pipeline.  If your system does not already have NCBI's BLAST+
+tools, you can install them as described in INSTALL_ancillary.txt.
+
 
 "
 

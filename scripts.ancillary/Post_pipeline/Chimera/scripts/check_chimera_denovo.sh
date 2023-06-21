@@ -22,11 +22,8 @@ combined abundance table, it is not clear how count data from different studies
 with different sequencing depths would impact uchime3_denovo.
 
 Dependencies: vsearch must be installed and so must the R package ShortRead.
-Conda packages exist for both, respecitvely 'vsearch' and
-'bioconductor-shortread'.  You can install both into an environment for
-processing ASVs after running the DADA2 nifH pipeline. E.g. my environment
-'DADA2_nifH_postFilter' includes these packages as well as others needed for
-check_nifH_contaminants.sh.
+vsearch can be installed as described in INSTALL_ancillary.txt.  ShortRead is
+required for dada2 and gets installed as described in INSTALL.txt.
 
 "
 

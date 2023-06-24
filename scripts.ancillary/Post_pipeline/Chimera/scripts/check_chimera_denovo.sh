@@ -2,6 +2,8 @@
 
 ## Run the vsearch implementation of uchime3_denovo to check for chimera.
 
+WORKDIR=Work_on_chimera
+
 usageStr="
 
 Usage:
@@ -9,17 +11,18 @@ Usage:
 
 Use vsearch implementation of uchime3_denovo to check for chimeric sequences.
 Sequence ID's in asv.fasta must correspond to the row names in the abundance
-table asvAbundances.tsv (which has columns = samples).
+table asvAbundances.tsv (which has columns = samples).  uchime3_denovo is run
+separately for each sample in the table.  Then each of the samples in which
+an ASV was detected votes on whether the ASV is a chimera (majority vote wins).
 
-Output files:
-    chimera.out      - Stats/results for all ASVs in uchimeout5 format.
+Output:
     nonchimera.fasta - Non-chimeric ASVs.
     chimera.fasta    - Chimeric ASVs.
-
-asvAbundances.tsv should be the abundance table from a single study because that
-is what uchime3_denovo expects to see.  Although the script could execute on a
-combined abundance table, it is not clear how count data from different studies
-with different sequencing depths would impact uchime3_denovo.
+    ${WORKDIR}  - Directory with uchime3_denovo outputs for each sample.
+                       Includes uchime3_denovo stats (uchimeout5 format) and
+                       chimeraVotes.csv which shows the number of samples
+                       that voted for an ASV to be chimeric or not.  Only
+                       ASVs with >0 chimera votes are included.
 
 Dependencies: vsearch must be installed and so must the R package ShortRead.
 vsearch can be installed as described in INSTALL_ancillary.txt.  ShortRead is
@@ -37,25 +40,70 @@ if [ ! -f "$asvAbundances" ] || [ ! -f "$asvFasta" ] ; then
     exit -1
 fi
 
+if [ -d "$WORKDIR" ] ; then echo "$WORKDIR already exists."; exit -1; fi
+
+## Ensure that we have required scripts.
 SDIR="$(dirname $(realpath "${BASH_SOURCE[0]}"))"
 if [ ! -d "$SDIR" ] ; then echo "Cannot get directory for $0"; exit -1; fi
-"$SDIR/prepareFastaForUchime3_denonovo.R" "$asvAbundances" "$asvFasta" u3d.fasta
-
-CMD="vsearch --uchime3_denovo u3d.fasta --nonchimeras nonchimera.fasta --chimera chimera.fasta --uchimeout chimera.out --uchimeout5"
-echo "Will run vsearch as follows: "
-echo "$CMD"
-$($CMD)
-howdItGo="$?"
-rm u3d.fasta
-if [ ! "$howdItGo" -eq 0 ] ; then
-    echo "vsearch --uchime3_denovo returned error $howdItGo"
+PREPAREUCHIME3="$SDIR/prepareFastaForUchime3_denonovo.R"
+DECIDECHIMERA="$SDIR/decideChimeraHelper.R"
+if [ ! -x "$PREPAREUCHIME3" ] || [ ! -x "$DECIDECHIMERA" ] ; then
+    echo "Missing required helper scripts for check_chimera_denovo.sh.  Aborting"
+    exit -1
+fi
+if [ -z `which vsearch` ] ; then
+    echo "check_chimera_denovo.sh cannot find vsearch.  Aborting"
     exit -1
 fi
 
-## Strip off the size info that we had to add for uchime3_denovo.
-for x in chimera.fasta nonchimera.fasta; do
+## Prepare one FASTA for each column of the abundance table.
+"$PREPAREUCHIME3" "$asvAbundances" "$asvFasta" "$WORKDIR"
+if [ ! "$?" -eq 0 ] ; then
+    echo "prepareFastaForUchime3_denonovo.R failed. Aborting."
+    exit -1
+fi
+
+ccdPWD=$(realpath `pwd`)
+cd $WORKDIR
+
+echo "Will run vsearch on each sample individually.  Outputs are in $WORKDIR"
+for fas in `find . -name "*.fasta"`; do
+    desc="${fas%.*}"
+    ## The 'chimera' and 'nonchimera' fastas are used by DECIDECHIMERA.
+    CMD="vsearch --uchime3_denovo ${fas} --nonchimeras ${desc}.nonchimera.fasta --chimera ${desc}.chimera.fasta --uchimeout ${desc}.chimera.out --uchimeout5"
+    echo "### Running uchime3 denovo on $fas using the following command:"
+    echo "    $CMD"
+    $($CMD)
+    howdItGo="$?"
+    if [ ! "$howdItGo" -eq 0 ] ; then
+        echo "vsearch --uchime3_denovo returned error $howdItGo"
+        exit -1
+    fi
+done
+
+## Strip off the ASV "size" (counts) info that was added for uchime3_denovo so
+## that the ids files output by DECIDECHIMERA will have IDs that extractFasta.pl
+## can find in asvFasta.
+for x in *.fasta; do
     cat $x | sed 's/^>size=[0-9]*;/>/' > tmp.fasta
     mv tmp.fasta $x
 done
+
+## Vote on chimera
+"$DECIDECHIMERA"
+if [ ! "$?" -eq 0 ] ; then
+    echo "decideChimeraHelper.R failed. Aborting."
+    exit -1
+fi
+
+## Wrap-up:  Delete the fastas (the per sample and the vsearch outputs) and
+## pop up to initial directory to create the main output files.
+rm *.fasta
+cd $ccdPWD
+
+## Create main output files.
+extractFasta.pl "${WORKDIR}/chimera.ids"    "$asvFasta" > chimera.fasta
+extractFasta.pl "${WORKDIR}/nonchimera.ids" "$asvFasta" > nonchimera.fasta
+
 echo "Done!"
 exit 0

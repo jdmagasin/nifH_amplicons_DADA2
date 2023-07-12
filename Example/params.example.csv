@@ -25,7 +25,7 @@
 ## deleted or commented out the next two lines, these values would still be
 ## used.)
 NifH_minLen,  33
-NifH_minBits,100
+NifH_minBits,150
 
 
 ## Primers used by cutadapt
@@ -61,6 +61,7 @@ allowMissingPrimers,TRUE
 ## truncQ (e.g. 9) encourages reads to overlap which causes DADA2 to find many
 ## of the same ASVs as approach "B."
 ##
+## Note that the values below are not the defaults defined by dada2::filterAndTrim()
 truncQ,16
 ##truncLen.fwd,XXX  <-- replace based on your R1 qualities
 ##truncLen.rev,YYY  <-- replace based on your R2 qualities

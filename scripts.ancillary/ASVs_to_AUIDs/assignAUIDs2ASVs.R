@@ -43,6 +43,11 @@ Options:
 outFile  <- 'asv2auid.tsv'
 outFasta <- 'asv2auid.fasta' # optional
 
+## The assignment of AUID identifiers should be completely deterministic for a
+## given input list of FASTA files. However, it is good practice to set the
+## random seed (even though nothing about this script should be impacted by
+## this).
+set.seed(7675308)
 
 args <- commandArgs(trailingOnly=T)
 if (length(args) == 0) {

@@ -1,3 +1,5 @@
+## Copyright (C) 2023 Jonathan D. Magasin
+##
 ## Parameters file for the DADA2 pipeline. Most parameters control DADA2's
 ## filterAndTrim(). You can adjust the parameters to try to balance:
 ##

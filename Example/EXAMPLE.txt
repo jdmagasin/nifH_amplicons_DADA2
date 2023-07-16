@@ -2,6 +2,8 @@
 ####################### Example of the DADA2 nifH pipeline #####################
 ################################################################################
 
+Copyright (C) 2023 Jonathan D. Magasin
+
 The steps below run the DADA2 pipeline on a small data set comprised of eight
 samples from Arctic 2017, four from the 0.2-3um size fraction and four from
 >3um.  Each size fraction is processed completely independently.

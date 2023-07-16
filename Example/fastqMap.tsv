@@ -1,3 +1,5 @@
+## Copyright (C) 2023 Jonathan D. Magasin
+##
 ## Example of an input table for organizeFastqs.R. The table defines the
 ## "processing groups" for the DADA2 pipeline.  Processing groups partition the
 ## samples (paired MiSeq FASTQs) for separate proessing by DADA2.  So if you see

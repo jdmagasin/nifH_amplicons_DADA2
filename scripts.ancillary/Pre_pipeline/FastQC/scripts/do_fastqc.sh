@@ -1,9 +1,11 @@
 #!/bin/bash
 
+## Copyright (C) 2023 Jonathan D. Magasin
+
 ##
 ## Helper to run FastQC.
-
-## Currently uses the default fastqc parameters in particluar for
+##
+## Currently uses the default fastqc parameters in particular for
 ## --contaminants, --adapters, and --limits.  Possibly we could ammend
 ## the default lists for each of these to include lab/nifH-specific info.
 ##   However, my check_nifH_contaminants.sh will check ASVs after running the

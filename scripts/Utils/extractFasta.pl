@@ -1,5 +1,7 @@
 #!/usr/bin/perl
 
+# Copyright (C) 2023 Jonathan D. Magasin
+
 #
 # Extract from a FASTA the sequences specified in an ID's file (one ID per line).
 # ID's are everything between the '>' and the first whitespace (or newline).

@@ -1,5 +1,7 @@
 #!/bin/env Rscript
 
+## Copyright (C) 2023 Jonathan D. Magasin
+
 ##
 ## Create AUID count tables by returning to the ASV count tables and
 ## substituting in the AUID for the ASV.  The ASV-to-AUID mapping is within the

@@ -1,5 +1,7 @@
 #!/usr/bin/env Rscript
 
+## Copyright (C) 2023 Jonathan D. Magasin
+
 ##
 ## Count reads at each processing stage of the DADA2 pipeline.  Presumes directory
 ## and file names created by the pipeline.

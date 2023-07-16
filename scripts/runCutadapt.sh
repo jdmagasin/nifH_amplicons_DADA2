@@ -1,5 +1,7 @@
 #!/bin/bash
 
+## Copyright (C) 2023 Jonathan D. Magasin
+
 ##
 ## For all the paired-end fastqs (full file paths) in the passed list, run
 ## cutadapt on them to trim nifH primers (and any adapters that are more 5' or

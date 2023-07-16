@@ -16,3 +16,5 @@ All scripts run from the command-line in a unix-like shell (BASH recommended) an
   - Post_pipeline:  For identifying ASVs that are not likely _nifH_
   
 - **bin:** Symbolic links to main scripts so they can be run easily from your unix-like shell.  All scripts are self-docu
+
+**Copyright (C) 2023 Jonathan D. Magasin**

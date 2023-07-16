@@ -1,5 +1,7 @@
 #!/bin/bash
 
+## Copyright (C) 2023 Jonathan D. Magasin
+
 OUTDIR="Data.nobackup"
 PARAMS=$1
 ## If missing params file or if -h,--help, -help, etc., then print usage.

@@ -1,4 +1,7 @@
 #!/bin/bash
+
+## Copyright (C) 2023 Jonathan D. Magasin
+
 ##
 ## Blastn sequences (e.g. ASVs from nifH amplicon sequence data) against 2017
 ## ARB nifH sequences.

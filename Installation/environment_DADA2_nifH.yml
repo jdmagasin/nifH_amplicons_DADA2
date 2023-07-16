@@ -9,6 +9,8 @@
 ##    https://benjjneb.github.io/dada2/dada-installation.html
 ## However, it is at v3.11 for DADA2 and v4.0 for R.
 ##
+## Copyright (C) 2023 Jonathan D. Magasin
+##
 name: DADA2_nifH
 channels:
   - conda-forge

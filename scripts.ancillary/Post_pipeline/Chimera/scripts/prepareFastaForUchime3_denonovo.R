@@ -1,5 +1,7 @@
 #!/bin/env Rscript
 
+## Copyright (C) 2023 Jonathan D. Magasin
+
 ##
 ## Make a FASTA file with definition lines that are expected by
 ## vsearch's uchime3_denovo.  It is okay to pass a FASTA that

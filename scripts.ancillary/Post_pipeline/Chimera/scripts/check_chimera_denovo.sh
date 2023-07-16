@@ -1,5 +1,7 @@
 #!/bin/bash
 
+## Copyright (C) 2023 Jonathan D. Magasin
+
 ## Run the vsearch implementation of uchime3_denovo to check for chimera.
 
 WORKDIR=Work_on_chimera

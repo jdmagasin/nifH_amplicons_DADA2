@@ -1,5 +1,7 @@
 #!/bin/bash
 
+## Copyright (C) 2023 Jonathan D. Magasin
+
 ## Stream me a fastq.  I will use FragGeneScan (old version) to predict ORFs.
 ## (No quality info in the FGS output of course.)
 

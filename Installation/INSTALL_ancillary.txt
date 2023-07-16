@@ -2,6 +2,8 @@
 ########## Installation of ancillary tools for the DADA2 nifH pipeline #########
 ################################################################################
 
+Copyright (C) 2023 Jonathan D. Magasin
+
 If you wish to use the ancillary tools in ../scripts.ancillary, then you must
 make sure that several additional bioinformatics tools are available.  All of
 them can be installed using conda (or mamba).  I suggest that you install the

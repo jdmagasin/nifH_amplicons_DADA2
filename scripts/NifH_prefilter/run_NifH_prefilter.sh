@@ -1,5 +1,7 @@
 #!/bin/bash
 
+## Copyright (C) 2023 Jonathan D. Magasin
+
 ##
 ## Runs findReadsWithNifHDomain.sh on the cutadapt-trimmed fastqs.  Just run on
 ## the R1 reads.  That should be sufficient, and findReadsWithNifHDomain.sh (and

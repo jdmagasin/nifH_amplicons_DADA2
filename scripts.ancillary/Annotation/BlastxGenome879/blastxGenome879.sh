@@ -1,4 +1,7 @@
 #!/bin/bash
+
+## Copyright (C) 2023 Jonathan D. Magasin
+
 ##
 ## Blastx sequences (e.g. ASVs from nifH amplicon sequence data) against genome879
 ## taken from the Zehr Lab pages (March 2019 version).

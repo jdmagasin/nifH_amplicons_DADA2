@@ -2,6 +2,8 @@
 #################### Installation of the DADA2 nifH pipeline ###################
 ################################################################################
 
+Copyright (C) 2023 Jonathan D. Magasin
+
 The DADA2 nifH pipeline uses several external tools (e.g. R, DADA2, cutadapt).
 To get them we will use miniconda3, a software package and environment manager.
 This document describes how to get miniconda3 and then use it to create an

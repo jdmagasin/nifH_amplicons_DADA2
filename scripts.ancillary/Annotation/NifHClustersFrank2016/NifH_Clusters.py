@@ -1,3 +1,6 @@
+
+## Copyright (C) 2016 Ildiko E. Frank
+
 #-----------------------------------------------------------------------------------------------------------
 # Python script to classify NifH protein sequences into main clusters and
 # subclusters based on CART models [Frank et al. 2016]. It requires the

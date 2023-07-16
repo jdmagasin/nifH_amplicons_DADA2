@@ -1,5 +1,7 @@
 #!/bin/env Rscript
 
+## Copyright (C) 2023 Jonathan D. Magasin
+
 ##
 ## Make a directory structure that organizes FASTQs in a useful way, specified
 ## in the input .tsv file.

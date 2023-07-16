@@ -1,5 +1,7 @@
 #!/bin/bash
 
+## Copyright (C) 2023 Jonathan D. Magasin
+
 ##
 ## Usage:
 ##     assignNifHclustersToNuclSeqs.sh  fasta  [minNtLen]  [maxNtLen]

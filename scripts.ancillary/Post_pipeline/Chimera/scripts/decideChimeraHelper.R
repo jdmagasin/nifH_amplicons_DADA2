@@ -1,5 +1,7 @@
 #!/bin/env Rscript
 
+## Copyright (C) 2023 Jonathan D. Magasin
+
 ##
 ## Called by check_chimera_denovo.sh after it runs uchime3_denovo on each of the
 ## samples (columns in the abundance table).

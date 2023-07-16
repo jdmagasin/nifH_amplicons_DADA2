@@ -1,6 +1,8 @@
 #!/bin/bash
 
-## Requires HMMER3 so you probably should have already activated the DADA2_nifH
+## Copyright (C) 2023 Jonathan D. Magasin
+
+## Requires HMMER3 so you probably have already activated your DADA2_nifH
 ## environment.  Search specified ASV sequences (or any FASTA) for PF00142, the
 ## NifH domain.  This script is a simplified version of the scripts in
 ## NifH_prefilter.

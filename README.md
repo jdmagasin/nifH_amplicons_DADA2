@@ -2,7 +2,7 @@
 
 This repository contains our DADA2 pipeline for processing nitrogenase (_nifH_) amplicon data that was sequenced using paired-end MiSeq.
 
-All scripts run from the command-line in a unix-like shell (BASH recommended) and provide documentation when run with no parameters.  For example, the documentation for the main pipeline script, run_DADA2_pipeline.sh, are shown below.
+All scripts run from the command-line in a unix-like shell (BASH recommended) and provide documentation when run with no parameters.  For example, the documentation from the main pipeline script, run_DADA2_pipeline.sh, is included below.
 
 
 ## Repository contents

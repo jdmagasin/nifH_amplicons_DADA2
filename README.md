@@ -17,4 +17,4 @@ All scripts run from the command-line in a unix-like shell (BASH recommended) an
   
 - **bin:** Symbolic links to main scripts so they can be run easily from your unix-like shell.  All scripts are self-docu
 
-**Copyright (C) 2023 Jonathan D. Magasin**
+_Copyright (C) 2023 Jonathan D. Magasin_

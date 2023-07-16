@@ -8,8 +8,7 @@
 
 USAGE="blastxGenome879.sh nuclFasta outPath [queryPctId] [queryPctCvg]"
 
-## From https://stackoverflow.com/questions/59895/how-can-i-get-the-source-directory-of-a-bash-script-from-within-the-script-itsel
-SDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+SDIR="$(dirname $(realpath "${BASH_SOURCE[0]}"))"
 ## Pre-created.  
 NIFHDB="$SDIR/Genome879DB/genome879DB"
 

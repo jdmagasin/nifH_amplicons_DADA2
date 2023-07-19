@@ -6,18 +6,22 @@ Copyright (C) 2023 Jonathan D. Magasin
 
 If you wish to use the ancillary tools in ../scripts.ancillary, then you must
 make sure that several additional bioinformatics tools are available.  All of
-them can be installed using conda (or mamba).  I suggest that you install the
-additional packages within your "DADA2_nifH" conda environment (which you
-created as described in INSTALL.txt).  To do this you can activate DADA2_nifH:
-   conda activate DADA2_nifH
+them can be installed using conda (or mamba).  I strongly suggest that you
+install the additional packages within your "DADA2_nifH" conda environment
+(which you created as described in INSTALL.txt).  To do this you can activate
+DADA2_nifH:
+   (base) % conda activate DADA2_nifH
+   (DADA2_nifH) %
 and then install as described below.
 
 You only must install packages that are missing.  For example, your system might
 already have BLAST+.  If so then it is not necessary to install an additional
-version within DADA2_nifH.  However, you are free to do so.  The conda-installed
-BLAST+ will override your system BLAST+ while DADA2_nifH is activated.
+version within the DADA2_nifH environment.  However, you are free to do so.  The
+conda-installed BLAST+ will override your system BLAST+ while DADA2_nifH is
+activated.
 
-For each tool below, the script that launches the tool is shown in parentheses.
+For each tool listed below, the script that launches the tool is shown in
+parentheses.
 
 
 ** Pre_pipeline **
@@ -25,7 +29,7 @@ For each tool below, the script that launches the tool is shown in parentheses.
       [no additional packages required]
 
   FastQC (do_fastqc.sh)
-      conda install -c bioconda fastqc    # ver 0.12.1 is okay
+   (DADA2_nifH) % conda install -c bioconda fastqc">=0.12.1"
 
   CheckReadOrientations (checkReadOrientations.R)
       [no additional packages required]
@@ -33,10 +37,10 @@ For each tool below, the script that launches the tool is shown in parentheses.
 
 ** Post_pipeline **
   Chimera (check_chimera_denovo.sh)
-      conda install -c bioconda vsearch   # ver 2.22.1 is okay
+   (DADA2_nifH) % conda install -c bioconda vsearch">=2.22.1"
 
   Contaminants (check_nifH_contaminants.sh)
-      conda install -c bioconda blast     # ver 2.14.0 is okay
+   (DADA2_nifH) % conda install -c bioconda blast">=2.14.0"
 
   CheckNifHLike (classifyNifH.sh)
       [no additional packages required]
@@ -44,18 +48,22 @@ For each tool below, the script that launches the tool is shown in parentheses.
 
 ** Annotation **
   BlastnARB2017 (blastnARB2017.sh)
-      conda install -c bioconda blast           # Same as Contaminants
+   (DADA2_nifH) % conda install -c bioconda blast">=2.14.0"       # Same as Contaminants
       
   BlastxGenome879 (blastxGenome879.sh)
-      conda install -c bioconda blast           # Same as Contaminants
+   (DADA2_nifH) % conda install -c bioconda blast">=2.14.0"       # Same as Contaminants
       
   NifHClustersFrank2016 (assignNifHclustersToNuclSeqs.sh)
-      conda install -c conda-forge biopython    # ver 1.81 is okay.  Will get numpy too.
+   (DADA2_nifH) % conda install -c conda-forge biopython">=1.81"  # Will get numpy too.
 
 
-Package versions above are okay (have tested).  More recent versions should be
-fine too.  Slightly older versions probably are fine as well.
+Package versions shown above are the lowest number with which we have tested.
+More recent versions should be okay.  Slightly older versions probably are also
+okay.
 
+The following command will check that all required R packages and external tools
+are installed for both the pipeline and the ancillary scripts:
+   (DADA2_nifH) % check_installation.R ancillary
 
 Note that all ancillary scripts (shown in parentheses) should already be
 available from the command line because there are links to them within the 'bin'

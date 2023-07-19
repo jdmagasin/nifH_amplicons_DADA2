@@ -1,14 +1,14 @@
-# DADA2 pipeline for processing _nifH_ amplicon data sets
+# DADA2 pipeline for processing _nifH_ amplicon sequencing data
 
-This repository contains our DADA2 pipeline for processing nitrogenase (_nifH_) amplicon data that was sequenced using paired-end MiSeq.
+This repository contains our DADA2 pipeline for processing nitrogenase (_nifH_) amplicon data that were sequenced using paired-end MiSeq.
 
 All scripts run from the command-line in a unix-like shell (BASH recommended) and provide documentation when run with no parameters.  For example, the documentation from the main pipeline script, run_DADA2_pipeline.sh, is included below.
 
 
 ## Repository contents
 
-- **Installation:**  Documentation for installing (mini)conda and required conda and R packages.
-- **Example:** A small example data set for testing your installation and learning how to create parameter files.
+- **[Installation](Installation/INSTALL.txt):**  Documentation for installing (mini)conda and required conda and R packages.
+- **[Example](Example/EXAMPLE.txt):** A small example data set for testing your installation and learning how to create the parameter file and table of input FASTQ files.
 - **run_DADA2_pipeline.sh:**  Main script that runs the whole pipeline.
   
 - **scripts:** Helper scripts used by run_DADA2_pipeline.sh.

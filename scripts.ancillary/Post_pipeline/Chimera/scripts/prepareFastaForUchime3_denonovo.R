@@ -10,7 +10,7 @@
 ##
 
 args <- commandArgs(trailingOnly=T)
-if (!file.exists(args[1:2]) || dir.exists(args[3])) {
+if (!all(file.exists(args[1:2])) || dir.exists(args[3])) {
     stop("Need an ASV abundance table, a FASTA file, and a name for the output ",
          "directory for creating temporary FASTA files for vsearch, one per sample. ",
          "All ASVs in the abundance table must be in the input FASTA.  Extra ASVs ",

@@ -72,7 +72,7 @@ echo "Will run vsearch on each sample individually.  Outputs are in $WORKDIR"
 for fas in `find . -name "*.fasta"`; do
     desc="${fas%.*}"
     ## The 'chimera' and 'nonchimera' fastas are used by DECIDECHIMERA.
-    CMD="vsearch --uchime3_denovo ${fas} --nonchimeras ${desc}.nonchimera.fasta --chimera ${desc}.chimera.fasta --uchimeout ${desc}.chimera.out --uchimeout5"
+    CMD="vsearch --uchime3_denovo ${fas} --nonchimeras ${desc}.nonchimera.fasta --chimeras ${desc}.chimera.fasta --uchimeout ${desc}.chimera.out --uchimeout5"
     echo "### Running uchime3 denovo on $fas using the following command:"
     echo "    $CMD"
     $($CMD)

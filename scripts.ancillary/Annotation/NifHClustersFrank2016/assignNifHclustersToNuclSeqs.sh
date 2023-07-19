@@ -28,11 +28,14 @@
 
 asvFasta=$1
 if [ ! -f "$asvFasta" ] ; then
-    echo "Pass me a fasta file with nifH nucleotide sequences."
-    echo "These could be ASV's from DADA2, or similar."
-    echo "Then optionally pass integers for the minimum and maxiumum"
-    echo "number of nucleotides.  Only ASVs with ORFs in this range"
-    echo "will be used.  Default is no length restriction."
+    echo "Usage:"
+    echo "    assignNifHclustersToNuclSeqs.sh  fasta  [minNtLen]  [maxNtLen]"
+    echo
+    echo "Pass a FASTA file with nifH nucleotide sequences.  These could be ASV's"
+    echo "from DADA2, or similar.  Optionally pass integers for the minimum and"
+    echo "number of nucleotides for open reading frames (ORFs).  Only ASV's with"
+    echo "ORFs in the specified range will be used.  By default there is no length"
+    echo "restriction."
     exit -1
 fi
 

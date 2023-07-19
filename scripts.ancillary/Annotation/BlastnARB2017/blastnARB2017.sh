@@ -11,14 +11,14 @@ USAGE="blastnARB2017.sh nuclFasta outPath [queryPctId] [queryPctCvg]"
 
 fasta=$1
 if [ ! -f "$fasta" ] ; then
-    echo "No fasta!"
-    echo "$USAGE"
+    echo "You did not specify a nucleotide FASTA file (nuclFasta)."
+    echo -e "Usage:\n\t$USAGE\n"
     exit -1
 fi
 ODIR=$2
-if [ -d "$ODIR" ] ; then
-    echo "Output directory $ODIR already exists."
-    echo "$USAGE"
+if [ -z "$ODIR" ] || [ -d "$ODIR" ] ; then
+    echo "Please specify an output directory (outPath) that does not already exist."
+    echo -e "Usage:\n\t$USAGE\n"
     exit -1
 fi
 pid=98

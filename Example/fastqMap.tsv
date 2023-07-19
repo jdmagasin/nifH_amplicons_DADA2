@@ -6,13 +6,15 @@
 ## the same ASV sequence inferred for different processing groups, your
 ## confidence in the ASV correctness increases.
 ##
-## In this example that uses a small subset of the Arctic 2017 data, we want the
-## 0.2-3um and the >3um size fractions to be processing groups.  This is
-## accomplished by specifying the size fraction in column 2.  If Arctic 2017
-## also had mRNA samples, then I would suggest putting "DNA" or "mRNA" in column
-## 2 and the size fraction in column 3 to define four processing groups.
-## I.e. columns 2 through N-1 determine the processing groups.  The directory
-## hierarchy created by organizeFastqs.R follows the columns and would be:
+## This example uses a small subset of the Arctic nifH amplicon data from
+## Harding et al. 2018: Just 10 samples, and only the first 10K paired reads
+## from each sample.  We want the 0.2-3um and the >3um size fractions to be
+## processing groups.  This is accomplished by specifying the size fraction in
+## column 2.  If this study also had mRNA samples, then I would suggest putting
+## "DNA" or "mRNA" in column 2 and the size fraction in column 3 to define four
+## processing groups.  I.e. columns 2 through N-1 determine the processing
+## groups.  The directory hierarchy created by organizeFastqs.R follows the
+## columns and would be:
 ##   LinksToFastqs/DNA/Filt_3
 ##   LinksToFastqs/DNA/Filt_0.2
 ##   LinksToFastqs/mRNA/Filt_3
@@ -36,21 +38,25 @@
 ## determine the absolute paths when it creates symbolic links.
 ##
 ## Creating a file such as this for hundreds of FASTQs is best done with a
-## short script.  Jonathan is happy to help with this.
-
-/home/kturk/Arctic_2017/FASTQ_Generation_2021-05-06_08_51_05Z-412503091/Kendra001_70052_L001-ds.ea71347a995e4a49b2912db6fe305c12/Kendra001-70052_S1_L001_R1_001.fastq.gz	Filt_3	Kendra001_70052
-/home/kturk/Arctic_2017/FASTQ_Generation_2021-05-06_08_51_05Z-412503091/Kendra001_70052_L001-ds.ea71347a995e4a49b2912db6fe305c12/Kendra001-70052_S1_L001_R2_001.fastq.gz	Filt_3	Kendra001_70052
-/home/kturk/Arctic_2017/FASTQ_Generation_2021-05-06_08_51_05Z-412503091/Kendra002_70068_L001-ds.df5e969c637a45cc9cb4ea06ad24a8c8/Kendra002-70068_S2_L001_R1_001.fastq.gz	Filt_3	Kendra002_70068
-/home/kturk/Arctic_2017/FASTQ_Generation_2021-05-06_08_51_05Z-412503091/Kendra002_70068_L001-ds.df5e969c637a45cc9cb4ea06ad24a8c8/Kendra002-70068_S2_L001_R2_001.fastq.gz	Filt_3	Kendra002_70068
-/home/kturk/Arctic_2017/FASTQ_Generation_2021-05-06_08_51_05Z-412503091/Kendra003_70094_L001-ds.ac8179cf4ad0451b931111dc6e039b9c/Kendra003-70094_S3_L001_R1_001.fastq.gz	Filt_3	Kendra003_70094
-/home/kturk/Arctic_2017/FASTQ_Generation_2021-05-06_08_51_05Z-412503091/Kendra003_70094_L001-ds.ac8179cf4ad0451b931111dc6e039b9c/Kendra003-70094_S3_L001_R2_001.fastq.gz	Filt_3	Kendra003_70094
-/home/kturk/Arctic_2017/FASTQ_Generation_2021-05-06_08_51_05Z-412503091/Kendra004_70109_L001-ds.e62c5c70731f4ec79de3f387f0a48a36/Kendra004-70109_S4_L001_R1_001.fastq.gz	Filt_3	Kendra004_70109
-/home/kturk/Arctic_2017/FASTQ_Generation_2021-05-06_08_51_05Z-412503091/Kendra004_70109_L001-ds.e62c5c70731f4ec79de3f387f0a48a36/Kendra004-70109_S4_L001_R2_001.fastq.gz	Filt_3	Kendra004_70109
-/home/kturk/Arctic_2017/FASTQ_Generation_2021-05-06_08_51_05Z-412503091/Kendra006_70252_L001-ds.c31c0293b32947d7869a9b2d82e1c95f/Kendra006-70252_S6_L001_R1_001.fastq.gz	Filt_0.2	Kendra006_70252
-/home/kturk/Arctic_2017/FASTQ_Generation_2021-05-06_08_51_05Z-412503091/Kendra006_70252_L001-ds.c31c0293b32947d7869a9b2d82e1c95f/Kendra006-70252_S6_L001_R2_001.fastq.gz	Filt_0.2	Kendra006_70252
-/home/kturk/Arctic_2017/FASTQ_Generation_2021-05-06_08_51_05Z-412503091/Kendra008_70281_L001-ds.4da22e5f34d64d04a52ce4c517b68e1f/Kendra008-70281_S8_L001_R1_001.fastq.gz	Filt_0.2	Kendra008_70281
-/home/kturk/Arctic_2017/FASTQ_Generation_2021-05-06_08_51_05Z-412503091/Kendra008_70281_L001-ds.4da22e5f34d64d04a52ce4c517b68e1f/Kendra008-70281_S8_L001_R2_001.fastq.gz	Filt_0.2	Kendra008_70281
-/home/kturk/Arctic_2017/FASTQ_Generation_2021-05-06_08_51_05Z-412503091/Kendra009_70300_L001-ds.77163ae843a5488cb6cc7b4fb910ae8a/Kendra009-70300_S9_L001_R1_001.fastq.gz	Filt_0.2	Kendra009_70300
-/home/kturk/Arctic_2017/FASTQ_Generation_2021-05-06_08_51_05Z-412503091/Kendra009_70300_L001-ds.77163ae843a5488cb6cc7b4fb910ae8a/Kendra009-70300_S9_L001_R2_001.fastq.gz	Filt_0.2	Kendra009_70300
-/home/kturk/Arctic_2017/FASTQ_Generation_2021-05-06_08_51_05Z-412503091/Kendra010_70314_L001-ds.496d873632734989912e941fa38bc8ed/Kendra010-70314_S10_L001_R1_001.fastq.gz	Filt_0.2	Kendra010_70314
-/home/kturk/Arctic_2017/FASTQ_Generation_2021-05-06_08_51_05Z-412503091/Kendra010_70314_L001-ds.496d873632734989912e941fa38bc8ed/Kendra010-70314_S10_L001_R2_001.fastq.gz	Filt_0.2	Kendra010_70314
+## short script.
+##
+Data.Harding2018.abridged/Harding137-63180_S137_L001_R1_001.fastq.gz	Filt3	Harding137_63180
+Data.Harding2018.abridged/Harding137-63180_S137_L001_R2_001.fastq.gz	Filt3	Harding137_63180
+Data.Harding2018.abridged/Harding138-63181_S138_L001_R1_001.fastq.gz	Filt0.2	Harding138_63181
+Data.Harding2018.abridged/Harding138-63181_S138_L001_R2_001.fastq.gz	Filt0.2	Harding138_63181
+Data.Harding2018.abridged/Harding139-63188_S139_L001_R1_001.fastq.gz	Filt3	Harding139_63188
+Data.Harding2018.abridged/Harding139-63188_S139_L001_R2_001.fastq.gz	Filt3	Harding139_63188
+Data.Harding2018.abridged/Harding140-63189_S140_L001_R1_001.fastq.gz	Filt0.2	Harding140_63189
+Data.Harding2018.abridged/Harding140-63189_S140_L001_R2_001.fastq.gz	Filt0.2	Harding140_63189
+Data.Harding2018.abridged/Harding141-63190_S141_L001_R1_001.fastq.gz	Filt3	Harding141_63190
+Data.Harding2018.abridged/Harding141-63190_S141_L001_R2_001.fastq.gz	Filt3	Harding141_63190
+Data.Harding2018.abridged/Harding142-63191_S142_L001_R1_001.fastq.gz	Filt0.2	Harding142_63191
+Data.Harding2018.abridged/Harding142-63191_S142_L001_R2_001.fastq.gz	Filt0.2	Harding142_63191
+Data.Harding2018.abridged/Harding144-63201_S144_L001_R1_001.fastq.gz	Filt0.2	Harding144_63201
+Data.Harding2018.abridged/Harding144-63201_S144_L001_R2_001.fastq.gz	Filt0.2	Harding144_63201
+Data.Harding2018.abridged/Harding145-63210_S145_L001_R1_001.fastq.gz	Filt3	Harding145_63210
+Data.Harding2018.abridged/Harding145-63210_S145_L001_R2_001.fastq.gz	Filt3	Harding145_63210
+Data.Harding2018.abridged/Harding146-63211_S146_L001_R1_001.fastq.gz	Filt0.2	Harding146_63211
+Data.Harding2018.abridged/Harding146-63211_S146_L001_R2_001.fastq.gz	Filt0.2	Harding146_63211
+Data.Harding2018.abridged/Harding147-63216_S147_L001_R1_001.fastq.gz	Filt3	Harding147_63216
+Data.Harding2018.abridged/Harding147-63216_S147_L001_R2_001.fastq.gz	Filt3	Harding147_63216

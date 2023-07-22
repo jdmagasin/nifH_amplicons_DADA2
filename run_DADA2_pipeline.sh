@@ -129,8 +129,8 @@ fi
 ## Fastq2Samp() which defines the convention encoded right here).
 echo
 echo "Checking if FASTQ names follow format: {Samp}{_stuff1_}R{1,2}{stuff2}.fastq.gz"
-basename -a `cat "$rflist"` | grep 'R1' \
-    | sed -e 's/\.fastq\.gz$//'  -e 's/R1.*$//'  -e 's/_.*$//' \
+basename -a `cat "$rflist"` | grep '_R1' \
+    | sed -e 's/\.fastq\.gz$//'  -e 's/_R1.*$//'  -e 's/_.*$//' \
     | sort | uniq -c \
   > checkSampleNamesImpliedByFastqNames.tmp
 numDupSamps=`cat checkSampleNamesImpliedByFastqNames.tmp | grep -c -v "  1"`
@@ -143,7 +143,7 @@ if [ "$numDupSamps" -ge 1 ] ; then
     echo "   - stuff1, if present, can have any character but must be flanked by \"_\""
     echo "     Usually stuff1 will be/include the sequencing lane (L001).  stuff1 is"
     echo "     not interesting to the study and is excluded from column names in the"
-    echo "     in the final abundance table."
+    echo "     final abundance table."
     echo "   - stuff2 can be anything, or absent"
     echo "   - The .fastq.gz could be absent, but that would be bad style."
     echo "Your FASTQ names imply the following $numDupSamps duplicated sample names,"

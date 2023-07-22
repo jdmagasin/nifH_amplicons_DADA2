@@ -21,9 +21,9 @@
 ## biological variability of nifH.)  See the script runCutadapt.sh which trims
 ## nifH primers (and thus adapters and barcodes) from paired-end Illumina reads.
 ##
-## This script works with DADA2 v1.16.0 and R v4.0.3 (at least). I recommend
-## that you install both in a conda environment as described in the INSTALL.txt
-## document distributed with the DADA2 nifH pipeline.
+## This script works with DADA2 v1.16.0 and R v4.0.3, and later versions for both.
+## I recommend that you install both in a conda environment as described in the
+## INSTALL.txt document distributed with the DADA2 nifH pipeline.
 ##
 ## History
 ## -------
@@ -37,6 +37,7 @@
 ##                   if the R2s are poor quality (not uncommon) & won't merge.
 ##  2021 Oct 30      Support truncLen parameter for filterAndTrim()
 ##  2022 Jan 15      Support id.field parameter for filterAndTrim()
+##  Please see git log for more recent history.
 ##
 ################################################################################
 
@@ -198,8 +199,8 @@ Fastq2Index <- function(fq) {
 ## Make sure we can find dada2, and others.  In a cluster environment (like hummingbird)
 ## the script might need some help finding locally installed packages.
 needPkgs <- c('dada2','ShortRead',
-              'MASS',  # for NMDS
-              'ggplot2','reshape2','ggrepel',  # plots
+              'MASS',                # for NMDS
+              'ggplot2','reshape2',
               'vegan')
 havePkgs <- list.files(.libPaths())
 havePkgs <- sapply(needPkgs, function (p) any(grepl(p,havePkgs)))
@@ -334,30 +335,21 @@ rm(qpdir,i,samp,plotFile)
 
 
 ## In this post Brian Callahan said our filtering parameters [for Ana's CCS
-## data] looked reasonable and that the main goal is to not pick *bad*
+## PacBio data] looked reasonable and that the main goal is to not pick *bad*
 ## parameters (rather than to optimize):
 ##   https://github.com/benjjneb/dada2/issues/897
 ##
-## FIXME: Kendra uses PEAR as with parameter "-q 19" so that two consecutive
-## bases with QS < 19 cause truncation of "the rest of the read."  She also
-## requires *assembled* reads to be between 300 and 400 nt for the Guam data
-## (assembled, so don't do that here).
-##
-## Okay, let's try filtering here with the goal of later producing reads between
-## around 300-400nt.  Reason is that I think the error models might be bad right
-## now, and I wonder if the reason is that we are getting lots of non-nifH,
-## based on the many ASVs (merged reads) that are much shorter than 300nt.  Just
-## as for Ana's data I tried to make learnErrors() see only the 18S and not the
-## ITS, perhaps the short sequences are non-nifH and are thus introducing true
-## variability that learnErrors() could mistake as sequencing error.
-## So... mergePairs() tells me the number of overlapping bases (nmatch, since
-## nmismatch and nindel seem to always be 0), and the ASV which lets me estimate
-## the length of the paired reads that produced the ASV.  Just assume that the
-## merge happened as follows with R1/2 only of equal length:
-##        R1 only            overlap              R2 only
+
+## If I have a target length range for my ASVs, then I can use the results from
+## mergePairs() to help me tune params for filterAndTrim() accordingly.
+## mergePairs() reports the number of overlapping bases (actually, "nmatch" but
+## I usually only allow <=1 mismatch so ~"overlapping").  So if mergePairs()
+## gives an ASV of length 'asvLen' and I assume ~equal lengths for R1 and R2
+## reads, then the ASV is comprised of (on average):
+##        R1 only bases        nmatch       R2 only bases
 ##        ----------------[-------------]----------------
-## Looking at the first four samples, if I want ASV with lengths 300-400nt, then
-## I should pick reads that have 162 <= len <= 284.
+## Thus, to encourage and ASV length in some range, pick filterAndTrim() params
+## tend to produce reads of the following length:
 ##     readLen  =  nmatch + (asvLen - nmatch)/2
 ##
 if (!all(file.exists(filteredFastqs))) {
@@ -590,7 +582,6 @@ if (!file.exists(ddsRdsFile)) {
         ## derep knows the abundances of the unique sequences, so don't worry
         ## that dada() won't know relative abundances.
         cat("Now, denoising...\n")
-        ## FIXME: (1) Dropped BAND_SIZE; (2) Should I 'pool'?
         cpuTime = system.time({ dds[[sam]] <- dada(derep, err=errors, multithread=TRUE) })
         cat("Time spent in dada():\n")
         print(cpuTime)
@@ -609,9 +600,7 @@ if (!file.exists(ddsRdsFile)) {
 
 track <- readRDS(trackRdsFile)
 cat("Here's how the number of reads have changed after each of the previous steps.\n")
-## FIXME: Would be nice to show the initial read count.  Unlike for Ana I
-## don't have data file for primer removal though.
-##df = cbind(initial=???, filtered=track[,2],
+## This excludes reads lost during primer removal which is done before this script.
 df = cbind(filtered=track[,2], denoised=sapply(dds, function(x) sum(x$denoised)))
 rownames(df) <- sapply(rownames(df), function(fq) {
     paste0(Fastq2Samp(fq), '_R', Fastq2Index(fq))
@@ -752,7 +741,7 @@ if (nrow(df) < 5 || ncol(df) <= 2) {
         labs(title = "Samples represented by ASV abundances",
              caption = paste("NMDS on",dmeth,"distances; stress =", stress),
              x=NULL, y=NULL) +
-        ##geom_text_repel(aes(label=Sample), size=3) +  # FIXME: Can crash here with viewport of 0 dimensions.
+        ##geom_text_repel(aes(label=Sample), size=3) +  # Can crash here with viewport of 0 dimensions.
         theme(legend.position="none") + theme_bw()
     ggsave(file.path(plotsDir,'asvsNMDS.pdf'), width=4.5, height=4.5, units='in')
     rm(nmds, dmeth)
@@ -879,7 +868,7 @@ write.table(df, file=asvsNoChimAbundLenFreqTxt, sep="\t", quote=F)
 ## FIXME: processedTable has separate R1 and R2 lines but 'df'
 ## has the merged counts, so this step fails.
 
-cat("Here again are the numbers of reads after each step, no including after chimera removal.\n")
+cat("Here again are the numbers of reads after each step, not including after chimera removal.\n")
 df <- data.frame(processedTable, deChimeraed = colSums(df)[rownames(processedTable)])
 print(df)
 ## Overwrite the previous plot of reads processed.

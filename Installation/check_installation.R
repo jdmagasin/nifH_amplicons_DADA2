@@ -18,7 +18,7 @@ cat("\nChecking for R packages required by the DADA2 nifH pipeline:  ")
 ## List below based on grep'ing for libary() in all R scripts.  Some packages
 ## are required by dada2 (e.g. ShortRead) and not listed in
 ## environment_DADA2_nifH.yml
-needPacks <- c('dada2','ShortRead','MASS','ggplot2','reshape2','ggrepel','vegan','digest')
+needPacks <- c('dada2','ShortRead','MASS','ggplot2','reshape2','vegan','digest')
 installedPacks <- data.frame(installed.packages())
 missing <- which(! needPacks %in% installedPacks$Package)
 if (length(missing) == 0) {

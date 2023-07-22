@@ -42,7 +42,7 @@ reverse,ADNGCCATCATYTCNCC
 ## Tell cutadapt not to throw out read pairs that are missing primers. This is
 ## useful for data sets lacking primers e.g. if uploaded to the SRA.  We still
 ## run cutadapt (1) to remove any ovelooked primers (2) because it is simpler to
-## have outputs and directory strucutre from all stages of the pipeline.
+## have outputs and directory structure from all stages of the pipeline.
 allowMissingPrimers,TRUE
 
 
@@ -69,7 +69,7 @@ truncQ,16
 ##truncLen.rev,YYY  <-- replace based on your R2 qualities
 maxEE.fwd,2
 maxEE.rev,4
-minLen,20
+
 
 ## Several other filter/trim  options that are sometimes useful:
 
@@ -91,7 +91,6 @@ minLen,20
 ## By default dada2::mergePairs() uses minOverlap = 12 and maxMismatch = 0.  I
 ## prefer to use 1 and let mergePairs() resolve the mismatch using the higher
 ## quality sequence (forward or reverse).
-minOverlap,12
 maxMismatch,1
 
 ## You can tell DADA2 not to merge the left and right sequences when generating

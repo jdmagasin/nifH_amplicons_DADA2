@@ -1,6 +1,6 @@
 # DADA2 pipeline for processing _nifH_ amplicon sequencing data
 
-This repository contains our DADA2 pipeline for processing nitrogenase (_nifH_) amplicon data that were sequenced using paired-end MiSeq.
+This repository contains our DADA2 pipeline for processing nitrogenase (_nifH_) amplicon data that were sequenced using paired-end MiSeq.  No coding is required. The pipeline takes a parameters file (text) which controls key DADA2 functions.  A table of structured descriptions of the samples (e.g. DNA or RNA; location; size fraction) is used to group samples for pipeline processing.  Primers are trimmed with cutadapt.  Error models are (optionally) precalculated using only the reads that appear to be _nifH_ (not PCR artifacts).
 
 All scripts run from the command-line in a Unix/Linux shell (BASH recommended) and provide documentation when run with no parameters.  For example, the documentation from the main pipeline script, run_DADA2_pipeline.sh, is included below.
 

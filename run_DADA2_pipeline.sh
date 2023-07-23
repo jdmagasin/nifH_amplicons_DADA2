@@ -128,7 +128,7 @@ fi
 ## so that we don't have to wait until that stage only to get a crash (in
 ## Fastq2Samp() which defines the convention encoded right here).
 echo
-echo "Checking if FASTQ names follow format: {Samp}{_stuff1_}R{1,2}{stuff2}.fastq.gz"
+echo "Checking if FASTQ names follow format: {Samp}{_stuff1}_R{1,2}{stuff2}.fastq.gz"
 basename -a `cat "$rflist"` | grep '_R1' \
     | sed -e 's/\.fastq\.gz$//'  -e 's/_R1.*$//'  -e 's/_.*$//' \
     | sort | uniq -c \
@@ -137,7 +137,7 @@ numDupSamps=`cat checkSampleNamesImpliedByFastqNames.tmp | grep -c -v "  1"`
 if [ "$numDupSamps" -ge 1 ] ; then
     echo "It looks like you have used invalid FASTQ file names because they start with"
     echo "sample names that are duplicated.  FASTQ names must be structured like this:"
-    echo "    {Samp}{_stuff1_}R{1,2}{stuff2}.fastq.gz"
+    echo "    {Samp}{_stuff1}_R{1,2}{stuff2}.fastq.gz"
     echo "where:"
     echo "   - Samp can have any character other than \"_\"."
     echo "   - stuff1, if present, can have any character but must be flanked by \"_\""

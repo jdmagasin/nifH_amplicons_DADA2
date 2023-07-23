@@ -2,7 +2,7 @@
 
 This repository contains our DADA2 pipeline for processing nitrogenase (_nifH_) amplicon data that were sequenced using paired-end MiSeq.
 
-All scripts run from the command-line in a unix-like shell (BASH recommended) and provide documentation when run with no parameters.  For example, the documentation from the main pipeline script, run_DADA2_pipeline.sh, is included below.
+All scripts run from the command-line in a Unix/Linux shell (BASH recommended) and provide documentation when run with no parameters.  For example, the documentation from the main pipeline script, run_DADA2_pipeline.sh, is included below.
 
 
 ## Repository contents
@@ -13,7 +13,7 @@ All scripts run from the command-line in a unix-like shell (BASH recommended) an
   
 - **scripts:** Helper scripts used by run_DADA2_pipeline.sh.
 - **scripts.ancillary:**  Additional tools that are not part of the pipeline, organized within four subdirectories.  Most tools includes an Example (subdirectory).
-   - ASVs_to_AUIDS:  For combining results for different data sets (run separately through the pipeline) into a since abundance table and FASTA with new sequence identifiers (AUIDs).
+   - ASVs_to_AUIDS:  For combining results for different data sets (run separately through the pipeline) into one abundance table and FASTA with new sequence identifiers (AUIDs).
   - Annotation:  Several tools for annotating _nifH_ ASVs.
   - Pre_pipeline:  Several tools for evaluating data sets before running them through the pipeline.
   - Post_pipeline:  For identifying ASVs that are not likely _nifH_.

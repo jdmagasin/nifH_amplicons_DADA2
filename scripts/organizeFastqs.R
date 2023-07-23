@@ -22,7 +22,9 @@
 ##      abundances (e.g. rare members can be transcriptionally very active) and
 ##      perhaps different sequencing error characteristics, so it seems safer
 ##      for DADA2 to process them separately. (Granted, the pipeline runs dada()
-##      with pool=F so ASV inference happens separately for each sample.)
+##      with pool=F so ASV inference happens separately for each sample. However,
+##      DADA2 does not create an error model for each sample and isBimeraDenovo()
+##      takes all samples at once.)
 ##
 ## Overview of input tsv file:
 ## - Column 1 of each line has a path to a FASTQ file.  The paths can be full or
@@ -120,13 +122,15 @@ where:
      examples above.
 
    - stuff2 can be anything, or absent. Most likely it will begin with '_' as in
-     the examples.
+     the example.
 
    - The '.fastq.gz' can be absent, but that is bad style.
 
 Sometimes you must write a small script to change your FASTQ names to follow the
-format, usually to convert '_' in the sample name, or to change \"_1\" to \"_R1\"
-and similarly for the reverse FASTQ.
+format, usually to convert '_' that appear in the sample name to some other
+character.  FASTQs from the Sequencing Read Archive use the format <run
+name>_1.fastq.gz.  For convenience organizeFastqs.R automatically changes _1 and
+_2 to _R1 and _R2 for the symbolic links.
 
 "
 
@@ -161,7 +165,14 @@ ValidFastqNames <- function(namVec)
     }
 }
 
-ValidFastqNames(fastqMap[,1])
+## SRA names are not pipeline-friendly but can be easily fixed
+Check_SRA_fastq_names <- function(namVec) { any(grepl("_[12]\\.fastq\\.gz$", namVec)) }
+Fixup_SRA_fastq_names <- function(namVec) { sub('_([12])\\.fastq\\.gz$', '_R\\1.fastq.gz', namVec) }
+
+## Abort if the FASTQ names are invalid -- but tolerate SRA names
+## since we will convert them to valid when we make the symlinks.
+ValidFastqNames(Fixup_SRA_fastq_names(fastqMap[,1]))
+
 
 ## Basic checks of the tsv, for paired FASTQs only.
 if (grepl('_R[1,2]',fastqMap[1,1])) {
@@ -200,13 +211,20 @@ for (p in unique(paths)) {
 ## paths still is 1:1 with the fastqs which is what we need for setting up the
 ## symlinks.
 fpaths <- file.path(paths, basename(fastqMap[,1]))  # full symlink paths (dest)
-idx <- which(!file.exists(fpaths))
-cat("Will make",length(idx),"symbolic links to FASTQs.\n")
-if (length(idx) > 0) {
-    ## This converts relative paths to absolute or aborts. Safer so that the
-    ## DADA2 pipeline can switch the current working directory and still find
-    ## the FASTQs.
-    srcFqPaths <- normalizePath(fastqMap[idx,1], mustWork=TRUE)
-    ok <- sum(file.symlink(srcFqPaths, fpaths[idx]))
-    cat("Successfully created",ok,"symlinks.\n")
+cat("Will make",length(fpaths),"symbolic links to FASTQs.\n")
+
+## This converts relative paths to absolute or aborts. Safer so that the
+## DADA2 pipeline can switch the current working directory and still find
+## the FASTQs.
+srcFqPaths <- normalizePath(fastqMap[,1], mustWork=TRUE)
+pipeFriendlyFastqNames <- fpaths
+if (Check_SRA_fastq_names(pipeFriendlyFastqNames)) {
+    cat("Note:  Symbolic links will use \"_R1.fastq.gz\" rather than \"_1.fastq.gz\"\n",
+        "      which appears in the source FASTQs, and similiar for the reverse reads.\n",
+        "      Perhaps you are using data from the Sequencing Read Archive.  If so\n",
+        "      then should verify that your read IDs used Illumina (CASAVA) format.  If\n",
+        "      not, then you should set \"id.field\" in your pipeline parameters file.\n")
+    pipeFriendlyFastqNames <- Fixup_SRA_fastq_names(pipeFriendlyFastqNames)
 }
+ok <- sum(file.symlink(srcFqPaths, pipeFriendlyFastqNames))
+cat("Successfully created",ok,"symlinks.\n")

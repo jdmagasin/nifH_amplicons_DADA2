@@ -12,11 +12,11 @@ All scripts run from the command-line in a Unix/Linux shell (BASH recommended) a
 - **run_DADA2_pipeline.sh:**  Main script that runs the whole pipeline.
   
 - **scripts:** Helper scripts used by run_DADA2_pipeline.sh.
-- **scripts.ancillary:**  Additional tools that are not part of the pipeline, organized within four subdirectories.  Most tools includes an Example (subdirectory).
-   - ASVs_to_AUIDS:  For combining results for different data sets (run separately through the pipeline) into one abundance table and FASTA with new sequence identifiers (AUIDs).
+- **scripts.ancillary:**  Additional tools you might find useful, mainly for quality-filtering and annotating ASVs after running the pipeline.  Most tools include an Example subdirectory.
+   - ASVs_to_AUIDS:  For combining results across runs of the pipeline: Merge abundance tables and assign new sequence identifiers (AUIDs).
   - Annotation:  Several tools for annotating _nifH_ ASVs.
   - Pre_pipeline:  Several tools for evaluating data sets before running them through the pipeline.
-  - Post_pipeline:  For identifying ASVs that are not likely _nifH_.
+  - Post_pipeline:  Quality filters for identifying ASVs that are not likely _nifH_.
   
 - **bin:** Symbolic links to main scripts so they can be run easily from your unix-like shell.
 

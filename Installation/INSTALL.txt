@@ -71,12 +71,12 @@ suggestions in case you experience problems:
        (a) Ask your system administrator to install newer libraries.  A
            system-wide upgrade impacts everyone, so your sysadmin will assess
            the risk of breaking software that depend on the older libraries.
-	   
+
        (b) You could install an older version of conda that works with your
            system's older libraries, and then do "conda update conda" to get the
            latest Miniconda. This will automatically get the newer libraries as
            local copies.  (No impact to other users.)
-	   
+
      I used "b" to resolve an outdated glibc on an old CentOS 7 workstation.
 
 If you successfully installed miniconda (or mamba) then your shell prompt should
@@ -267,13 +267,13 @@ have to install Xcode.)
 
 *** DADA2 R package install ***
 
-We will use Bioconductor to install DADA2 as described at:
+Use Bioconductor to install DADA2 as described at:
     https://bioconductor.org/packages/release/bioc/html/dada2.html
 In the shell with DADA2_nifH active, start R:
 
   (DADA2_nifH) % R
 
-Then in the R console do the following lines to install Bioconductor and DADA2:
+Then in the R console do the following to install Bioconductor and DADA2:
 
    ## Install Bioconductor if necessary.  It takes just a few seconds.  When
    ## asked which CRAN mirror to use, "0-Cloud [https]" is good.
@@ -296,16 +296,18 @@ verify that dada2 was installed by loading it (and then you can exit R).
 
 
 Notes:
-  1. The DADA2 will be available only when DADA2_nifH is active.
-     miniconda3 manages the R (and other tools) that were installed to
-     DADA2_nifH. However, R itself must manage packages installed with R.  For
-     example, the dada2 package you just installed will be stored in:
+  1. The dada2 R package will only be available when DADA2_nifH is active.
+     miniconda3 manages (and other tools) that were installed to DADA2_nifH.
+     However, R itself must manage packages that were installed using R.  For
+     example, the dada2 R package you will be stored in a directory with all
+     other R packages:
             ~/miniconda3/envs/DADA2_nifH/lib/R/library/dada2
      This makes it possible to have different conda environments with different
      versions of R and R packages.
 
-  2. The dada2 web page (link above) will mention a specific version of R which
-     might differ than the 4.1.3 mentioned in environment_DADA2_nifH.yml.
+  2. The dada2 web page (link above) will mention the specific version of R
+     that is required.  It might differ than v4.1.3 mentioned in
+     environment_DADA2_nifH.yml.
 
 
 *** Install vegan and digest ***

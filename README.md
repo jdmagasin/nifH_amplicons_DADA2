@@ -1,6 +1,6 @@
 # DADA2 pipeline for processing _nifH_ amplicon sequencing data
 
-This repository contains our DADA2 pipeline for processing nitrogenase (_nifH_) amplicon data that were sequenced using paired-end MiSeq.
+This repository contains our DADA2 pipeline for processing nitrogenase (_nifH_) amplicon data that were sequenced using paired-end MiSeq.  No coding is required. The pipeline takes a parameters file (text) which controls key DADA2 functions.  A table of structured descriptions of the samples (e.g. DNA or RNA; location; size fraction) is used to group samples for pipeline processing.  Primers are trimmed with cutadapt.  Error models are (optionally) precalculated using only the reads that appear to be _nifH_ (not PCR artifacts).
 
 All scripts run from the command-line in a Unix/Linux shell (BASH recommended) and provide documentation when run with no parameters.  For example, the documentation from the main pipeline script, run_DADA2_pipeline.sh, is included below.
 
@@ -12,11 +12,11 @@ All scripts run from the command-line in a Unix/Linux shell (BASH recommended) a
 - **run_DADA2_pipeline.sh:**  Main script that runs the whole pipeline.
   
 - **scripts:** Helper scripts used by run_DADA2_pipeline.sh.
-- **scripts.ancillary:**  Additional tools that are not part of the pipeline, organized within four subdirectories.  Most tools includes an Example (subdirectory).
-   - ASVs_to_AUIDS:  For combining results for different data sets (run separately through the pipeline) into one abundance table and FASTA with new sequence identifiers (AUIDs).
+- **scripts.ancillary:**  Additional tools you might find useful, mainly for quality-filtering and annotating ASVs after running the pipeline.  Most tools include an Example subdirectory.
+   - ASVs_to_AUIDS:  For combining results across runs of the pipeline: Merge abundance tables and assign new sequence identifiers (AUIDs).
   - Annotation:  Several tools for annotating _nifH_ ASVs.
   - Pre_pipeline:  Several tools for evaluating data sets before running them through the pipeline.
-  - Post_pipeline:  For identifying ASVs that are not likely _nifH_.
+  - Post_pipeline:  Quality filters for identifying ASVs that are not likely _nifH_.
   
 - **bin:** Symbolic links to main scripts so they can be run easily from your unix-like shell.
 

@@ -168,7 +168,7 @@ cat("Output directory will be ", dada2OutDir, "\n")
 ## Presumes names are structured like this:
 legalFastqNameDesc <- "
 Fastq names are expected to follow this format:
-   {Samp}{_stuff1_}R{1,2}{stuff2}.fastq.gz
+   {Samp}{_stuff1}_R{1,2}{stuff2}.fastq.gz
 where:
    - Samp can have any character other than \"_\".
    - stuff1, if present, can have any character but must be flanked by \"_\"
@@ -354,7 +354,7 @@ rm(qpdir,i,samp,plotFile)
 ##
 if (!all(file.exists(filteredFastqs))) {
     ## Missing some filtered fastqs (whether R1 or R2 -- see above).
-    cat("Quality filtering the reads. Will truncate reads at the first position",
+    cat("Quality filtering the reads.\nWill truncate reads at the first position",
         "with a quality score Q <=",filterAndTrimParams$truncQ,".\n")
     cat("Will drop reads that have any uncalled bases or that have fewer than",
         filterAndTrimParams$minLen,"nt.\n")
@@ -429,7 +429,7 @@ if (!file.exists(plotFile)) {
           main='Quality-trimmed reads', xlab = 'read length (nt)') +
         theme_bw()
     ggsave(plotFile, width=5, height=3, units='in')
-    cat("Stats for read lengths after filtering:\n")
+    cat("\nStats for read lengths after filtering:\n")
     print(summary(lens))
     rm(lens.fn,lens,plotFile)
 }
@@ -457,7 +457,7 @@ if (!file.exists(dereplicatedRdsFile)) {
 ## can free up the huge amount of memory needed for 'dereplicated', at a very
 ## small performance hit for derepliating each sample again (very fast).
 ##
-cat("Note that dereplicated reads at this point helps us make the error models",
+cat("Note that dereplicated reads at this point helps us make the error models\n",
     "in the next step.  Later, we dereplicate again during sample inference.\n")
 
 
@@ -587,7 +587,7 @@ if (!file.exists(ddsRdsFile)) {
         print(cpuTime)
         rm(derep) # so not in memory during next derepFastq()
         saveRDS(dds, file=tmpDdsFile)
-        cat("Finished ", sam, "at",date(),"\n")
+        cat("Finished ", sam, "at",date(),"\n\n")
     }
     saveRDS(dds, ddsRdsFile)
     unlink(tmpDdsFile)
@@ -599,7 +599,7 @@ if (!file.exists(ddsRdsFile)) {
 
 
 track <- readRDS(trackRdsFile)
-cat("Here's how the number of reads have changed after each of the previous steps.\n")
+cat("\nHere is how the number of reads have changed after each of the previous steps.\n")
 ## This excludes reads lost during primer removal which is done before this script.
 df = cbind(filtered=track[,2], denoised=sapply(dds, function(x) sum(x$denoised)))
 rownames(df) <- sapply(rownames(df), function(fq) {
@@ -709,7 +709,7 @@ cat("Before removing chimeras, the sequence table has", ncol(sequenceTab),
     "ASV's and", nrow(sequenceTab), "samples.\n")
 
 cat("Saving ASV abundances (", asvsAbundTxt,") ",
-    "and fasta file (", asvsFastaTxt, ")\n")
+    "and fasta file (", asvsFastaTxt, ")\n\n")
 df = data.frame(t(sequenceTab))                       # Make rows the ASV ID's
 rownames(df) = as.character(asvSeq2Id[rownames(df)])
 colnames(df) <- rownames(sequenceTab)                 # Use original (R-unfriendly) sample names
@@ -720,13 +720,16 @@ if (nrow(df) < 5 || ncol(df) <= 2) {
     cat("Not doing NMDS. Too few ASVs and/or samples.\n")
 } else {
     ## NMDS of samples by their ASV profiles.
+    cat("Doing NMDS of the samples, each represented by its ASV abundances.\n")
     df <- df[,which(apply(df, 2, function(v) !all(v==0)))]   # remove empty samples
     df <- df[which(apply(df,  1, function(v) !all(v==0))),]  # remove empty ASVs
     ## Normalize sequencing depths. At least need to if we use Bray-Curtis dissimilarities
     ## because B-C is affected by sampling sizes.
     df <- decostand(t(df), method='total')
     dmeth <- 'bray'  # euclidean, canberra, jaccard, gower, ...
+    sink(file('/dev/null'))                                  # sink nmds convergence messages.
     nmds <- metaMDS(df, dmeth, k=2, autotransform=F)         # autotransform=F b/c used decostand()
+    sink()
     stress = round(nmds$stress,3)
     cat("NMDS of",dmeth,"distances between sample ASV abundances had stress", stress, "\n")
     df = data.frame(nmds$points, rownames(nmds$points))
@@ -779,11 +782,13 @@ if (nrow(df) < 5) {
 rm(df)
 
 
+if (FALSE) {
 ################################################################################
 BigStep("Assigning taxonomy -- DROPPED for nifH")
 
 cat("Not supported.  We could use DADA2's assignTaxonomy() which uses a naive Bayes classifier.\n",
     "But for nifH we have better ways.\n")
+}
 
 
 ################################################################################
@@ -801,11 +806,11 @@ if (!file.exists(bimsRds)) {
     bims <- readRDS(bimsRds)
 }
 
-cat("How many of the ASVs are probably chimeric (TRUE) vs. not (FALSE):")
+cat("How many of the ASVs are probably chimeric (TRUE) vs. not (FALSE):\n")
 print(table(bims))
 
 cat("What % of the total abundance is from chimera? ",
-    100*sum(sequenceTab[,bims])/sum(sequenceTab), "%\n")
+    paste0(100*sum(sequenceTab[,bims])/sum(sequenceTab), "%"),"\n")
 
 if (exists('taxa') && !is.null(taxa)) {
     cat("This table summarizes the genera associated with chimeric ASVs")
@@ -822,7 +827,8 @@ if (exists('taxa') && !is.null(taxa)) {
 cat("Throwing out chimeric ASVs\n")  # Not sure why Callahan did not.
 sequenceTab <- sequenceTab[,!bims,drop=F]
 cat("After removing chimeras, the sequence table has", ncol(sequenceTab),
-    "ASV's and", nrow(sequenceTab), "samples. Saving to",seqTabNoChimRdsFile,"\n")
+    "ASV's and", nrow(sequenceTab), "samples.\n",
+    "Saving sequence table to",seqTabNoChimRdsFile,"\n")
 saveRDS(sequenceTab, file=seqTabNoChimRdsFile)
 cat("Saving FASTA of non-chimeric ASVs as",asvsNoChimFastaTxt,"\n")
 ## Make sure we retain the original ASV ID's, even if there will be holes for
@@ -858,18 +864,23 @@ MakeTableOfASV_Len_Freq <- function(asvAbund, asvFasta)
 }
 
 cat("Writing table of ASVs that shows their lengths, frequencies, and num samples in",
-    "which they appear: ", asvsNoChimAbundLenFreqTxt,"\n",
-    "This will help you follow up on abundant ASVs that have non-nifH-like lengths.\n")
-df <- MakeTableOfASV_Len_Freq(asvsNoChimAbundTxt, asvsNoChimFastaTxt)
-write.table(df, file=asvsNoChimAbundLenFreqTxt, sep="\t", quote=F)
+    "which they appear:\n\t", asvsNoChimAbundLenFreqTxt,"\n",
+    "This will help you follow up on abundant ASVs that have non-nifH-like lengths.\n\n")
+df2 <- MakeTableOfASV_Len_Freq(asvsNoChimAbundTxt, asvsNoChimFastaTxt)
+write.table(df2, file=asvsNoChimAbundLenFreqTxt, sep="\t", quote=F)
+rm(df2)
 
 
 ## Show earlier table but now with ASV abundances.
-## FIXME: processedTable has separate R1 and R2 lines but 'df'
-## has the merged counts, so this step fails.
-
-cat("Here again are the numbers of reads after each step, not including after chimera removal.\n")
-df <- data.frame(processedTable, deChimeraed = colSums(df)[rownames(processedTable)])
+## 'processedTable' has separate R1 and R2 lines but 'df' (still the abundance table)
+## has sample names without _R1,2.  Also, df's counts are post-merge and appear to
+## count read *pairs*.
+x <- colSums(df)[ sub('_R.$','',rownames(processedTable)) ]
+stopifnot(!is.na(x))
+df <- data.frame(processedTable, deChimeraed = x)
+rm(x)
+cat("\nHere again are the numbers of reads after each step, now including the _paired_\n",
+    "read counts in the abundance table (after merging and chimera removal).\n")
 print(df)
 ## Overwrite the previous plot of reads processed.
 df$Sample = rownames(df)

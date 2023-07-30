@@ -1,8 +1,28 @@
 # DADA2 pipeline for processing _nifH_ amplicon sequencing data
 
-This repository contains our DADA2 pipeline for processing nitrogenase (_nifH_) amplicon data that were sequenced using paired-end MiSeq.  No coding is required. The pipeline takes a parameters file (text) which controls key DADA2 functions.  A table of structured descriptions of the samples (e.g. DNA or RNA; location; size fraction) is used to group samples for pipeline processing.  Primers are trimmed with cutadapt.  Error models are (optionally) precalculated using only the reads that appear to be _nifH_ (not PCR artifacts).
+This repository contains our DADA2 pipeline for processing nitrogenase (_nifH_) amplicon data that
+were sequenced using paired-end MiSeq.  Features of our pipeline include:
 
-All scripts run from the command-line in a Unix/Linux shell (BASH recommended) and provide documentation when run with no parameters.  For example, the documentation from the main pipeline script, run_DADA2_pipeline.sh, is included below.
+  - A text file provides key DADA2 parameters (e.g. for filterAndTrim()).  No coding is required to
+    run the pipeline.
+
+  - Samples are input using a "FASTQ map" text table that includes structured descriptions,
+    e.g. whether the sample was DNA or RNA, the collection site, and the size fraction.  The
+    pipeline uses the descriptions to partition the samples into "processing groups" which are run
+    separately through DADA2.  Advantages of this approach include:
+    
+       1. Results organized hierarchically e.g. DNA/Station41/SizeFrac_0.2
+       2. Faster processing by DADA2.
+       3. Separate error models e.g. for DNA and RNA samples
+
+  - Error models are (optionally) precalculated using only the reads that appear to be _nifH_, not PCR
+    artifacts.  On average, this results in more reads retained (up to a few K) in each sample and
+    fewer ASVs (up to a few K).
+
+
+All scripts run from the command-line in a Unix/Linux shell (BASH recommended) and provide
+documentation when run with no parameters.  For example, the documentation from the main pipeline
+script, run_DADA2_pipeline.sh, is included below.
 
 
 ## Repository contents

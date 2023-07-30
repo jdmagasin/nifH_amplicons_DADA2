@@ -117,7 +117,7 @@ Yes.
 1. Set _forward_ and _reverse_ in your parameters file to your PCR primers. Otherwise
    the pipeline will default to primers _nifH1_ and _nifH4_.
 
-2. Disable precalculated error models by setting _skipNifHErrorModels_" to _true_.
+2. Disable precalculated error models by setting _skipNifHErrorModels_ to _true_.
 
 We have used our pipeline with 16S rRNA MiSeq data using these steps.  No coding
 changes were required.

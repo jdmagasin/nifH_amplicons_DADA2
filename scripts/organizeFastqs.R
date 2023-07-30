@@ -146,7 +146,18 @@ if (!file.exists(fastqMapTsv)) {
 
 topDir <- 'LinksToFastqs'
 if (dir.exists(topDir)) {
-    stop("ERROR: ",topDir," exists. Rename or remove it.\n")
+    ## Offer to delete topDir so we don't have to suggest that they 'rm -rf' it.
+    cat(topDir, "exists.  You must rename or delete it to proceed.\n")
+    cat("Delete",topDir,"('y' or 'n')?: ")
+    if ('y' == readLines('stdin', 1)) {
+        if (0 == unlink(topDir, recursive=TRUE, force=FALSE)) {
+            cat(paste0("Deleted.  Will create a new ", topDir,".\n"))
+        } else {
+            stop("ERROR: Failed to delete", topDir,"\n")
+        }
+    } else {
+        stop("Aborting.  You must rename or delete", topDir, "\n")
+    }
 }
 
 fastqMap <- read.table(fastqMapTsv, header=F, comment.char='#')

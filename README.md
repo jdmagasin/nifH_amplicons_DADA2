@@ -19,6 +19,7 @@ were sequenced using paired-end MiSeq.  Features of our pipeline include:
     artifacts.  On average, this results in more reads retained (up to a few K) in each sample and
     fewer ASVs (up to a few K).
 
+  - Automatically runs cutadapt.
 
 All scripts run from the command-line in a Unix/Linux shell (BASH recommended) and provide
 documentation when run with no parameters.  For example, the documentation from the main pipeline
@@ -108,6 +109,19 @@ LinksToFastqs) that organizes the FASTQs into "processing groups":
  miniconda3.  The document INSTALL.txt describes how to get set up to run
  the pipeline.
 ```
+
+## Can I use the pipeline with other types of amplicon data?
+
+Yes.
+
+1. Set _forward_ and _reverse_ in your parameters file to your PCR primers. Otherwise
+   the pipeline will default to primers _nifH1_ and _nifH4_.
+
+2. Disable precalculated error models by setting _skipNifHErrorModels_" to _true_.
+
+We have used our pipeline with 16S rRNA MiSeq data using these steps.  No coding
+changes were required.
+
 
 ***
 

@@ -3,27 +3,49 @@
 This repository contains our DADA2 pipeline for processing nitrogenase (_nifH_) amplicon data that
 were sequenced using paired-end MiSeq.  Features of our pipeline include:
 
-  - A text file provides key DADA2 parameters (e.g. for filterAndTrim()).  No coding is required to
+  - A text file provides key DADA2 [parameters](Example/params.example.csv) (e.g. for filterAndTrim()).  No coding is required to
     run the pipeline.
 
-  - Samples are input using a "FASTQ map" text table that includes structured descriptions,
+  - Samples are input using a [FASTQ map](Example/fastqMap.tsv) (text table) that includes structured descriptions,
     e.g. whether the sample was DNA or RNA, the collection site, and the size fraction.  The
     pipeline uses the descriptions to partition the samples into "processing groups" which are run
     separately through DADA2.  Advantages of this approach include:
     
-       1. Results organized hierarchically e.g. DNA/Station41/SizeFrac_0.2
+       1. Results organized hierarchically e.g. DNA/Station41/SizeFrac_0.2.
        2. Faster processing by DADA2.
-       3. Separate error models e.g. for DNA and RNA samples
+       3. Separate error models for each processing group.
 
-  - Error models are (optionally) precalculated using only the reads that appear to be _nifH_, not PCR
-    artifacts.  On average, this results in more reads retained (up to a few K) in each sample and
-    fewer ASVs (up to a few K).
+  - Error models can be precalculated using only the reads that appear to be _nifH_, not PCR
+    artifacts.  On average, this results in up to a few thousand more reads retained in each sample and
+    fewer ASVs (by as much as a few K).
 
   - Automatically runs cutadapt.
+
+  - Simple set up by creating a [conda environment](https://docs.conda.io/en/latest/index.html) called DADA2_nifH.
+
+Once the [parameters file](Example/params.example.csv) and [FASTQ map](Example/fastqMap.tsv) are created, two commands launch the pipeline:
+
+```bash session
+(DADA2_nifH) [jmagasin@thalassa]$ organizeFastqs.R fastqMap.tsv
+(DADA2_nifH) [jmagasin@thalassa]$ run_DADA2_pipeline.sh params.csv &> log.pipeline.txt &
+```
 
 All scripts run from the command-line in a Unix/Linux shell (BASH recommended) and provide
 documentation when run with no parameters.  For example, the documentation from the main pipeline
 script, run_DADA2_pipeline.sh, is included below.
+
+
+## Can I use the pipeline with other types of amplicon data?
+
+Yes.
+
+1. Set _forward_ and _reverse_ in your parameters file to your PCR primers. Otherwise
+   the pipeline will default to primers _nifH1_ and _nifH4_.
+
+2. Disable precalculated error models by setting _skipNifHErrorModels_ to _true_.
+
+We have used our pipeline with 16S rRNA MiSeq data using these steps.  No coding
+changes were required.
 
 
 ## Repository contents
@@ -109,19 +131,6 @@ LinksToFastqs) that organizes the FASTQs into "processing groups":
  miniconda3.  The document INSTALL.txt describes how to get set up to run
  the pipeline.
 ```
-
-## Can I use the pipeline with other types of amplicon data?
-
-Yes.
-
-1. Set _forward_ and _reverse_ in your parameters file to your PCR primers. Otherwise
-   the pipeline will default to primers _nifH1_ and _nifH4_.
-
-2. Disable precalculated error models by setting _skipNifHErrorModels_ to _true_.
-
-We have used our pipeline with 16S rRNA MiSeq data using these steps.  No coding
-changes were required.
-
 
 ***
 

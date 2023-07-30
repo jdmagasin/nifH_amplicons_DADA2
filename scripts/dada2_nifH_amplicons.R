@@ -600,11 +600,16 @@ if (!file.exists(ddsRdsFile)) {
 
 track <- readRDS(trackRdsFile)
 cat("\nHere is how the number of reads have changed after each of the previous steps.\n")
+cat("These two columns count only the forward reads.\n")
 ## This excludes reads lost during primer removal which is done before this script.
-df = cbind(filtered=track[,2], denoised=sapply(dds, function(x) sum(x$denoised)))
-rownames(df) <- sapply(rownames(df), function(fq) {
-    paste0(Fastq2Samp(fq), '_R', Fastq2Index(fq))
-})
+## Also, 'forward' because that is all we get back from filterAndTrim() which was used
+## to create 'track'.
+idx <- match(rownames(track), basename(names(dds)))
+stopifnot(!is.na(idx))  # Match every R1 from fAT() to its dds entry
+x <- sapply(dds, function(x) sum(x$denoised))[idx]  # Ignore the R2s
+df <- cbind(filtered = track[,2], denoised = x)
+rm(idx, x)
+rownames(df) <- sapply(rownames(df), Fastq2Samp)
 
 processedTable <- df  # Need this for final table.
 print(processedTable)
@@ -810,7 +815,7 @@ cat("How many of the ASVs are probably chimeric (TRUE) vs. not (FALSE):\n")
 print(table(bims))
 
 cat("What % of the total abundance is from chimera? ",
-    paste0(100*sum(sequenceTab[,bims])/sum(sequenceTab), "%"),"\n")
+    paste0(round(100*sum(sequenceTab[,bims])/sum(sequenceTab),2), "%"),"\n")
 
 if (exists('taxa') && !is.null(taxa)) {
     cat("This table summarizes the genera associated with chimeric ASVs")
@@ -872,16 +877,20 @@ rm(df2)
 
 
 ## Show earlier table but now with ASV abundances.
-## 'processedTable' has separate R1 and R2 lines but 'df' (still the abundance table)
-## has sample names without _R1,2.  Also, df's counts are post-merge and appear to
-## count read *pairs*.
-x <- colSums(df)[ sub('_R.$','',rownames(processedTable)) ]
+## Recall that 'processedTable' has just the R1's in the filtered and denoised columns.
+x <- colSums(df)[ rownames(processedTable) ]
 stopifnot(!is.na(x))
 df <- data.frame(processedTable, deChimeraed = x)
 rm(x)
 cat("\nHere again are the numbers of reads after each step, now including the _paired_\n",
     "read counts in the abundance table (after merging and chimera removal).\n")
 print(df)
+idx <- which(!all(apply(df, 1, function(v) all(order(v, decreasing=T) == 1:length(v)))))
+if (length(idx) > 0) {
+    cat("WARNING:  It looks like reads do not strictly decrease for these samples:\n",
+         rownames(df)[idx],"\n")
+}
+rm(idx)
 ## Overwrite the previous plot of reads processed.
 df$Sample = rownames(df)
 df <- melt(df, id='Sample')

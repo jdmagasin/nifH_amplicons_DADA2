@@ -16,8 +16,9 @@ were sequenced using paired-end MiSeq.  Features of our pipeline include:
        3. Separate error models for each processing group.
 
   - Error models can be precalculated using only the reads that appear to be _nifH_, not PCR
-    artifacts.  On average, this results in up to a few thousand more reads retained in each sample and
-    fewer ASVs (by as much as a few K).
+    artifacts.  On average, this results in up to a few thousand more reads retained in each sample
+    and fewer ASVs (by as much as a few K).  [These plots](Readmore/nifH_error_models.md) compare
+    results with vs. without using _nifH_ error models.
 
   - Automatically runs cutadapt.
 

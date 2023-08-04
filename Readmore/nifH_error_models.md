@@ -10,7 +10,7 @@ through bimera removal, as well as after subsequent filtering for ASVs with leng
 capture _nifH_ (280 - 260 nt).  Gains were usually small and occurred during ASV inference.  For
 NEMO and Harding_2021 the median gains were > 3%.
 
-![ASVs if use nifH error models](asv_abund_comparison_if_use_nifH_error_models.png)
+![ASVs if use nifH error models](read_gain_if_use_nifH_errror_models.png)
 
 
 The following plot compares ASVs found when the pipeline was run with vs. without _nifH_ error
@@ -22,4 +22,4 @@ differed between the two pipeline runs.  Additionally, using the standard error 
 unique ASVs (on _y_ axis) compared to using the _nifH_ model (on _x_ axis), even though _nifH_
 models resulted in using more total reads (first plot).
 
-![Read gain if use nifH error models](read_gain_if_use_nifH_errror_models.png)
+![Read gain if use nifH error models](asv_abund_comparison_if_use_nifH_error_models.png)

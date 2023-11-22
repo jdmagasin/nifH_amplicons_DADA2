@@ -1,5 +1,7 @@
 #!/bin/env Rscript
 
+## Copyright (C) 2023 Jonathan D. Magasin
+
 usage <- '
 Usage:
 

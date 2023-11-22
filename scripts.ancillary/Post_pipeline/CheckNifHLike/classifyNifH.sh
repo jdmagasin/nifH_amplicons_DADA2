@@ -1,5 +1,7 @@
 #!/bin/bash
 
+## Copyright (C) 2023 Jonathan D. Magasin
+
 ## Usage:
 ##    classifyNifH.sh fasta
 ## where fasta is a nucleotide fasta file of sequences you want to

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+## Copyright (C) 2023 Jonathan D. Magasin
+
 ## Search a FASTQ for reads that contain NifH domains and extract them to
 ## readsExtracted.fastq.gz
 

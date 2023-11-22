@@ -1,5 +1,7 @@
 #!/bin/bash
 
+## Copyright (C) 2023 Jonathan D. Magasin
+
 ##
 ## Search nifH ASVs for possible contaminants that are:
 ##   - known from previous work (pulbications) to exist in PCR reagents

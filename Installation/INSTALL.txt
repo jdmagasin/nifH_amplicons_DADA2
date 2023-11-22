@@ -2,24 +2,28 @@
 #################### Installation of the DADA2 nifH pipeline ###################
 ################################################################################
 
+Copyright (C) 2023 Jonathan D. Magasin
+
 The DADA2 nifH pipeline uses several external tools (e.g. R, DADA2, cutadapt).
 To get them we will use miniconda3, a software package and environment manager.
 This document describes how to get miniconda3 and then use it to create an
 "environment" that you will use whenever running the DADA2 pipeline.
 
 These instructions presume a unix/linux environment.  They have been exercised
-on Linux workstations and macOS laptops.
+on Linux (workstations and a Chromebook) and macOS laptops.
 
 Overview:
   0. Get the pipeline and all documentation from the GitHub repository.
   1. Install Miniconda.
   2. Create the DADA2_nifH environment. This step downloads external tools and
      includes them in a new environment for running the pipeline.
-  3. Install the DADA2 R package, and two others.
-  4. Add the pipeline scripts to your path.
+  3. Add the pipeline scripts to your path.
   -- Installation completed! --
-  5. Try the example
-  6. Install packages needed for ancillary tools [optional]
+  4. Try the example
+  5. Install packages needed for ancillary tools [optional]
+  
+  Appendix:  Using R to install the DADA2 and several other R package
+
 
 Below '%' is the unix shell prompt.  Your's might differ.  Although these
 instructions should work for any unix shell, we prefer bash.  You can check your
@@ -67,12 +71,12 @@ suggestions in case you experience problems:
        (a) Ask your system administrator to install newer libraries.  A
            system-wide upgrade impacts everyone, so your sysadmin will assess
            the risk of breaking software that depend on the older libraries.
-	   
+
        (b) You could install an older version of conda that works with your
            system's older libraries, and then do "conda update conda" to get the
            latest Miniconda. This will automatically get the newer libraries as
            local copies.  (No impact to other users.)
-	   
+
      I used "b" to resolve an outdated glibc on an old CentOS 7 workstation.
 
 If you successfully installed miniconda (or mamba) then your shell prompt should
@@ -105,7 +109,8 @@ everything needed to run the DADA2 nifH pipeline.  (The environment name is
 specified in the .yml file so we do not pass "-n DADA2_nifH".)  This step will
 take awhile (~10 min, or much faster if you are using mamba):
 
-  (base) % conda env create --file ~/DADA2_nifH_pipeline/Installation/environment_DADA2_nifH.yml
+  (base) % cd ~/DADA2_nifH_pipeline/Installation
+  (base) % conda env create --file environment_DADA2_nifH.yml
 
 Let's verify the conda DADA2_nifH environment.  First activate it and note that
 the prompt changes:
@@ -114,13 +119,10 @@ the prompt changes:
   (DADA2_nifH) %
 
 Now use the following commands to verify that several required tools are
-available from the DADA2_nifH environment:
+available from the DADA2_nifH environment.
 
   (DADA2_nifH) % which R
   /home/you/miniconda3/envs/DADA2_nifH/bin/R
-  (DADA2_nifH) % R --version
-  R version 4.1.3 (2022-03-10) -- "One Push-Up"
-  ...
   (DADA2_nifH) % which cutadapt
   /home/you/miniconda3/envs/DADA2_nifH/bin/cutadapt
   (DADA2_nifH) % which hmmalign
@@ -128,91 +130,25 @@ available from the DADA2_nifH environment:
   (DADA2_nifH) % which FragGeneScan
   /home/you/miniconda3/envs/DADA2_nifH/bin/FragGeneScan
 
+Please also run this short R script which additionally checks for missing R
+packages:
+  (DADA2_nifH) % check_installation.R
+
+
 Later, you can deactivate the environment with:
 
   (DADA2_nifH) % conda deactivate
 
 After deactivation, the 'which' commands above will either report errors or will
 find default versions of the tools on your system.  (E.g. R will probably be
-found in /usr/bin/R and could be a different version.)
+found in /usr/bin/R.)
 
 ** Whenever you want to use the DADA2 nifH pipeline, you must first "activate"
 the DADA2_nifH environment as described above. **
 
 
 --------------------------------------------------------------------------------
-# 3. Install the DADA2 R package and a few others
---------------------------------------------------------------------------------
-
-This step installs DADA2, vegan (with tons of support for ecological
-statistics), and ggrepel (minor ggplot addition for non-overlapping labels in
-plots).
-
-
-*** DADA2 R package install ***
-
-We will use Bioconductor to install DADA2 as described at:
-    https://bioconductor.org/packages/release/bioc/html/dada2.html
-In the shell with DADA2_nifH active, start R:
-
-  (DADA2_nifH) % R
-
-Then in the R console do the following lines to install Bioconductor and DADA2:
-
-   ## Install Bioconductor if necessary.  It takes just a few seconds.  When
-   ## asked which CRAN mirror to use, "0-Cloud [https]" is good.
-   if (!requireNamespace("BiocManager", quietly = TRUE))
-       install.packages("BiocManager")
-
-   ## Now use Bioconductor to install the latest dada2.  This takes a long time.
-   ## Check in periodically because at some point you will be asked if you want
-   ## to update all/some/none of several mysteriously named packages.  Choose
-   ## all.
-   BiocManager::install("dada2")
-
-The install takes around 30 min on our workstation because DADA2 uses many
-packages that must be downloaded and compiled.  At the end of a successful
-installation, you should see a few messages about tests that worked.  You can
-verify that dada2 was installed by loading it (and then you can exit R).
-
-    library(dada2) # Better work!
-    quit()         # Hit 'n' when it asks if you want to save.
-
-
-Notes:
-  1. The DADA2 will be available only when DADA2_nifH is active.
-     miniconda3 manages the R (and other tools) that were installed to
-     DADA2_nifH. However, R itself must manage packages installed with R.  For
-     example, the dada2 package you just installed will be stored in:
-            ~/miniconda3/envs/DADA2_nifH/lib/R/library/dada2
-     This makes it possible to have different conda environments with different
-     versions of R and R packages.
-
-  2. We installed R v4.1 (specified in the .yml file).  At some point, a new
-     version of DADA2 might require a newer version of R and the .yml file will
-     have to be updated.
-
-  3. There is a way to install DADA2 using conda (rather than Bioconductor),
-     however I could not get it to work as of Aug. 12, 2021.
-
-
-*** Install vegan and ggrepel ***
-
-While DADA2_nifH is the active environment, launch R.  Then do a CRAN install of
-vegan and ggrepel (since neither is in Bioconductor):
-
-    install.packages('vegan')   # You can choose the "0-Cloud" mirror again.
-                                # The install will take ~1 min.
-    install.packages('ggrepel') # This install takes ~10 sec.
-
-    quit()  # Hit 'n' when it asks if you want to save.
-
-You should now have all the required external software for running the DADA2
-nifH pipeline.
-
-
---------------------------------------------------------------------------------
-# 4. Add the pipeline scripts to your path
+# 3. Add the pipeline scripts to your path
 --------------------------------------------------------------------------------
 
 Short version (if you are very comfortable with unix shells):
@@ -289,7 +225,7 @@ That's it!  You should now be able to run the pipeline on a small example.
 
 
 --------------------------------------------------------------------------------
-# 5. Try the mini Arctic 2017 example
+# 4. Try the mini Arctic 2017 example
 --------------------------------------------------------------------------------
 
 Please see the example:
@@ -300,14 +236,91 @@ You can probably begin at step 2.
 
 
 --------------------------------------------------------------------------------
-# 6. Install packages needed for ancillary tools [optional]
+# 5. Install packages needed for ancillary tools [optional]
 --------------------------------------------------------------------------------
 
-The github repository includes additional tools that you might find helfpul when
+The GitHub repository includes additional tools that you might find helfpul when
 preparing to run the pipeline (e.g. for selecting read trimming lengths) or for
-evaluating ASVs.  These are provided in the scripts.ancillary directory.  Some
-of these tools require additional bioinformatics tools which can be installed
+evaluating ASVs.  These tools are provided in the scripts.ancillary directory.
+Some of them require additional bioinformatics tools which can be installed
 using conda.  Instructions for adding the additional tools are described in
 INSTALL_ancillary.txt.
+
+
+--------------------------------------------------------------------------------
+# Appendix:  Using R to install the DADA2 R package and a few others
+--------------------------------------------------------------------------------
+
+We strongly recommend using conda to install dada2 and other required packages.
+
+However, the latest version of DADA2 can also be installed from within R as
+described in Benjamin Callahan's DADA2 installation page:
+    https://benjjneb.github.io/dada2/dada-installation.html
+You might wish to do this if the dada2 version in bioconda is too old.  However,
+installing from R requires the compilation of many R packages needed by dada2
+and will likely take >30 min.  More importantly, errors sometimes occur during
+compilation and can be laborious to solve.  If you decide to install from R, at
+the very least your system must have development tools available.  (If on a
+Linux machine, you probably already have GNU tools.  If using macOS, you might
+have to install Xcode.)
+
+
+*** DADA2 R package install ***
+
+Use Bioconductor to install DADA2 as described at:
+    https://bioconductor.org/packages/release/bioc/html/dada2.html
+In the shell with DADA2_nifH active, start R:
+
+  (DADA2_nifH) % R
+
+Then in the R console do the following to install Bioconductor and DADA2:
+
+   ## Install Bioconductor if necessary.  It takes just a few seconds.  When
+   ## asked which CRAN mirror to use, "0-Cloud [https]" is good.
+   if (!requireNamespace("BiocManager", quietly = TRUE))
+       install.packages("BiocManager")
+
+   ## Now use Bioconductor to install the latest dada2.  This takes a long time.
+   ## Check in periodically because at some point you will be asked if you want
+   ## to update all/some/none of several mysteriously named packages.  Choose
+   ## all.
+   BiocManager::install("dada2")
+
+The install takes around 30 min on our workstation because DADA2 uses many
+packages that must be downloaded and compiled.  At the end of a successful
+installation, you should see a few messages about tests that worked.  You can
+verify that dada2 was installed by loading it (and then you can exit R).
+
+    library(dada2) # Better work!
+    quit()         # Hit 'n' when it asks if you want to save.
+
+
+Notes:
+  1. The dada2 R package will only be available when DADA2_nifH is active.
+     miniconda3 manages (and other tools) that were installed to DADA2_nifH.
+     However, R itself must manage packages that were installed using R.  For
+     example, the dada2 R package you will be stored in a directory with all
+     other R packages:
+            ~/miniconda3/envs/DADA2_nifH/lib/R/library/dada2
+     This makes it possible to have different conda environments with different
+     versions of R and R packages.
+
+  2. The dada2 web page (link above) will mention the specific version of R
+     that is required.  It might differ than v4.1.3 mentioned in
+     environment_DADA2_nifH.yml.
+
+
+*** Install vegan and digest ***
+
+While DADA2_nifH is the active environment, launch R.  Then do a CRAN install of
+vegan and digest (assuming you did not install them using conda):
+
+    install.packages('vegan')   # You can choose the "0-Cloud" mirror again.
+    install.packages('digest')
+
+    quit()  # Hit 'n' when it asks if you want to save.
+
+You should now have all the required external software for running the DADA2
+nifH pipeline.
 
 -- END --

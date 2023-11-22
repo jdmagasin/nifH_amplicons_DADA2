@@ -1,5 +1,7 @@
 #!/bin/bash
 
+## Copyright (C) 2023 Jonathan D. Magasin
+
 ## Hmmer3 search for NifH-like proteins in the amino acid fasta on stdin.
 ## Output only tabular results for NifH domains in hmmsearch.Fer_NifH.domtab.
 ## (Domain table because it has alignment bounds so I can get alignment

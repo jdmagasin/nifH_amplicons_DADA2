@@ -1,5 +1,7 @@
 #!/usr/local/bin/Rscript
 
+## Copyright (C) 2023 Jonathan D. Magasin
+
 suppressMessages(library(ShortRead))
 args <- commandArgs(trailingOnly=T)
 idsFile   <- args[1]

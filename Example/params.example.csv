@@ -1,3 +1,5 @@
+## Copyright (C) 2023 Jonathan D. Magasin
+##
 ## Parameters file for the DADA2 pipeline. Most parameters control DADA2's
 ## filterAndTrim(). You can adjust the parameters to try to balance:
 ##
@@ -25,7 +27,7 @@
 ## deleted or commented out the next two lines, these values would still be
 ## used.)
 NifH_minLen,  33
-NifH_minBits,100
+NifH_minBits,150
 
 
 ## Primers used by cutadapt
@@ -40,7 +42,7 @@ reverse,ADNGCCATCATYTCNCC
 ## Tell cutadapt not to throw out read pairs that are missing primers. This is
 ## useful for data sets lacking primers e.g. if uploaded to the SRA.  We still
 ## run cutadapt (1) to remove any ovelooked primers (2) because it is simpler to
-## have outputs and directory strucutre from all stages of the pipeline.
+## have outputs and directory structure from all stages of the pipeline.
 allowMissingPrimers,TRUE
 
 
@@ -61,12 +63,13 @@ allowMissingPrimers,TRUE
 ## truncQ (e.g. 9) encourages reads to overlap which causes DADA2 to find many
 ## of the same ASVs as approach "B."
 ##
+## Note that the values below are not the defaults defined by dada2::filterAndTrim()
 truncQ,16
 ##truncLen.fwd,XXX  <-- replace based on your R1 qualities
 ##truncLen.rev,YYY  <-- replace based on your R2 qualities
 maxEE.fwd,2
 maxEE.rev,4
-minLen,20
+
 
 ## Several other filter/trim  options that are sometimes useful:
 
@@ -88,7 +91,6 @@ minLen,20
 ## By default dada2::mergePairs() uses minOverlap = 12 and maxMismatch = 0.  I
 ## prefer to use 1 and let mergePairs() resolve the mismatch using the higher
 ## quality sequence (forward or reverse).
-minOverlap,12
 maxMismatch,1
 
 ## You can tell DADA2 not to merge the left and right sequences when generating

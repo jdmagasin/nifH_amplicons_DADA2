@@ -1,5 +1,7 @@
 #!/usr/bin/env Rscript
 
+## Copyright (C) 2023 Jonathan D. Magasin
+
 ## Usage:
 ##   classifyNifH.R  positveExampleBlastx.tab  negativeExampleBlastx.tab
 ##

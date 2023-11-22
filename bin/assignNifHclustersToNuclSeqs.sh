@@ -1,0 +1,1 @@
+../scripts.ancillary/Annotation/NifHClustersFrank2016/assignNifHclustersToNuclSeqs.sh

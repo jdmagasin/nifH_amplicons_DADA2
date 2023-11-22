@@ -1,13 +1,15 @@
 #!/bin/env Rscript
 
+## Copyright (C) 2023 Jonathan D. Magasin
+
 ##
-## Make a directory structure that organizes FASTQs in a useful way, specified
-## in the input .tsv file.
+## Overview.  See the command line docs (or usageStr).
 ##
-## Additional info (mainly covered in usageStr):
-##
-## It is useful to organize sequencing runs input to the DADA2 pipeline (for
-## example) by sample type (DNA vs. RNA, size fraction, etc):
+## Make a directory structure (in LinksToFASTQs) that organizes FASTQs into
+## groups for processing by the pipeline.  The structure is specified in a .tsv
+## file.  For example, one might want to organize sequencing runs by whether
+## they are DNA vs. RNA, collection station, size fraction, etc.  Reasons for
+## organizing this way include:
 ##
 ##   1. Makes it easier to browse the data from the command line, including
 ##      short shell scripts that recover data by type. 
@@ -19,11 +21,15 @@
 ##      More importantly, DNA and RNA samples have very different relative
 ##      abundances (e.g. rare members can be transcriptionally very active) and
 ##      perhaps different sequencing error characteristics, so it seems safer
-##      for DADA2 to process them separately.
+##      for DADA2 to process them separately. (Granted, the pipeline runs dada()
+##      with pool=F so ASV inference happens separately for each sample. However,
+##      DADA2 does not create an error model for each sample and isBimeraDenovo()
+##      takes all samples at once.)
 ##
-## - Each line is a path to a FASTQ file.  The paths can be full or relative, as
-##   long as they are reachable from the working directory in which you run the
-##   pipeline.  If "ls some/path/to/my/R1.FASTQ" works, you're fine.
+## Overview of input tsv file:
+## - Column 1 of each line has a path to a FASTQ file.  The paths can be full or
+##   relative, as long as they are reachable from the working directory in which
+##   you run the pipeline.  If "ls some/path/to/my/R1.FASTQ" works, you're fine.
 ##
 ## - Columns >=2 describe the folder hierarchy that the pipeline will create
 ##   to hold each FASTQ.  For example column 2 could hold "DNA" or "RNA" as
@@ -39,28 +45,39 @@ usageStr <- "
 
 organizeFastqs.R
 
-Make a directory structure that meaningfully organizes FASTQs as specfied in the
-input table (.tsv).  Usually sequencing centers provide a flat directory
-hierarchy e.g. with one directory that contains subdirectories for each pair of
-FASTQs (R1 and R2).  Use this script to organize the FASTQs meaningfully. For
-example, you can partition them into groups with specific sequence type (DNA
-vs. mRNA) and/or size fraction (example below).  This is a good choice when
-using this script before running the DADA2 pipeline.
+Often the samples from a study represent different locations, seasons, depths,
+size fractions, and/or nucleic acid type (DNA or RNA), and consequently
+different microbial communities and sequencing error profiles.  We suggest
+partitioning samples along these differences and processing them separately by
+DADA2.
+
+Our DADA2 nifH pipeline supports the separate handling of different sample types
+through \"processing groups\", each with its own error model and ASV inference by
+dada().  Before running the pipeline, one runs organizeFastqs.R to create a
+directory structure (LinksToFastqs) that describes the processing groups. Each
+processing group corresponds to a path through the LinksToFastqs hierarchy. For
+example, one path might be LinksToFastqs/DNA/Station23/SizeFract0.2.  (See
+example below.)
 
 Usage:
     organizeFastqs.R   fastqMap.tsv
 
-Each line of the fastqMap.tsv maps one FASTQ file (in column 1) to a location in
-a directory structure (hierarchy in columns 2 to N).  This script creates the
-directory structure, and the leaf folders contain symbolic links to the original
-FASTQs.
+Each line of fastqMap.tsv describes one FASTQ file.  Column 1 has the path (full
+or relative) to the source FASTQ file, with separate lines for the forward and
+the reverse FASTQs.  Columns 2 to N describe intended path to the FASTQ within
+LinksToFastqs, with column N the name of a directory that holds symbolic links
+to the source FASTQs to save disk space.
+
+The input tsv file can be named whatever you like. Within the tsv you can
+comment out (with '#' at the line start) or remove samples, e.g. bad sequencing
+runs, then rerun the script.
 
 Example: Suppose the sequencing center provided our paired FASTQs in
 sudirectories for each MiSeq run such as MyMiSeqRun100_65647-43208182,
-MyMiSeqRun100_65647-43208888, etc. Suppose we have DNA and RNA samples
-and multiple size fractions and want to reorganize first by sample type
-(DNA, mRNA) and then by size fraction.  The following fastqMap.tsv (tabs
-separate columns) will do that.
+MyMiSeqRun100_65647-43208888, etc. Suppose we have DNA and RNA samples and
+multiple size fractions and want to reorganize first by sample type (DNA, mRNA)
+and then by size fraction.  The following input file will do that. (Note that
+*tabs* separate the columns.)
 
      some/path/to/MyMiSeqRun100_65647-43208182/MyMiSeqRun100-65647-S100_L001_R1_001.fastq.gz  DNA  Frac02  MyMiSeqRun100-65647
      some/path/to/MyMiSeqRun100_65647-43208182/MyMiSeqRun100-65647-S100_L001_R2_001.fastq.gz  DNA  Frac02  MyMiSeqRun100-65647
@@ -83,8 +100,8 @@ separate columns) will do that.
                   +--[link to MyMiSeqRun100-65647-S101_L001_R2_001.fastq.gz]
 
   This example also simplifies the names of the folders that contain the paired
-  FASTQs since we do not care about the \"43208182\" attached by the sequencing
-  center.
+  FASTQs (in the last column) since we do not care about the \"43208182\"
+  attached by the sequencing center.
 
 
 ** FASTQ naming conventions **
@@ -93,23 +110,27 @@ The DADA2 nifH pipeline must be able to extract sample names and sequencing read
 direction ('R1' or 'R2') from the FASTQ file names.  FASTQ names should follow
 this format:
 
-    {Samp}{_stuff1_}R{1,2}{stuff2}{.fastq.gz}
+    {Samp}{_stuff1}_R{1,2}{stuff2}{.fastq.gz}
 
 where:
-   - Samp can have any character other than '_'.  Do not use '_' to delimit
-     parts of your sample names because those parts will not appear e.g. in the
-     sample names in the ASV abundance table.
+   - Samp is required.  It can have any character other than '_'.  Do not use
+     '_' to delimit parts of your sample names because those parts will not
+     appear e.g. in the sample names in the ASV abundance table.
 
-   - stuff1, if present, can have any character but must be flanked by '_'
-     Usually stuff1 will be the sequencing lane e.g. L001 in the examples above.
+   - stuff1, if present, can have any character (including '_') but must be
+     flanked by '_'. Usually stuff1 will be the sequencing lane e.g. L001 in the
+     examples above.
 
    - stuff2 can be anything, or absent. Most likely it will begin with '_' as in
-     the examples.
+     the example.
 
-   - The .fastq.gz could be absent, but that would be bad style.
+   - The '.fastq.gz' can be absent, but that is bad style.
 
-Sometimes you must write a small script to change your FASTQ names to follow
-the format, usually to convert '_' in the sample name.
+Sometimes you must write a small script to change your FASTQ names to follow the
+format, usually to convert '_' that appear in the sample name to some other
+character.  FASTQs from the Sequencing Read Archive use the format <run
+name>_1.fastq.gz.  For convenience organizeFastqs.R automatically changes _1 and
+_2 to _R1 and _R2 for the symbolic links.
 
 "
 
@@ -125,26 +146,57 @@ if (!file.exists(fastqMapTsv)) {
 
 topDir <- 'LinksToFastqs'
 if (dir.exists(topDir)) {
-    stop("ERROR: ",topDir," exists. Rename or remove it.\n")
+    ## Offer to delete topDir so we don't have to suggest that they 'rm -rf' it.
+    cat(topDir, "exists.  You must rename or delete it to proceed.\n")
+    cat("Delete",topDir,"('y' or 'n')?: ")
+    if ('y' == readLines('stdin', 1)) {
+        if (0 == unlink(topDir, recursive=TRUE, force=FALSE)) {
+            cat(paste0("Deleted.  Will create a new ", topDir,".\n"))
+        } else {
+            stop("ERROR: Failed to delete", topDir,"\n")
+        }
+    } else {
+        stop("Aborting.  You must rename or delete", topDir, "\n")
+    }
 }
 
-###fastqMapTsv <- 'fastqMap.tsv' # developing
 fastqMap <- read.table(fastqMapTsv, header=F, comment.char='#')
 stopifnot(ncol(fastqMap) >=2)  # col 1 has source and the remainder have directory parts
 
+## Check for pipeline-friendly FASTQ names.
+ValidFastqNames <- function(namVec)
+{
+    badNams <- which(!sapply(basename(namVec), grepl,
+                             pattern='^[^_]+(|.*[^_])_R[12].*$'))
+    if (length(badNams) > 0) {
+        cat("The following FASTQ names do not follow the format required by the",
+            "DADA2 nifH pipeline.  See organizeFastqs.R docs for description.\n",
+            namVec[badNams], "\n")
+        stop("Abborting due to bad FASTQ names.\n")
+    }
+}
+
+## SRA names are not pipeline-friendly but can be easily fixed
+Check_SRA_fastq_names <- function(namVec) { any(grepl("_[12]\\.fastq\\.gz$", namVec)) }
+Fixup_SRA_fastq_names <- function(namVec) { sub('_([12])\\.fastq\\.gz$', '_R\\1.fastq.gz', namVec) }
+
+## Abort if the FASTQ names are invalid -- but tolerate SRA names
+## since we will convert them to valid when we make the symlinks.
+ValidFastqNames(Fixup_SRA_fastq_names(fastqMap[,1]))
+
 
 ## Basic checks of the tsv, for paired FASTQs only.
-if (grepl('_R[1,2]_',fastqMap[1,1])) {
+if (grepl('_R[1,2]',fastqMap[1,1])) {
     ## Data seems to have paired FASTQs so make sure that they all come in pairs.
-    x <- table(sub('_R[1,2]_','',fastqMap[,1]))
+    x <- table(sub('_R[1,2]','',fastqMap[,1]))
     if (any(x!=2)) {
         cat("The following data sets seem to not have exactly one R1 and R2 file.\n")
-	print( names(x)[x!=2] )
+        print( names(x)[x!=2] )
     }
 
     ## Make sure that for each pair of FASTQs the holding directory (final
     ## column) is the same.
-    x <- paste(sub('_R[1,2]_','',fastqMap[,1]), ':', fastqMap[,ncol(fastqMap)])
+    x <- paste(sub('_R[1,2]','',fastqMap[,1]), ':', fastqMap[,ncol(fastqMap)])
     x <- table(x)
     if (any(x!=2)) {
         cat("The following FASTQs seem not to be with their paired FASTQ in ",
@@ -170,13 +222,20 @@ for (p in unique(paths)) {
 ## paths still is 1:1 with the fastqs which is what we need for setting up the
 ## symlinks.
 fpaths <- file.path(paths, basename(fastqMap[,1]))  # full symlink paths (dest)
-idx <- which(!file.exists(fpaths))
-cat("Will make",length(idx),"symbolic links to FASTQs.\n")
-if (length(idx) > 0) {
-    ## This converts relative paths to absolute or aborts. Safer so that the
-    ## DADA2 pipeline can switch the current working directory and still find
-    ## the FASTQs.
-    srcFqPaths <- normalizePath(fastqMap[idx,1], mustWork=TRUE)
-    ok <- sum(file.symlink(srcFqPaths, fpaths[idx]))
-    cat("Successfully created",ok,"symlinks.\n")
+cat("Will make",length(fpaths),"symbolic links to FASTQs.\n")
+
+## This converts relative paths to absolute or aborts. Safer so that the
+## DADA2 pipeline can switch the current working directory and still find
+## the FASTQs.
+srcFqPaths <- normalizePath(fastqMap[,1], mustWork=TRUE)
+pipeFriendlyFastqNames <- fpaths
+if (Check_SRA_fastq_names(pipeFriendlyFastqNames)) {
+    cat("Note:  Symbolic links will use \"_R1.fastq.gz\" rather than \"_1.fastq.gz\"\n",
+        "      which appears in the source FASTQs, and similiar for the reverse reads.\n",
+        "      Perhaps you are using data from the Sequencing Read Archive.  If so\n",
+        "      then should verify that your read IDs used Illumina (CASAVA) format.  If\n",
+        "      not, then you should set \"id.field\" in your pipeline parameters file.\n")
+    pipeFriendlyFastqNames <- Fixup_SRA_fastq_names(pipeFriendlyFastqNames)
 }
+ok <- sum(file.symlink(srcFqPaths, pipeFriendlyFastqNames))
+cat("Successfully created",ok,"symlinks.\n")

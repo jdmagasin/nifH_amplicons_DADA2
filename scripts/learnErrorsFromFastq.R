@@ -1,5 +1,7 @@
 #!//usr/local/bin/rscript
 
+## Copyright (C) 2023 Jonathan D. Magasin
+
 ## Recurisvely search a directory for FASTQ files. Use all of them
 ## to create an error model using DADA2's learnErrors().  The intent
 ## is to use this script on FASTQ's that have been filtered to have

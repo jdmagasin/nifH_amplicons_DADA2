@@ -2,14 +2,17 @@
 ####################### Example of the DADA2 nifH pipeline #####################
 ################################################################################
 
-The steps below run the DADA2 pipeline on a small data set comprised of eight
-samples from Arctic 2017, four from the 0.2-3um size fraction and four from
->3um.  Each size fraction is processed completely independently.
+Copyright (C) 2023 Jonathan D. Magasin
+
+The steps below run the DADA2 nifH pipeline on a small data set comprised of
+ten Arctic samples from Harding et al. 2018, five from the 0.2-3um size fraction
+and five from >3um.  Each size fraction is processed completely independently.
 
 Execute each of the steps 1-4 from the command line in your unix shell, which
-can be whatever you like (bash, tcsh, etc.). The DADA2 pipeline (step 4) takes
-18 minutes to run on our workstation.  Full data sets with a few hundred samples
-take a few hours.
+can be whatever you like (bash, tcsh, etc.). The DADA2 pipeline (step 4) takes 5
+minutes to run on our workstation -- for this abridged data set with just the
+first 10K read pairs and only ten samples.  Full data sets with a few hundred
+samples might take several hours.
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -34,29 +37,28 @@ take a few hours.
 3. Gather the FASTQs into a directory hierarchy rooted at LinksToFastqs.  The
    hierarchy is organized according to the processing groups defined in
    fastqMap.tsv.  You only need to do this step once (not each time you run the
-   pipeline).  See notes in fastqMap.tsv and help via "organizeFastqs.R --help"
-   Also note the required FASTQ name format described in the help for
-   organizeFastqs.R.
+   pipeline).  See documentation at the top of fastqMap.tsv.  Also see help
+   provided by running "organizeFastqs.R --help"
+   FASTQ filename requirements are described in the help for organizeFastqs.R.
 
       organizeFastqs.R fastqMap.tsv
 
 
-4. Run the DADA2 pipeline.  See notes in params.example.csv.  You can
-   run the pipeline multiple times to try different parameters for
-   DADA2 (but reusing outputs from previous pipeline stages). See
-   documentation with "run_DADA2_pipeline.sh --help".
+4. Run the DADA2 pipeline.  See notes in params.example.csv.  You can run the
+   pipeline multiple times to try different parameters for DADA2.  When results
+   from early stages are detected (cutadapt and error model creation), they are
+   reused.  See documentation with "run_DADA2_pipeline.sh --help".
 
       run_DADA2_pipeline.sh params.example.csv > log.txt
 
-   The pipeline is now running.  It will take ~18 minutes to complete this
-   small example.
+   The pipeline is now running.  It will take ~18 minutes to complete.
 
    Suggestion: Rather than wait 18 minutes before you can interact with the
-   shell, enter control-z to get back control.  Control-z will temporarily
-   suspend the current job, which is the pipeline.  After control-Z, do the
-   following steps to: see the pipeline job [jobs]; restart it as a background
-   process [bg]; verify that the pipeline is running in the background [jobs];
-   and then look at the last 20 lines of the log [tail].
+   shell, enter control-z.  This will temporarily suspend the current job (which
+   is the pipeline).  After control-z, do the following steps to: see the
+   pipeline job [jobs]; restart the pipeline as a background process [bg];
+   verify that the pipeline is running in the background [jobs]; and then look
+   at the last 20 lines of the log [tail].
 
        jobs
        bg
@@ -66,13 +68,13 @@ take a few hours.
    You can do the tail command whenever you like to see how the pipeline is
    progressing, or jobs to see if it is still running.
 
-   In particular, you do *not* have to remain logged in to thalassa until the
-   job completes.  For long jobs, I usually log out of thalassa and ssh back in
-   every few hours to see how the job is going (using the 'ps' command [not 'jobs'] and
-   'tail' to see if there is a "Done!" message (or error) at the end of the log.
+   In particular, you do *not* have to remain logged in to your machine until
+   the job completes.  For long jobs, I usually log out of our workstation and
+   ssh back in every few hours to see how the job is going (using the 'ps'
+   command [not 'jobs'] and 'tail' to see if there is a "Done!" message (or
+   error) at the end of the log.
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 
 Key outputs:
 
@@ -80,23 +82,24 @@ Key outputs:
    points to outputs of interest.
 
 2. A summary of reads that passed cutadapt primer trimming is in:
-     ~/ToolsShared/NifH_amplicons/DADA2/Example/Data.nobackup/Data.trimmed/summary.cutadapt.txt
+      Data.nobackup/Data.trimmed/summary.cutadapt.txt
 
 3. To get an idea of how many NifH-like sequences are in your data, see:
-     ~/ToolsShared/NifH_amplicons/DADA2/Example/Data.nobackup/Data.NifH_prefilter/summary.NifH_prefilter.txt
+      Data.nobackup/Data.NifH_prefilter/summary.NifH_prefilter.txt
    These are the reads that were used to create the error models used by DADA2.
-   You might also spot some samples that look problematic (very few nifH-like
-   reads) that could be dropped.
+   You might also spot some samples that look problematic (e.g. with very few
+   nifH-like reads), which you might decide to drop.
 
-4. Inspect the error model plots (.pdfs) Data.nobackup/ErrorModels (separate for
-   each size fraction).  You will need some guidance from the DADA2 pages to
-   interpret these, or I can help.  If they look terrible, then we should try to
+4. Inspect the error model plots (.pdfs) in Data.nobackup/ErrorModels (separate
+   for each size fraction).  You will need some guidance from the DADA2 web
+   pages to interpret these.  If they look terrible, then you should try to
    improve them before working the the ASVs. (Bad error models are likely to
    cause rarer ASVs to not be inferred.)
 
 5. DADA2 output.  For each size fraction and for the date you ran the pipeline,
-   there is separate output.  E.g. Data.nobackup/Dada2PipeOutput/Filt_3/Out.2021Aug6/
-   within which you should check out (fixme: breifly):
+   there is separate output.  For example:
+      Data.nobackup/Dada2PipeOutput/Filt_3/Out.2023Jul18/
+   within which you should have a look at:
 
      - The DADA2 log file has messages specific to DADA2 (stage 4 -- not the
        top level log file).
@@ -110,7 +113,7 @@ Key outputs:
      - readCountsDuringProcessing.....png: This plot shows the percentage of
        reads retained at each stage of the pipeline.  Use it to spot excessive
        loss of reads ---> parameter adjustments.  E.g. are reads dropped due to
-       quality, or failure to overlap?
+       poor quality?  Or failure to overlap at the merge step?
 
 
 -- END --

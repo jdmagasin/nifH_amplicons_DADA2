@@ -12,17 +12,17 @@
 
 usageStr <- "
 Usage:
-    assignAUIDs2ASVs.R  listOfAsvFastas.txt  [options]
+    assignAUIDs2ASVs.R  listOfAsvFastas.txt  [referenceAuidFasta] [options]
 
 Pass a table (.tsv) of full paths to FASTA files such as ASVs from DADA2 (column
 1) and descriptive tags for each set (column 2). The tag can be anything but
 short is best and you can structure it, e.g. sample Arctic2017:DNA:Filt0.2.
 
 The script will assign AUIDs (ASV unique id's) to all sequences and output a
-table (asv2auid.tsv) that includes the AUIDs, sequence md5's, the sequences
-themselves, the tags, and in which 'tags' the sequence was detected so that you
-can identify sequences found across locations, size fractions, etc. (depending
-on the information in your tags).
+table (asv2auid.tsv) that includes: the AUIDs; sequence md5's; the sequences
+themselves; the tags; the 'tags' in which each sequence was detected. The last
+column allows you to identify sequences that were found across locations, size
+fractions, etc. (assuming your tags indicate that information).
 
 Important difference between AUIDs and md5s:
    AUIDs: Short and legible.  Uniquely assigned to each sequence **within a set
@@ -32,6 +32,12 @@ Important difference between AUIDs and md5s:
    md5s: Long and illegible.  Unique* to each sequence. The md5s can be compared
          across invocations of this script. (*It is _extremely_ unlikely that two
          distinct sequences would have the same md5 checksum.)
+
+To recycle AUIDs that were assigned in a previous run of this script, you may
+pass a referenceAuidFasta.  Any ASVs in the new FASTAs that eactly match a
+reference AUID will get the reference's AUID number.  Any new ASVs will receive
+AUID numbers that start at one after the maximum AUID number in
+referenceAuidFasta.
 
 Options:
   -fasta: Write out a fasta file of the AUIDs with definition lines that
@@ -65,6 +71,11 @@ if (file.exists(outFile) || file.exists(outFasta)) {
     stop(outFile,"and/or",outFile,"already exist.")
 }
 
+refFasta <- args[2]
+## If arg 2 is an option, then file.exists() will fail. If it's not a valid
+## FASTA, then readFasta() will fail later.
+if (grepl('^-.+',refFasta) || !file.exists(refFasta)) { refFasta <- NULL }
+
 cat("Loading ASV fastas...\n")
 asvFastaPaths <- read.table(asvFastaPathsFile, sep="\t", header=F)
 stopifnot(ncol(asvFastaPaths) == 2)
@@ -80,7 +91,7 @@ asv2auid <- data.frame()
 for (i in 1:nrow(asvFastaPaths)) {
     seq <- readFasta(asvFastaPaths$Path[i])
     if (length(seq) == 0) { stop(asvFastaPaths$Path[i]," has no sequences.") }
-    ## The MD5's are the values. Names are the ASV sequences.
+    ## The MD5's are the values. Names are the ASV nucleotide sequences.
     md5s <- sapply(as.character(sread(seq)), digest, algo='md5')
     aids <- as.character(id(seq))  # same order as md5s
     ## If the fastas are from the DADA2 pipeline, then Source encodes the
@@ -96,9 +107,49 @@ for (i in 1:nrow(asvFastaPaths)) {
 }
 rm(i,seq,md5s,aids,df)
 
-## Now figure out which ASVs have identical UIDs and thus identical sequences
-## (assuming no md5 collisions).  "AUID" meaning ASV unique ID.
-asv2auid$AUID <- paste0('AUID.',match(asv2auid$md5, unique(asv2auid$md5)))
+## Assume the first AUID will be AUID.1, unless a reference FASTA is passed.
+## See comment just below.
+firstNewAuidNum <- 1
+
+## Now assign AUIDs. First use the reference FASTA if there is one.
+if (!is.null(refFasta)) {
+    refs <- readFasta(refFasta)
+    rids <- sub(' +.*$', '', as.character(id(refs)))  # Drop text after "AUID.num"
+    if (!all(grepl('^AUID\\.[0-9]+$',rids))) {
+        stop("Not all sequences in",refFasta,"have identifiers of the form AUID.[number]")
+    }
+    firstNewAuidNum <- max(as.integer(sub('AUID\\.','',rids))) + 1
+    stopifnot(firstNewAuidNum >= 2)
+    cat(paste0("Using reference AUIDs so the first possible new AUID will be AUID.",
+               firstNewAuidNum, ", which is one more than the maximum in the references.\n"))
+    ## Add column AUID to asv2auid.  Set it to the reference AUID, or NA if no ref found.
+    asv2auid <- merge(asv2auid,
+                      data.frame(AUID = rids,
+                                 md5 = sapply(as.character(sread(refs)), digest, algo='md5')),
+                      all.x=T)
+    cat("There were", length(table(asv2auid$AUID, useNA='no')),
+        "AUIDs that were already known from",refFasta,"\n")
+    rm(refs,rids)
+} else {
+    asv2auid$AUID <- NA
+}
+
+## At this point each item in asv2auid$AUID is either a reference AUID, or NA
+## for new ASVs.
+idx <- which(is.na(asv2auid$AUID))
+if (length(idx) > 0) {
+    ## We have new ASVs.  Those with identical MD5's should get the same AUID.
+    ## I assume no MD5 collisions.
+    newMd5s <- asv2auid[idx,'md5']
+    midx <- match(newMd5s, unique(newMd5s))
+    stopifnot(!is.na(midx))
+    stopifnot(min(midx) == 1)  # Ensures that if no refFasta then lowest AUID # is 1.
+                               # If a refFasta, then the next line offsets the lowest #.
+    asv2auid[idx,'AUID'] <- paste0('AUID.', as.integer(midx + firstNewAuidNum -1))
+    ## Sanity check: No new ASV's MD5 can be among the ref AUIDs (or merge() failed).
+    stopifnot(!any(unique(newMd5s) %in% unique(asv2auid[-idx,'md5'])))
+    rm(newMd5s,midx)
+}
 
 ## Prefered column order
 asv2auid <- asv2auid[,c('Source','ASVid','AUID','md5','Tag','Length','Seq')]
@@ -118,8 +169,9 @@ if (length(idx) > 0) {
     rm(ss)
 }
 
-## Write out asv2auid
+## Write out asv2auid.
 cat("Writing",outFile,"...\n")
+rownames(asv2auid) <- NULL
 write.table(asv2auid, file=outFile, sep="\t", quote=F)
 
 
@@ -138,6 +190,11 @@ if (length(grep('-fasta', args)) != 0) {
     for (i in idx) {
         stopifnot( asv2auid[match(descTab[i,'AUID'],asv2auid$AUID),'Seq'] == descTab[i,'Seq'] )
     }
+    ## Now reorder AUIDs by ID # (increasing) and write out the FASTA.
+    oidx <- as.integer(sub('^AUID\\.','',as.character(descTab$AUID)))
+    stopifnot(!is.na(oidx))
+    oidx <- order(oidx, decreasing = F)
+    descTab <- descTab[oidx,]
     cat("Writing FASTA",outFasta,"...\n")
     writeLines(paste0('>',descTab$AUID,' ',descTab$Desc,'\n',descTab$Seq,'\n'), outFasta)
 }

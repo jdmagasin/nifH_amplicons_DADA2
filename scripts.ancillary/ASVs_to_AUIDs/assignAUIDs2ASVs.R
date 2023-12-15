@@ -71,10 +71,12 @@ if (file.exists(outFile) || file.exists(outFasta)) {
     stop(outFile,"and/or",outFile,"already exist.")
 }
 
-refFasta <- args[2]
-## If arg 2 is an option, then file.exists() will fail. If it's not a valid
-## FASTA, then readFasta() will fail later.
-if (grepl('^-.+',refFasta) || !file.exists(refFasta)) { refFasta <- NULL }
+refFasta <- NULL
+if (length(args[2]) > 0 && !grepl('^-.+',args[2])) {
+    ## Arg 2 is present and not -fasta or -length.
+    refFasta <- args[2]
+    if (!file.exists(refFasta)) { stop("Missing reference FASTA ",refFasta) }
+} 
 
 cat("Loading ASV fastas...\n")
 asvFastaPaths <- read.table(asvFastaPathsFile, sep="\t", header=F)

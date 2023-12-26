@@ -721,13 +721,14 @@ colnames(df) <- rownames(sequenceTab)                 # Use original (R-unfriend
 write.table(df, file=asvsAbundTxt, sep="\t", quote=F)
 write(paste0('>',as.character(asvSeq2Id),"\n",names(asvSeq2Id)), file=asvsFastaTxt)
 
+## NMDS, if sufficient data
+df <- df[,which(apply(df, 2, function(v) !all(v==0)))]   # remove empty samples
+df <- df[which(apply(df,  1, function(v) !all(v==0))),]  # remove empty ASVs
 if (nrow(df) < 5 || ncol(df) <= 2) {
     cat("Not doing NMDS. Too few ASVs and/or samples.\n")
 } else {
     ## NMDS of samples by their ASV profiles.
     cat("Doing NMDS of the samples, each represented by its ASV abundances.\n")
-    df <- df[,which(apply(df, 2, function(v) !all(v==0)))]   # remove empty samples
-    df <- df[which(apply(df,  1, function(v) !all(v==0))),]  # remove empty ASVs
     ## Normalize sequencing depths. At least need to if we use Bray-Curtis dissimilarities
     ## because B-C is affected by sampling sizes.
     df <- decostand(t(df), method='total')

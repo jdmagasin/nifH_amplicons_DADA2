@@ -1,0 +1,23 @@
+## Copyright (C) 2023 Jonathan D. Magasin
+##
+## This file describes the minimal conda environment DADA2_nifH for running the DADA2 nifH pipeline.
+## If you also wish to use ancillary scripts included with the pipeline, then you should instead use
+## environment_DADA2_nifH_with_ancillary.yml.  Please see INSTALL.txt.
+##
+## The pipeline and ancillary tools were developed mainly using DADA2 version 1.20.0 (and R v4.1.3).
+## However, any DADA2 version >=1.20 should be fine, including the latest (as of July 15, 2023),
+## v1.28.0 (which requires R >=4.3).
+##
+name: DADA2_nifH
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - r-base             >=4.1.3
+  - bioconductor-dada2 >=1.20.0
+  - r-vegan            >=2.5.7
+  - cutadapt           >=3.4
+  - fraggenescan       >=1.31
+  - hmmer              >=3.3.2
+  - r-digest           >=0.6.27     # Needed by assignAUIDs2ASVs.R

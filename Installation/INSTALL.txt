@@ -20,7 +20,6 @@ Overview:
   3. Add the pipeline scripts to your path.
   -- Installation completed! --
   4. Try the example
-  5. Install packages needed for ancillary tools [optional]
   
   Appendix:  Using R to install the DADA2 and several other R package
 
@@ -104,13 +103,18 @@ command to verify that conda-forge will be the first channel searched:
 # 2. Create the DADA2_nifH environment
 --------------------------------------------------------------------------------
 
-Create a conda environment called "DADA2_nifH" that includes nearly everything
-everything needed to run the DADA2 nifH pipeline.  (The environment name is
-specified in the .yml file so we do not pass "-n DADA2_nifH".)  This step will
-take awhile (~10 min, or much faster if you are using mamba):
+Create a conda environment called "DADA2_nifH" that includes everything needed
+to run the DADA2 nifH pipeline as well as the ancillary scripts for pre- and
+post-pipeline quality filtering and annotation.
 
   (base) % cd ~/DADA2_nifH_pipeline/Installation
-  (base) % conda env create --file environment_DADA2_nifH.yml
+  (base) % conda env create --file environment_DADA2_nifH_with_ancillary.yml
+
+If you do not want to use the ancillary scripts, then you can substitute
+environment_DADA2_nifH_minimal.yml to create a DADA2_nifH environment that
+excludes packages required by the ancillary scripts.  This will save some disk
+space but is not recommended.  The ancillary scripts are essential for running
+the nifH amplicon workflow described in Morando, Magasin et al. 2024.
 
 Let's verify the conda DADA2_nifH environment.  First activate it and note that
 the prompt changes:
@@ -233,18 +237,6 @@ Please see the example:
   % cd ~/DADA2_nifH_pipeline/Example
 
 You can probably begin at step 2.
-
-
---------------------------------------------------------------------------------
-# 5. Install packages needed for ancillary tools [optional]
---------------------------------------------------------------------------------
-
-The GitHub repository includes additional tools that you might find helfpul when
-preparing to run the pipeline (e.g. for selecting read trimming lengths) or for
-evaluating ASVs.  These tools are provided in the scripts.ancillary directory.
-Some of them require additional bioinformatics tools which can be installed
-using conda.  Instructions for adding the additional tools are described in
-INSTALL_ancillary.txt.
 
 
 --------------------------------------------------------------------------------

@@ -6,9 +6,17 @@
 ## using DADA2 version 1.20.0 (and R v4.1.3).  However, any DADA2 version >=1.20 should be fine,
 ## including the latest (as of July 15, 2023), v1.28.0 (which requires R >=4.3).
 ##
-## Maintainer note: The nifH ASV workflow has its own conda environment which should be stacked
-## on DADA2_nifH. We cannot install R packages in the workflow environment because then the
-## workflow R installation will override the pipeline installation.
+## Maintainer note:
+## The nifH ASV workflow has its own conda environment (nifH_ASV_workflow) with some additional
+## packages.  To run the workflow one must stack nifH_ASV_workflow on DADA2_nifH so that conda
+## packages from the pipeline as well as the workflow will be available.  This is described in
+## workflow installation docs.  Stacking works for conda environments, not for R packages (which are
+## within the local R/library): If we install workflow-specific R packages (and R) within
+## nifH_ASV_workflow, then the R and R libraries in nifH_ASV_workflow (which is at the top of the
+## environment stack) will override those in DADA2_nifH.  This would manifest as R libraries in
+## pipeline scripts failing to load when the workflow runs those scripts.  The simple solution we
+## take is to install the few extra R packages needed by the workflow *here* in DADA2_nifH.  They
+## are noted below.
 ##
 name: DADA2_nifH
 channels:
@@ -23,4 +31,5 @@ dependencies:
   - fraggenescan       >=1.31
   - hmmer              >=3.3.2
   - r-digest           >=0.6.27     # Needed by assignAUIDs2ASVs.R
-  - r-lutz             >=0.3.1      # Needed by nifH ASV workflow
+  - r-lutz             >=0.3.1      # Needed by nifH ASV workflow (GatherMetadata)
+  - r-tidyverse        >=1.3        # Needed by nifH ASV workflow (WorkspaceStartup)

@@ -55,4 +55,13 @@ fi
 echo "Now classifying the sequences based on the blast results using the helper\n"
 echo "script classifyNifH.helper.R\n"
 $RHELP posHits.tab negHits.tab
+cat $NUCLFASTA | grep '^>' | sed 's/^>//' | cut -d' ' -f1 | sort | uniq > allseqs.tmp
+cat allseqs.tmp positives.ids negatives.ids unsure.ids | sort | uniq -c \
+  | grep '^ *1 ' | sed 's/^ *1 *//' > nohits.ids
+rm allseqs.tmp
+NH=`cat nohits.ids | wc -l`
+echo "Identified $NH sequences with no hits to either database (in nohits.ids)."
+if [ "$NH" -gt 0 ] ; then
+    echo "Probably these sequences are not nifH."
+fi
 echo "classifyNifH.sh has finished."

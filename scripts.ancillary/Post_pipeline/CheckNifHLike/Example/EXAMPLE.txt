@@ -14,5 +14,7 @@ Outputs:
   negHits.tab    - top 10 blastx hits to the negative NifH examples
   positives.ids  - subset of the ASVs for which the best positive hit was >10X
                    better than the best negative hit. (E-value was 10x smaller.)
-  negatives.ids  - analogous but the negative hit was 10X better
+  negatives.ids  - analogous but the negative hit was 10X better. (See also nohits.ids)
   unsure.ids     - no clearly better positive or negative hit for these sequences
+  nohits.ids     - ASVs that had no hits to either database.  These are likely not
+                   nifH.

@@ -9,6 +9,17 @@
 
 USAGE="blastnARB2017.sh nuclFasta outPath [queryPctId] [queryPctCvg]"
 
+SDIR="$(dirname $(realpath "${BASH_SOURCE[0]}"))"
+## Pre-created.  See ARB_nifH_2017/readme.
+NIFHDB="$SDIR/ARB_nifH_2017/NifHDB"
+
+## Special/hidden feature to get a path to the DB that can be passed to
+## blastdbcmd e.g to get the size of the DB.
+if [ "$1" == "DBpath" ] ; then
+    echo "$NIFHDB"
+    exit 0
+fi
+
 fasta=$1
 if [ ! -f "$fasta" ] ; then
     echo "You did not specify a nucleotide FASTA file (nuclFasta)."
@@ -30,10 +41,6 @@ echo "Will blastn each sequence in $fasta against ARB 2017 nifH genes"
 echo "and retain hits that are >${pid}%id and >${qcov}% query coverage."
 echo "Alignment output will be limited to max 100 one line descriptions"
 echo "and 10 alignments.  Outputs will be in $ODIR"
-
-SDIR="$(dirname $(realpath "${BASH_SOURCE[0]}"))"
-## Pre-created.  See ARB_nifH_2017/readme.
-NIFHDB="$SDIR/ARB_nifH_2017/NifHDB"
 
 mkdir -p $ODIR
 

@@ -124,9 +124,16 @@ if (is.na(preCalculatedErrorModel) && grepl('\\.rds$',paramsFile,ignore.case=T))
 }
 
 if (!is.na(paramsFile)) {
-    ## Parameters file. Tabular. Very simple for now.
+    ## Parameters file. Tabular. Very simple for now.  Use col.names to avoid read.csv() error if
+    ## the params file sets no parameters.
     stopifnot(file.exists(paramsFile))
-    ptab <-read.csv(paramsFile, header=F, row.names=1, comment.char = "#")
+    ptab <- read.csv(paramsFile, header=F, row.names=1, comment.char = "#", col.names = c('value'))
+    if (nrow(ptab) == 0) {
+        cat("Empty parameters file", paramsFile," so will use default values for all parameters.\n")
+        rm(ptab)
+    }
+}
+if (exists(ptab)) {
     p <- union(names(filterAndTrimParams), names(mergePairsParams))
     p <- union(p, names(specialParams))
     plist <- intersect(p, rownames(ptab))

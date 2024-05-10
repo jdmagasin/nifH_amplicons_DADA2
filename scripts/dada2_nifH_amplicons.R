@@ -133,7 +133,7 @@ if (!is.na(paramsFile)) {
         rm(ptab)
     }
 }
-if (exists(ptab)) {
+if (exists("ptab")) {
     p <- union(names(filterAndTrimParams), names(mergePairsParams))
     p <- union(p, names(specialParams))
     plist <- intersect(p, rownames(ptab))
@@ -729,8 +729,8 @@ write.table(df, file=asvsAbundTxt, sep="\t", quote=F)
 write(paste0('>',as.character(asvSeq2Id),"\n",names(asvSeq2Id)), file=asvsFastaTxt)
 
 ## NMDS, if sufficient data
-df <- df[,which(apply(df, 2, function(v) !all(v==0)))]   # remove empty samples
-df <- df[which(apply(df,  1, function(v) !all(v==0))),]  # remove empty ASVs
+df <- df[,which(apply(df, 2, function(v) !all(v==0))),  drop = F]  # remove empty samples
+df <- df[which(apply(df,  1, function(v) !all(v==0))),, drop = F]  # remove empty ASVs
 if (nrow(df) < 5 || ncol(df) <= 2) {
     cat("Not doing NMDS. Too few ASVs and/or samples.\n")
 } else {

@@ -127,7 +127,7 @@ if (!is.na(paramsFile)) {
     ## Parameters file. Tabular. Very simple for now.  Use col.names to avoid read.csv() error if
     ## the params file sets no parameters.
     stopifnot(file.exists(paramsFile))
-    ptab <- read.csv(paramsFile, header=F, row.names=1, comment.char = "#", col.names = c('value'))
+    ptab <- read.csv(paramsFile, header=F, row.names=1, comment.char = "#", col.names = c('dummy','value'))
     if (nrow(ptab) == 0) {
         cat("Empty parameters file", paramsFile," so will use default values for all parameters.\n")
         rm(ptab)

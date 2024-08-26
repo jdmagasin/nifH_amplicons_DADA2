@@ -64,7 +64,7 @@ MapOneAsvTable <- function(tsv, tag, useMd5=F, verbose=T)
 {
     stopifnot(tag %in% auidTab$Tag)
     auidSS <- subset(auidTab, Tag==tag)
-    asvTab <- read.table(tsv, sep='\t', header=T, row.names=1)
+    asvTab <- read.table(tsv, sep='\t', header=T, row.names=1, check.names=F)
     idx <- match(rownames(asvTab), auidSS$ASVid)            # Which ASVs have AUIDs
     if (verbose) {
         cat("The ASV table", tsv, "has tag", tag, "and contains", nrow(asvTab), "ASVs. ",

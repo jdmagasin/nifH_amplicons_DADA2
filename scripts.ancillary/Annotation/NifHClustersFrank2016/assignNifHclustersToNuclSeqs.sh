@@ -131,6 +131,10 @@ if [ ! -f "$ASV2CLUSTER" ] ; then
       > "$ASV2CLUSTER"
     echo "How many sequences are in each NifH cluster and subcluster:"
     cat "$ASV2CLUSTER" | cut -d, -f2,3 | sort | uniq -c | sort -k1gr
+    echo
+    ## Unexpected due to length and bit score cut offs but check.
+    cut -d, -f1 "$ASV2CLUSTER" | sort | uniq -c \
+      | awk '{if ($1 > 1) print "Warning!", $2, "has", $1, "clusters likely due to",$1,"open reading frames."}'
 fi
 
 echo "Done!"

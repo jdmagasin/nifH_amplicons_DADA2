@@ -124,9 +124,16 @@ if (is.na(preCalculatedErrorModel) && grepl('\\.rds$',paramsFile,ignore.case=T))
 }
 
 if (!is.na(paramsFile)) {
-    ## Parameters file. Tabular. Very simple for now.
+    ## Parameters file. Tabular. Very simple for now.  Use col.names to avoid read.csv() error if
+    ## the params file sets no parameters.
     stopifnot(file.exists(paramsFile))
-    ptab <-read.csv(paramsFile, header=F, row.names=1, comment.char = "#")
+    ptab <- read.csv(paramsFile, header=F, row.names=1, comment.char = "#", col.names = c('dummy','value'))
+    if (nrow(ptab) == 0) {
+        cat("Empty parameters file", paramsFile," so will use default values for all parameters.\n")
+        rm(ptab)
+    }
+}
+if (exists("ptab")) {
     p <- union(names(filterAndTrimParams), names(mergePairsParams))
     p <- union(p, names(specialParams))
     plist <- intersect(p, rownames(ptab))
@@ -722,8 +729,8 @@ write.table(df, file=asvsAbundTxt, sep="\t", quote=F)
 write(paste0('>',as.character(asvSeq2Id),"\n",names(asvSeq2Id)), file=asvsFastaTxt)
 
 ## NMDS, if sufficient data
-df <- df[,which(apply(df, 2, function(v) !all(v==0)))]   # remove empty samples
-df <- df[which(apply(df,  1, function(v) !all(v==0))),]  # remove empty ASVs
+df <- df[,which(apply(df, 2, function(v) !all(v==0))),  drop = F]  # remove empty samples
+df <- df[which(apply(df,  1, function(v) !all(v==0))),, drop = F]  # remove empty ASVs
 if (nrow(df) < 5 || ncol(df) <= 2) {
     cat("Not doing NMDS. Too few ASVs and/or samples.\n")
 } else {

@@ -60,7 +60,7 @@ example, one path might be LinksToFastqs/DNA/Station23/SizeFract0.2.  (See
 example below.)
 
 Usage:
-    organizeFastqs.R   fastqMap.tsv
+    organizeFastqs.R [-rename] fastqMap.tsv
 
 Each line of fastqMap.tsv describes one FASTQ file.  Column 1 has the path (full
 or relative) to the source FASTQ file, with separate lines for the forward and
@@ -113,9 +113,10 @@ this format:
     {Samp}{_stuff1}_R{1,2}{stuff2}{.fastq.gz}
 
 where:
-   - Samp is required.  It can have any character other than '_'.  Do not use
+   - Samp is required and will is used for the sample (column) names in the ASV
+     abundance table.  Samp can have any character other than '_'.  Do not use
      '_' to delimit parts of your sample names because those parts will not
-     appear e.g. in the sample names in the ASV abundance table.
+     appear in the sample names in the ASV abundance table.
 
    - stuff1, if present, can have any character (including '_') but must be
      flanked by '_'. Usually stuff1 will be the sequencing lane e.g. L001 in the
@@ -128,9 +129,20 @@ where:
 
 Sometimes you must write a small script to change your FASTQ names to follow the
 format, usually to convert '_' that appear in the sample name to some other
-character.  FASTQs from the Sequencing Read Archive use the format <run
-name>_1.fastq.gz.  For convenience organizeFastqs.R automatically changes _1 and
-_2 to _R1 and _R2 for the symbolic links.
+character.  FASTQs from the Sequencing Read Archive (SRA) use the format
+<run name>_1.fastq.gz.  For convenience organizeFastqs.R automatically changes _1
+and _2 to _R1 and _R2 for the symbolic links.
+
+Tip: Sometimes your FASTQ names, from which \"Samp\" is obtained, will not match
+sample names used in your metadata files.  E.g. your FASTQ names were assigned
+by the SRA (e.g. \"SRR12356789_1.fastq.gz\") but your metadata files use
+descriptive sample names (e.g. \"Monterey.M1.Aug2023.5m\").  In such cases you
+can use the metadata sample name in the rightmost column in your fastqMap, and
+pass -rename to organizeFastqs.R.  In the example, use
+\"Monterey.M1.Aug2023.5m\" in the rightmost column for the forward and reverse
+FASTQs for this sample, and pass -rename.  This tells organizeFastqs.R to use
+\"Monterey.M1.Aug2023.5m_R1.fastq.gz\" as the name for the symbolic link to
+\"SRR12356789_1.fastq.gz\", and similar for the R2 FASTQ.
 
 "
 
@@ -139,6 +151,8 @@ if (length(args)==0 || grepl("-h",args[1])) {
     cat(usageStr)
     quit(save='no')
 }
+renameSymLinks <- ('-rename' %in% args)
+if (renameSymLinks) { args <- args[args != '-rename'] }
 fastqMapTsv <- args[1]
 if (!file.exists(fastqMapTsv)) {
     stop("ERROR: Missing the fastqMap.tsv.")
@@ -180,9 +194,24 @@ ValidFastqNames <- function(namVec)
 Check_SRA_fastq_names <- function(namVec) { any(grepl("_[12]\\.fastq\\.gz$", namVec)) }
 Fixup_SRA_fastq_names <- function(namVec) { sub('_([12])\\.fastq\\.gz$', '_R\\1.fastq.gz', namVec) }
 
+## Helper for -rename.  Tack on the original FASTQ file extenions to the new
+## names in the rightmost column of the fastqMap
+MakeRenames <- function(origFastqNames, rightmostColValues)
+{
+    extensions <- sub('^.+(\\.fas.*)$', '\\1', origFastqNames)
+    stopifnot(extensions %in% c('.fastq','.fastq.gz'))
+    directions <- sub('^.+_R{0,1}([1-2])(\\.|_).+$', '\\1', origFastqNames)
+    stopifnot(directions %in% c('1','2','R1','R2'))
+    paste0(rightmostColValues, '_R', directions, extensions)
+}
+
 ## Abort if the FASTQ names are invalid -- but tolerate SRA names
 ## since we will convert them to valid when we make the symlinks.
-ValidFastqNames(Fixup_SRA_fastq_names(fastqMap[,1]))
+if (!renameSymLinks) {
+    ValidFastqNames(Fixup_SRA_fastq_names(fastqMap[,1]))
+} else {
+    ValidFastqNames( MakeRenames(fastqMap[,1], fastqMap[,ncol(fastqMap)]) )
+}
 
 
 ## Basic checks of the tsv, for paired FASTQs only.
@@ -221,7 +250,13 @@ for (p in unique(paths)) {
 
 ## paths still is 1:1 with the fastqs which is what we need for setting up the
 ## symlinks.
-fpaths <- file.path(paths, basename(fastqMap[,1]))  # full symlink paths (dest)
+if (!renameSymLinks) {
+    fpaths <- file.path(paths, basename(fastqMap[,1]))  # full symlink paths (dest)
+} else {
+    ## As above but symlinks do not use the original FASTQ names
+    fpaths <- MakeRenames(fastqMap[,1], fastqMap[,ncol(fastqMap)])
+    fpaths <- file.path(paths, fpaths)
+}
 cat("Will make",length(fpaths),"symbolic links to FASTQs.\n")
 
 ## This converts relative paths to absolute or aborts. Safer so that the

@@ -46,7 +46,7 @@ if (length(missing) == 0) {
 
 if (ancillary) {
     cat("\nChecking for external tools and packages required by the pipeline ancillary scripts:  ")
-    needTools <- c('fastqc','vsearch','blastn','blastx','python')
+    needTools <- c('fastqc','vsearch','blastn','blastx','python','mafft')
     missing <- sapply(paste('which',needTools), system, ignore.stdout=T, ignore.stderr=T)
     missing <- which(missing != 0)
     if (length(missing) == 0) {

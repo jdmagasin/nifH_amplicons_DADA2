@@ -26,6 +26,15 @@
 ##    to NifH_prefilter.
 ##
 
+for dep in run_FragGeneScan.pl extractFasta.pl mafft python; do
+    which $dep > /dev/null
+    if [ $? -ne 0 ] ; then
+        echo "ERROR!:  assignNifHclustersToNuclSeqs.sh requires $dep which is missing."
+	echo "Check your path and conda environment."
+	exit -1
+    fi
+done
+
 asvFasta=$1
 if [ ! -f "$asvFasta" ] ; then
     echo "Usage:"

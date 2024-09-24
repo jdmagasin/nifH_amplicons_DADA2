@@ -28,3 +28,4 @@ dependencies:
   - vsearch            >=2.22.1     #  check_chimera_denovo.sh
   - blast              >=2.14.0     #  check_nifH_contaminants.sh, classifyNifH.sh, blast{nARB2017,xGenome879}.sh
   - biopython          >=1.81       #  assignNifHclustersToNuclSeqs.sh
+  - mafft              >=7.490      #  assignNifHclustersToNuclSeqs.sh

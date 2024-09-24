@@ -83,6 +83,15 @@ cat hmmsearch.Fer_NifH.domtab.gz | gunzip \
   | sort | uniq \
   | gzip \
   > readsWithNifH.ids.gz
+numNifHReads=`cat readsWithNifH.ids.gz | gunzip | wc -l`
+if [ "$numNifHReads" -eq 0 ] ; then
+    echo
+    echo "PROBLEM!  No nifH-like reads were found by the NifH prefilter. This will cause a later failure when the"
+    echo "pipeline has no reads for building error models.  The usual reason for not finding any nfiH-like reads is"
+    echo "that your NifH_minBits is too high for the quality of your sequencing data.  Yours is ${MINBITS}.  Try"
+    echo "lowering NifH_minBits.  Set it to 0 if you want to use the trusted bit cut off defined in PF00142."
+    exit -1
+fi
 echo "done."
 echo
 
@@ -98,3 +107,5 @@ echo "Moving everything to the $OUTDIR"
 mv orfs* hmmsearch.Fer_NifH.* readsWithNifH.* readsExtracted.fastq.gz $OUTDIR
 echo "Predicted" `gunzip -c $OUTDIR/orfs.faa.gz | grep -c '^>'` "orfs."
 echo "Identified" `gunzip -c $OUTDIR/readsWithNifH.ids.gz* | wc -l` "reads with NifH domains."
+
+exit 0

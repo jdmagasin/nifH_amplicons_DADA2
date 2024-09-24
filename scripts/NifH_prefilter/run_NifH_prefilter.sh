@@ -33,6 +33,10 @@ for FQ in `find -L "$DATATRIMMEDDIR" -name '*_R1*.fastq.gz'`; do
           ## script expects the outdir not to exist).
         $SDIR/findReadsWithNifHDomain.sh  "$FQ"  "$OUTDIR" "$MINLEN" "$MINBITS" \
             > log.nifScan.txt 2>&1
+        if [ "$?" -ne 0 ] ; then
+            echo "findReadsWithNifHDomain.sh exited abnormally."
+            exit -1
+        fi
         mv log.nifScan.txt "$OUTDIR"
     else
         echo "Already have $OUTDIR"

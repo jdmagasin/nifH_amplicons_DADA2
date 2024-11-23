@@ -5,8 +5,8 @@
 ## environment_DADA2_nifH.yml.  Please see INSTALL.txt
 ##
 ## The pipeline and ancillary tools were developed mainly using DADA2 version 1.20.0 (and R v4.1.3).
-## However, any DADA2 version >=1.20 should be fine, including the latest (as of July 15, 2023),
-## v1.28.0 (which requires R >=4.3).
+## The package verions below were used when creating the nifH ASV database described in Morando and
+## Magasin et al., 2024 in Earth System Science Data.
 ##
 name: DADA2_nifH
 channels:
@@ -15,17 +15,17 @@ channels:
   - defaults
 dependencies:
   # Core pipeline
-  - r-base             >=4.1.3
-  - bioconductor-dada2 >=1.20.0
-  - r-vegan            >=2.5.7
-  - cutadapt           >=3.4
-  - fraggenescan       >=1.31
-  - hmmer              >=3.3.2
+  - r-base             =4.3.3
+  - bioconductor-dada2 =1.30.0
+  - r-vegan            =2.6_8
+  - cutadapt           =4.9
+  - fraggenescan       =1.31
+  - hmmer              =3.4
   
-  # Ancillary scripts               Needed by:
-  - r-digest           >=0.6.27     #  assignAUIDs2ASVs.R
-  - fastqc             >=0.12.1     #  do_fastqc.sh
-  - vsearch            >=2.22.1     #  check_chimera_denovo.sh
-  - blast              >=2.14.0     #  check_nifH_contaminants.sh, classifyNifH.sh, blast{nARB2017,xGenome879}.sh
-  - biopython          >=1.81       #  assignNifHclustersToNuclSeqs.sh
-  - mafft              >=7.490      #  assignNifHclustersToNuclSeqs.sh
+  # Ancillary scripts           Needed by:
+  - r-digest           =0.6.37 #  assignAUIDs2ASVs.R
+  - fastqc             =0.12.1 #  do_fastqc.sh
+  - vsearch            =2.28.1 #  check_chimera_denovo.sh
+  - blast              =2.16.0 #  check_nifH_contaminants.sh, classifyNifH.sh, blast{nARB2017,xGenome879}.sh
+  - biopython          =1.84   #  assignNifHclustersToNuclSeqs.sh
+  - mafft              =7.526  #  assignNifHclustersToNuclSeqs.sh

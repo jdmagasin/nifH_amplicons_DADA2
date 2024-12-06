@@ -123,6 +123,10 @@ if [ ! -f "$rflist" ] ; then
 else
     echo "$rflist already exists."
 fi
+if [ `cat "$rflist" | wc -l` -eq 0 ] ; then
+    echo "$rflist is empty because no .fastq.gz files were found below $FQDIR"
+    exit -1
+fi
 
 ## Check whether that FASTQs names are structured as expected by the pipeline,
 ## so that we don't have to wait until that stage only to get a crash (in

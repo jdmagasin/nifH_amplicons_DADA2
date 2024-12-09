@@ -30,8 +30,8 @@ for dep in run_FragGeneScan.pl extractFasta.pl mafft python; do
     which $dep > /dev/null
     if [ $? -ne 0 ] ; then
         echo "ERROR!:  assignNifHclustersToNuclSeqs.sh requires $dep which is missing."
-	echo "Check your path and conda environment."
-	exit -1
+        echo "Check your path and conda environment."
+        exit -1
     fi
 done
 
@@ -128,15 +128,22 @@ if [ ! -f "$ASVNIFHCLUSTERSFASTA" ] ; then
     echo "### Step 5.  NifH cluster and subcluster classification.  ###"
     ## Have the script figure out where the A.vinelandii residues begin.
     python "${SDIR}/NifH_Clusters.py" "$ASVSWITHNIFHA2M"
+    echo
 fi
 
 if [ ! -f "$ASV2CLUSTER" ] ; then
     echo "### Step 6.  Making a map file of sequences to clusters, subclusters. ###"
     ## Example:  >A.vinelandii WP_012698955.1 main cluster = 1 subcluster = 1G
+    ## Notes: 1. Remove WP_012698955 that step 3 added for the alignment.
+    ##        2. Rarely an input sequence will have >1 ORF. Do sort|uniq to collapse
+    ##           cases where the ORFs have the same classification. An alternative is
+    ##           to add a column with ORF lengths and let the user decide, likely to
+    ##           keep the longer ORF's classification.
     grep '^>' $ASVNIFHCLUSTERSFASTA \
       | sed -e 's/^>\(..*\) main cluster = \(..*\) subcluster = \(..*\)$/\1,\2,\3/' \
             -e 's/_[0-9]*_[0-9]*_[-+]//' \
       | grep -v "WP_012698955" \
+      | sort | uniq \
       > "$ASV2CLUSTER"
     echo "How many sequences are in each NifH cluster and subcluster:"
     cat "$ASV2CLUSTER" | cut -d, -f2,3 | sort | uniq -c | sort -k1gr

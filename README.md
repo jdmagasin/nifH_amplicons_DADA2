@@ -3,7 +3,7 @@
 This repository contains our DADA2 pipeline for processing nitrogenase (_nifH_) amplicon data that
 were sequenced using paired-end MiSeq.  Features of our pipeline include:
 
-  - A text file provides key DADA2 [parameters](Example/params.example.csv) (e.g. for filterAndTrim()).  No coding is required to
+  - A text file provides key DADA2 [parameters](Example/params.example.csv) (e.g., for filterAndTrim()).  No coding is required to
     run the pipeline.
 
   - Samples are input using a [FASTQ map](Example/fastqMap.tsv) (text table) that includes structured descriptions,
@@ -11,7 +11,7 @@ were sequenced using paired-end MiSeq.  Features of our pipeline include:
     pipeline uses the descriptions to partition the samples into "processing groups" which are run
     separately through DADA2.  Advantages of this approach include:
     
-       1. Results organized hierarchically e.g. DNA/Station41/SizeFrac_0.2.
+       1. Results organized hierarchically e.g., DNA/Station41/SizeFrac_0.2.
        2. Faster processing by DADA2.
        3. Separate error models for each processing group.
 
@@ -52,7 +52,7 @@ changes were required.
 ## Repository contents
 
 - **[Installation](Installation/INSTALL.txt):**  Documentation for installing (mini)conda and required conda and R packages.
-- **[Example](Example/EXAMPLE.txt):** A small example data set for testing your installation and learning how to create the parameter file and table of input FASTQ files.
+- **[Example](Example/EXAMPLE.txt):** A small example data set for testing your installation and learning how to create the parameter file and the table of input FASTQ files.  A second example shows how to compare pipeline outputs, e.g., ASVs and total abundances obtained when using different pipeline parameters. This is an important step before committing to the ASVs that you will use in your analysis.
 - **run_DADA2_pipeline.sh:**  Main script that runs the whole pipeline.
   
 - **scripts:** Helper scripts used by run_DADA2_pipeline.sh.
@@ -60,7 +60,7 @@ changes were required.
    - ASVs_to_AUIDS:  For combining results across runs of the pipeline: Merge abundance tables and assign new sequence identifiers (AUIDs).
   - Annotation:  Several tools for annotating _nifH_ ASVs.
   - Pre_pipeline:  Several tools for evaluating data sets before running them through the pipeline.
-  - Post_pipeline:  Quality filters for identifying ASVs that are not likely _nifH_.
+  - Post_pipeline:  Quality filters for identifying ASVs that are probably not _nifH_.
   
 - **bin:** Symbolic links to main scripts so they can be run easily from your unix-like shell.
 
@@ -68,7 +68,7 @@ changes were required.
 ## Documentation for run_DADA2_pipeline.sh
 
 ```
-This script uses DADA2 to identify nifH amplicon sequence
+ This script uses DADA2 to identify nifH amplicon sequence
  variants (ASVs) in paired MiSeq data sets.
 
  Usage:
@@ -121,11 +121,14 @@ LinksToFastqs) that organizes the FASTQs into "processing groups":
     merging to create full length ASVs; removal of chimeric ASVs.  Output
     is stored in Data.nobackup/Dada2PipeOutput/Out.<datestamp>
 
- If you rerun this script, previous outputs will be reused. Usually this is
- desired for stages 1-3 (e.g. there is no point in trimming primers again)
- and allows you to experiment with DADA2 (stage 4) parameters. However, if
- you want to rerun DADA2 but the datestamp already exists, just rename or
- delete the previous Out.<datestamp> directory.
+ If you rerun this script, previous outputs will be reused. This behavior
+ is usually desired for stages 1-3 (e.g., there is no reason to trim
+ primers again) and allows you to experiment with DADA2 parameters (stages
+ 4-9).  However, if you want to rerun DADA2 but the datestamp already
+ exists, you can (1) rename previous Out.<datestamp> directory, or (2) add
+ to your parameters file a Dada2OutdirTag.  For example, if you include
+ "Dada2OutdirTag, truncLen187" then output will go in directory
+ Out.truncLen187.<datestamp>.
 
  Required tools: This script depends on many external tools (R packages
  cutadapt, HMMER3, ...) nearly all of which can be installed using

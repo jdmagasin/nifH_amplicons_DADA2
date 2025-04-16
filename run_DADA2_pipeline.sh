@@ -7,8 +7,8 @@ PARAMS=$1
 ## If missing params file or if -h,--help, -help, etc., then print usage.
 if [ -z "$PARAMS" ] || [ ! -z `echo $PARAMS | grep '\-h'` ] ; then
     cat <<-EOUSAGE
-	 This script uses DADA2 to identify nifH amplicon sequence
-	 variants (ASVs) in paired MiSeq data sets.
+	 This script uses DADA2 to identify nifH amplicon sequence variants (ASVs)
+	 in paired MiSeq data sets.
 
 	 Usage:
             run_DADA2_pipeline.sh params.csv > log.date.txt
@@ -66,7 +66,7 @@ if [ -z "$PARAMS" ] || [ ! -z `echo $PARAMS | grep '\-h'` ] ; then
 	 4-9).  However, if you want to rerun DADA2 but the datestamp already
 	 exists, you can (1) rename previous Out.<datestamp> directory, or (2) add
 	 to your parameters file a Dada2OutdirTag.  For example, if you include
-         "Dada2OutdirTag, truncLen187" then output will go in directory
+	 "Dada2OutdirTag, truncLen187" then output will go in directory
 	 Out.truncLen187.<datestamp>.
 
 	 Required tools: This script depends on many external tools (R packages

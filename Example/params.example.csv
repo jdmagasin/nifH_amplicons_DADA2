@@ -15,6 +15,11 @@
 ## merged.
 ##
 
+## Make the DADA2 output directories appear as
+##   Data.nobackup/Dada2PipeOutput/Out.truncQ16.<datestamp>
+## Then we can simply change Dada2OutdirTag if we rerun the pipeline on the
+## same day, e.g., with a different truncQ cut off or with truncLen.fwd/rev.
+Dada2OutdirTag, truncQ16
 
 ## Parameters that impact DADA2 error models
 ##

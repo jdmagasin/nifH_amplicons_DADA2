@@ -1,0 +1,93 @@
+################################################################################
+###################### Example 2 of the DADA2 nifH pipeline ####################
+################################################################################
+
+Copyright (C) 2025 Jonathan D. Magasin
+
+Before analyzing the communities from the DADA2 nifH pipeline, you should check
+whether different parameter sets result in mainly the same ASVs and similar
+abundances.  Subtantial differences might indicate quality issues with your data
+which could be mitigated by tuning parameters.  We favor parameters that retain
+more of the read pairs from the FASTQs. In particular, sometimes trimming the
+read pairs at fixed lengths (truncLen in dada2::filterAndTrim()) can retain
+substantially more data compared to trimming based on quality (truncQ).  This
+was observed for some studies used in our paper (Morando and Magasin et
+al. 2025) which included ~1000 marine samples.
+
+This example shows how you can compare ASVs from two runs of the pipeline that
+used different parameters.  We run the pipeline using truncLen to trim the reads
+and compare to the ASVs obtained from EXAMPLE.txt which used truncQ.
+
+
+1. The trim lengths included in params.example2.csv were obtained from
+   estimateTrimLengths.R.  This script identifies trim lengths that should
+   maxmimize the number of reads that go into ASVs at dada2::mergePairs().  The
+   script was run as follows:
+
+      estimateTrimLengths.R  TGYGAYCCNAARGCNGA ADNGCCATCATYTCNCC  \
+        Data.Harding2018.abridged  >  estimate_trim_lens.txt
+
+   Below are the top five combinations of trim lengths for R1 (truncLen.fwd) and
+   R2 (truncLen.rev).  Similar combinations should also result in ~81% of the
+   reads going in to ASVs.  In params.example2.csv we trim at 233 nt for R1 and
+   173 nt for R2.  Note that the four "Err" columns estimate the numbers of
+   errors in the trimmed reads. However, these values should *not* be used as
+   the maxEE parameter.
+
+       TrimR1 TrimR2 Percentage expErrR1.mean expErrR1.sd expErrR2.mean expErrR2.sd
+    1     241    166     81.1 *          1.05        0.55          0.68        0.24
+    2     226    181         81          0.87        0.45          0.85        0.33
+    3     256    166       80.7          1.27        0.66          0.68        0.24
+    4     241    181       80.6          1.05        0.55          0.85        0.33
+    5     211    196       80.4          0.72        0.36          1.18        0.45
+
+
+2. Run the pipeline:
+
+      run_DADA2_pipeline.sh params.example2.csv > log2.txt
+
+   It is not necessary to run organizeFastqs.R again.  Moreover, the pipeline
+   will use the previous results for cutadapt and for prefiltering reads for
+   error models.  Only DADA2 will run. The new results for each processing group
+   will be in directories that include "truncLen_233_173" in their name (see
+   Dada2OutdirTag in params.example2.csv).
+
+   The log indicates that 75,671 reads went into ASVs at the merge step.  This
+   is ~76% of the ~100K total reads in the ten FASTQs (each with ~10K reads),
+   which is fairly close to the 81% projected by estimateTrimLengths.R.  Note
+   that more reads were retained using truncQ=16 (81,980 reads), but they are in
+   spurious ASVs that are filtered out in step #3.
+
+
+3. Compare the new and old ASVs in the Filt0.2 processing group.  Use option "A"
+   to filter out ASVs similarly to the nifH-ASV-workflow in Morando and Magasin
+   et al. 2025.  (Run comparePipelineOutputs.R with no paramerts to see
+   documentation.  Please fix 2025Apr15 to be your dates.)
+
+      comparePipelineOutputs.R  \
+          truncQ16=Data.nobackup/Dada2PipeOutput/Filt0.2/Out.truncQ16.2025Apr15/TextData/asvs.noChimera.fasta  \
+          truncLen_233_173=Data.nobackup/Dada2PipeOutput/Filt0.2/Out.truncLen_233_173.2025Apr15/TextData/asvs.noChimera.fasta  \
+          A
+
+    The Venn diagram shows that in the 0.2 um size fraction DADA2 identified 7
+    ASVs using truncQ and 11 ASVs using truncLen. The 6 ASVs found by both
+    pipeline runs comprised ~97% of the total abundance from each run:
+    
+        $`% total abundance from ASVs that are in truncQ16 and truncLen_233_173`
+                  truncQ16 truncLen_233_173 
+                      98               96
+
+    This means that the unique ASVs (1 for truncQ16, 5 for truncLen) were only
+    2-4% of the reads.  Notably truncLen retained 7% more reads than truncQ,
+    respectively 24,134 and 22,567 reads.
+
+    Similar steps can be used to compare the Filt3 processing group, summarized as:
+                                        Shared  Shared      Unique  Unique
+                       ASVs tot_abund   ASVs    abundance   ASVs    abundance
+      truncQ16         9    23572       8       94%         1       6%
+      truncLen_233_173 17   30867       8       85%         9       15%
+
+    For Filt3 truncLen retained 31% more reads and had 9 additional ASVs. The 9
+    ASVs were 15% of the total abundance.  For the example dataset, it looks
+    like truncLen will retain more data and ASVs if truncLen is used to trim the
+    reads.

@@ -60,11 +60,14 @@ if [ -z "$PARAMS" ] || [ ! -z `echo $PARAMS | grep '\-h'` ] ; then
 	    merging to create full length ASVs; removal of chimeric ASVs.  Output
 	    is stored in $OUTDIR/Dada2PipeOutput/Out.<datestamp>
 
-	 If you rerun this script, previous outputs will be reused. Usually this is
-	 desired for stages 1-3 (e.g. there is no point in trimming primers again)
-	 and allows you to experiment with DADA2 (stage 4) parameters. However, if
-	 you want to rerun DADA2 but the datestamp already exists, just rename or
-	 delete the previous Out.<datestamp> directory.
+	 If you rerun this script, previous outputs will be reused. This behavior
+	 is usually desired for stages 1-3 (e.g., there is no reason to trim
+	 primers again) and allows you to experiment with DADA2 parameters (stages
+	 4-9).  However, if you want to rerun DADA2 but the datestamp already
+	 exists, you can (1) rename previous Out.<datestamp> directory, or (2) add
+	 to your parameters file a Dada2OutdirTag.  For example, if you include
+         "Dada2OutdirTag, truncLen187" then output will go in directory
+	 Out.truncLen187.<datestamp>.
 
 	 Required tools: This script depends on many external tools (R packages
 	 cutadapt, HMMER3, ...) nearly all of which can be installed using
@@ -285,16 +288,23 @@ fi
 
 echo
 echo "##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### #####"
-echo "The main event, DADA2!  Will run DADA2 separately for each processing group,"
-echo "with independently inferred ASVs across DADA2 runs. A later stage of the"
-echo "pipeline will relabel ASV id's to AUID's (ASV unique id's) for identifying"
-echo "sequences found across DADA2 runs."
+echo "The main event, DADA2!  Will run DADA2 separately for each processing group."
+echo "This means ASVs will be inferred independently for each processing group and"
+echo "ASV id's will collide. Later you can fix the collisions using the ancillary"
+echo "scripts in ASVs_to_AUIDs to convert ASV id's from different DADA2 runs into"
+echo "AUID's (ASV unique id's)."
 ## One date stamp is used for all pgroups (even if DADA2 finishes the last group
 ## after midnight).  The stamp is so that we can have different DADA2 runs (with
 ## parameter tweaks) stored alongside each other.  (Previous stages of the
 ## pipeline change less frequently and their params should be finalized before
 ## playing with DADA2 params.)
 STAMP=$(echo $(date) | awk -F' ' '{print $6 $2 $3}')
+## Look for a user-specified stamp that will be used in addition to the date. This
+## lets user's re-run the pipeline multiple times on the same day:)
+USERSTAMP=`cat $PARAMS | grep "^Dada2OutdirTag" | cut -d, -f2 | tr -d [:space:]`
+if [ ! -z "$USERSTAMP" ] ; then
+    STAMP="${USERSTAMP}.${STAMP}"
+fi
 while read pgrp; do
     pdesc=`echo "$pgrp" | tr '/' '.'`
     logfile="log.dada2.${pdesc}.${STAMP}.txt"

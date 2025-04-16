@@ -98,7 +98,7 @@ Key outputs:
 
 5. DADA2 output.  For each size fraction and for the date you ran the pipeline,
    there is separate output.  For example:
-      Data.nobackup/Dada2PipeOutput/Filt_3/Out.2023Jul18/
+      Data.nobackup/Dada2PipeOutput/Filt3/Out.truncQ16.2023Jul18/
    within which you should have a look at:
 
      - The DADA2 log file has messages specific to DADA2 (stage 4 -- not the
@@ -115,5 +115,8 @@ Key outputs:
        loss of reads ---> parameter adjustments.  E.g. are reads dropped due to
        poor quality?  Or failure to overlap at the merge step?
 
+
+We strongly suggest that you also try EXAMPLE2.txt which illustrates how
+to compare pipeline outputs that used different parameters.
 
 -- END --

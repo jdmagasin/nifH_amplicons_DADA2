@@ -1,0 +1,26 @@
+## Copyright (C) 2025 Jonathan D. Magasin
+
+## The only parameters that differ in this file from params.example.csv are Dada2OutdirTag and
+## truncLen.fwd/rev are used rather than truncQ.
+
+Dada2OutdirTag, truncLen_233_173
+
+## Error model creation
+NifH_minLen,  33
+NifH_minBits,150
+
+## Primer trimming by cutadapt
+forward,TGYGAYCCNAARGCNGA
+reverse,ADNGCCATCATYTCNCC
+allowMissingPrimers,TRUE
+
+## DADA2 filterAndTrim()
+## These truncLen values were based on estimateTrimLengths.R. They should result in ~81% of
+## the reads going into ASVs (before the bimera check).
+truncLen.fwd,233
+truncLen.rev,173
+maxEE.fwd,2
+maxEE.rev,4
+
+## DADA2 mergePairs()
+maxMismatch,1

@@ -55,7 +55,14 @@ if (length(nicknames) <= 1) {
     stop("Please provide file paths to at least two FASTAs.")
 }
 fastas <- sapply(strsplit(args, '='), '[', 2)
-stopifnot(file.exists(fastas))
+if (!all(file.exists(fastas))) {
+    if (any(file.exists(nicknames))) {
+        stop("You must provide a label for every FASTA, e.g., ",
+             "\"RunA=path/to/run/A.fasta\".")
+    }
+    stop("The following FASTAs do not exist:\n\t",
+         paste(fastas[!file.exists(fastas)], collapse = "\n\t"))
+}
 names(fastas) <- nicknames
 
 

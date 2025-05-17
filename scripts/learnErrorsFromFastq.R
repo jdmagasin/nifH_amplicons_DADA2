@@ -37,7 +37,7 @@ suppressMessages(library(dada2))
 suppressMessages(library(ggplot2))
 cat("done.\n\n")
 
-cat("First filter and trim the reads using reasonable parameters. The goal is to",
+cat("First filter and trim the reads using reasonable parameters. The goal is to\n",
     "find parameters that produce a good enough error model.  No optimization.\n")
 fastqList.filtered <- gsub('\\.fastq.gz$', '.trimForErrorModel.fastq.gz', fastqList)
 idx <- which(sapply(fastqList.filtered, file.exists))
@@ -47,9 +47,13 @@ if (length(idx) > 0) {
 }
 track <- filterAndTrim(fwd=fastqList, filt=fastqList.filtered,
                        truncQ=10, maxEE=2, maxN=0, minLen=80, multithread=T)
-print(data.frame(reads.in     = track[,'reads.in'], 
+df <- data.frame(FASTQ        = sapply(fastqList, dirname),
+                 reads.in     = track[,'reads.in'], 
                  reads.out    = track[,'reads.out'],
-                 PctReadsKept = round(100*track[,'reads.out'] / track[,'reads.in'], 1)))
+                 PctReadsKept = round(100*track[,'reads.out'] / track[,'reads.in'], 1))
+rownames(df) <- NULL
+print(df)
+rm(df)
 cat("\n\n")
 
 

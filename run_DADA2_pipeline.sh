@@ -64,13 +64,13 @@ if [ -z "$PARAMS" ] || [ ! -z `echo $PARAMS | grep '\-h'` ] ; then
 	 is usually desired for stages 1-3 (e.g., there is no reason to trim
 	 primers again) and allows you to experiment with DADA2 parameters (stages
 	 4-9).  However, if you want to rerun DADA2 but the datestamp already
-	 exists, you can (1) rename previous Out.<datestamp> directory, or (2) add
-	 to your parameters file a Dada2OutdirTag.  For example, if you include
-	 "Dada2OutdirTag, truncLen187" then output will go in directory
+	 exists, you can (1) rename the previous Out.<datestamp> directory, or
+	 (2) set Dada2OutdirTag in your parameters file.  For example, if you add
+	 "Dada2OutdirTag, truncLen187" then output will go in the directory
 	 Out.truncLen187.<datestamp>.
 
 	 Required tools: This script depends on many external tools (R packages
-	 cutadapt, HMMER3, ...) nearly all of which can be installed using
+	 cutadapt, HMMER3, etc.) nearly all of which can be installed using
 	 miniconda3.  The document INSTALL.txt describes how to get set up to run
 	 the pipeline.
 
@@ -223,7 +223,7 @@ SKIP_NIFH_ERROR_MODELS=`cat $PARAMS | grep -i ^skipNifHErrorModels | grep -i 'tr
 if [ ! -z "$SKIP_NIFH_ERROR_MODELS" ] ; then
     echo "Skipping this step because you asked not to use precomputed error models." ;
 elif [ -d "$OUTDIR/Data.NifH_prefilter" ] ; then
-    echo "Looks like you already did this step. Skipping."
+    echo "It looks like you already identified NifH-like reads. Skipping this stage."
 else
     NIFH_MINLEN=`cat $PARAMS | grep "^NifH_minLen" | cut -d, -f2 | tr -d [:space:]`
     NIFH_MINBITS=`cat $PARAMS | grep "^NifH_minBits" | cut -d, -f2 | tr -d [:space:]`
@@ -233,7 +233,13 @@ else
     ## Not necessary to use processing groups.
     $SDIR/NifH_prefilter/run_NifH_prefilter.sh  Data.trimmed  "$NIFH_MINLEN"  "$NIFH_MINBITS"
     if [ "$?" -ne 0 ] ; then
-        echo "run_NifH_prefilter.sh failed. Aborting pipeline."
+        ## Safest to delete Data.NifH_prefilter even if just one fastq had a problem. This
+        ## ensures all prefiltering is from the same pipeline run / parameters.  Do not
+        ## delete intermediate outputs from run_NifH_prefilter.sh because they are useful
+        ## for understanding the crash.  They will be overwritten on the next run.
+        echo "run_NifH_prefilter.sh failed. See $OUTDIR/log.nifScan.txt for more information."
+        echo "Deleting $OUTDIR/Data.NifH_prefilter and aborting pipeline."
+        if [ -d Data.NifH_prefilter ] ; then rm -r Data.NifH_prefilter; fi
         exit -1
     fi
     echo
@@ -275,7 +281,8 @@ else
             ## pgrp encodes the path for the processing group.
             Rscript "${SDIR}/learnErrorsFromFastq.R"  "Data.NifH_prefilter/$pgrp" > "$logfile"
             if [ "$?" -ne 0 ] ; then
-                echo "learnErrorsFromFastq.R exited abnormally. Aborting pipeline."
+                echo "learnErrorsFromFastq.R exited abnormally. See $OUTDIR/$logfile for more"
+                echo "information. Aborting the pipeline."
                 exit -1
             fi
             mkdir -p "ErrorModels/$pgrp"

@@ -37,20 +37,21 @@ fi
 if [ -z "$MINBITS" ] ; then
     MINBITS=150
 fi
-echo "Runnning on $FASTQGZ.  Results will be in $OUTDIR when script completes."
+echo "Running on $FASTQGZ.  Results will be in $OUTDIR when script completes."
 mkdir -p $OUTDIR
 
 ## Easier (but uglier) to run my scripts from the current directory and then to
-## move resultws to OUTDIR.  Look for a few (not all) output files in the current
+## move results to OUTDIR.  Look for a few (not all) output files in the current
 ## directory (incomplete eariler result or parallel jobs, both problematic).
-if [ -f "orfs.faa.gz" ] || [ -f readsWithNifH.ids.gz ] || [ -f readsExtracted.fastq.gz ] ; then
-    echo "orfs.faa.gz,  readsWithNifH.ids.gz, or readsExtracted.fastq.gz already exists"
-    echo "in the current directory. Aborting."
-    exit -1
-fi
+for oldfile in "orfs.faa.gz" "readsWithNifH.ids.gz" "readsExtracted.fastq.gz" "hmmsearch.Fer_NifH.domtab.gz" ; do
+    if [ -f "$oldfile" ] ; then
+        echo "Deleting old $oldfile"
+        rm "$oldfile"
+    fi
+done
 
 
-echo -n "Predicting ORFs using FragGeneScan. Get some coffee..."
+echo "Predicting ORFs using FragGeneScan. Get some coffee..."
 gunzip -t $FASTQGZ 2> /dev/null
 if [ "$?" -eq 0 ] ; then
     cat $FASTQGZ | gunzip | $SDIR/fastq2orf.sh
@@ -60,7 +61,7 @@ fi
 gzip orfs.faa
 ## Save some space since I only want the .faa.
 rm orfs.{gff,ffn,out}
-echo "done predicting ORFs!"
+echo "Done predicting ORFs!"
 echo
 
 ## Now HMMER3. Then browse using the fields in the cut below and see the crappy
@@ -86,10 +87,12 @@ cat hmmsearch.Fer_NifH.domtab.gz | gunzip \
 numNifHReads=`cat readsWithNifH.ids.gz | gunzip | wc -l`
 if [ "$numNifHReads" -eq 0 ] ; then
     echo
-    echo "PROBLEM!  No nifH-like reads were found by the NifH prefilter. This will cause a later failure when the"
-    echo "pipeline has no reads for building error models.  The usual reason for not finding any nfiH-like reads is"
-    echo "that your NifH_minBits is too high for the quality of your sequencing data.  Yours is ${MINBITS}.  Try"
-    echo "lowering NifH_minBits.  Set it to 0 if you want to use the trusted bit cut off defined in PF00142."
+    echo "PROBLEM!  No nifH-like reads were found by the NifH prefilter for:"
+    echo "    $FASTQGZ"
+    echo "This will cause a later failure when the pipeline has no reads for building error models."
+    echo "The usual reason for not finding any nifH-like reads is that your NifH_minBits is too high"
+    echo "for the quality of your sequencing data.  Yours is ${MINBITS}.  Try lowering NifH_minBits."
+    echo "Set it to 0 if you want to use the trusted bit cut off defined in PF00142."
     exit -1
 fi
 echo "done."

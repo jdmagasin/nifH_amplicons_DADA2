@@ -8,6 +8,12 @@
 ## the scripts it calls) used fixed output file names, so we cannot have R1 and
 ## R2 results in the same directory.
 ##
+## Fastqs are found recursively, and prefiltering steps are done in the current
+## working directory (due to findReadsWithNifHDomain.sh). If an error occurs,
+## log.nifScan.txt has useful information.  If this script succeeds, the log and
+## all outputs for the prefiltered fastqs are moved to a subdirectory below
+## Data.NifH_prefilter/.  The subdirectory uses the same levels as the input
+## fastqs.
 
 DATATRIMMEDDIR=$1
 if [ ! -d "$DATATRIMMEDDIR" ] ; then
@@ -28,9 +34,9 @@ for FQ in `find -L "$DATATRIMMEDDIR" -name '*_R1*.fastq.gz'`; do
     OUTDIR="Data.NifH_prefilter/$OUTDIR"
     if [ ! -d "$OUTDIR" ] ; then
         echo "Searching for NifH in reads in $FQ..."
-          ## ~Ugly but the script outputs are to the current directory
-          ## and moved at completion. Save the log to cwd too (since the
-          ## script expects the outdir not to exist).
+        ## ~Ugly but the script outputs are to the current directory
+        ## and moved at completion. Save the log to cwd too (since the
+        ## script expects the outdir not to exist).
         $SDIR/findReadsWithNifHDomain.sh  "$FQ"  "$OUTDIR" "$MINLEN" "$MINBITS" \
             > log.nifScan.txt 2>&1
         if [ "$?" -ne 0 ] ; then

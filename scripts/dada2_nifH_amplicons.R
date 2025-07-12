@@ -106,6 +106,14 @@ cat("Starting on", date(),"\n")
 ## Assume have this many columns for tables printed to stdout
 options(width = 110)
 
+## Load utils. run_DADA2_pipeline.sh is either the one in "bin" found by the user's
+## PATH, or it is in the current directory. Either way, "scripts/" is close by.
+x <- suppressWarnings(system2('which', 'run_DADA2_pipeline.sh', stdout=T))
+if (length(x) == 0) { stop("Failed to find scripts/Utils/Rutils.R.") }
+x <- file.path(sub('bin$','',dirname(x)), "scripts","Utils","Rutils.R")
+if (!file.exists(x)) { stop("Failed to find scripts/Utils/Rutils.R.") }
+source(x); rm(x)
+
 ## Params:
 ##  - dataDir will be searched recursively for fastq's
 ##  - dataDir and data2Outdir must be specified if other params are.
@@ -393,29 +401,26 @@ if (!all(file.exists(filteredFastqs))) {
         revIdx <- RevFastqIdx(filteredFastqs)
         filtRs <- filteredFastqs[revIdx]
         names(filtRs) <- Fastq2Samp(filtRs)
-        track <- filterAndTrim(fwd = fastqs[fwdIdx], filt     = filtFs,
-                               rev = fastqs[revIdx], filt.rev = filtRs,
-                               truncQ = filterAndTrimParams$truncQ,
-                               truncLen = c(filterAndTrimParams$truncLen.fwd,
-                                            filterAndTrimParams$truncLen.rev),
-                               maxN   = 0,        # Default. Tolerate no uncalled positions.
-                               maxEE  = c(filterAndTrimParams$maxEE.fwd,
-                                          filterAndTrimParams$maxEE.rev),
-                               minLen = filterAndTrimParams$minLen,
-                               id.field = filterAndTrimParams$id.field,
-                               matchIDs = TRUE,   # only output reads that are paired.
-                               multithread=TRUE)  # Set F if errors occur (see Details)
+        track <- Graceful_filterAndTrim(fwd      = fastqs[fwdIdx], filt     = filtFs,
+                                        rev      = fastqs[revIdx], filt.rev = filtRs,
+                                        truncQ   = filterAndTrimParams$truncQ,
+                                        truncLen = c(filterAndTrimParams$truncLen.fwd,
+                                                     filterAndTrimParams$truncLen.rev),
+                                        maxN     = 0,      # Default. Tolerate no uncalled positions.
+                                        maxEE    = c(filterAndTrimParams$maxEE.fwd,
+                                                     filterAndTrimParams$maxEE.rev),
+                                        minLen   = filterAndTrimParams$minLen,
+                                        id.field = filterAndTrimParams$id.field,
+                                        matchIDs = TRUE)   # Only output reads that are paired.
     } else {
         ## Only filter based on the forward reads.
-        track <- filterAndTrim(fwd      = fastqs[fwdIdx],
-                               filt     = filtFs,
-                               truncQ   = filterAndTrimParams$truncQ,
-                               truncLen = filterAndTrimParams$truncLen.fwd,
-                               maxN     = 0,
-                               maxEE    = filterAndTrimParams$maxEE.fwd,
-                               minLen   = filterAndTrimParams$minLen,
-                               id.field = filterAndTrimParams$id.field,
-                               multithread=TRUE)
+        track <- Graceful_filterAndTrim(fwd      = fastqs[fwdIdx], filt     = filtFs,
+                                        truncQ   = filterAndTrimParams$truncQ,
+                                        truncLen = filterAndTrimParams$truncLen.fwd,
+                                        maxN     = 0,
+                                        maxEE    = filterAndTrimParams$maxEE.fwd,
+                                        minLen   = filterAndTrimParams$minLen,
+                                        id.field = filterAndTrimParams$id.field)
     }
 
     cat("Here are the numbers of reads input and retained:\n")

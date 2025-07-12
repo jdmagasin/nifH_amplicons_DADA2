@@ -13,6 +13,14 @@
 ##       using blast or HMMER3 with the appropriate HMM.
 ##
 
+## Load utils. run_DADA2_pipeline.sh is either the one in "bin" found by the user's
+## PATH, or it is in the current directory. Either way, "scripts/" is close by.
+x <- suppressWarnings(system2('which', 'run_DADA2_pipeline.sh', stdout=T))
+if (length(x) == 0) { stop("Failed to find scripts/Utils/Rutils.R.") }
+x <- file.path(sub('bin$','',dirname(x)), "scripts","Utils","Rutils.R")
+if (!file.exists(x)) { stop("Failed to find scripts/Utils/Rutils.R.") }
+source(x); rm(x)
+
 args <- commandArgs(trailingOnly=T)
 fqDir <- args[1]
 if (!dir.exists(fqDir)) {
@@ -45,8 +53,8 @@ if (length(idx) > 0) {
     stop("Aborting because these files already exist:\n",
          paste(fastqList.filtered[idx], collapse=', '), "\n")
 }
-track <- filterAndTrim(fwd=fastqList, filt=fastqList.filtered,
-                       truncQ=10, maxEE=2, maxN=0, minLen=80, multithread=T)
+track <- Graceful_filterAndTrim(fwd=fastqList, filt=fastqList.filtered,
+                                truncQ=10, maxEE=2, maxN=0, minLen=80)
 df <- data.frame(FASTQ        = sapply(fastqList, dirname),
                  reads.in     = track[,'reads.in'], 
                  reads.out    = track[,'reads.out'],

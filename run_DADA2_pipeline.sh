@@ -184,7 +184,7 @@ echo "Running cutadapt. Presuming paired reads and the standard nifH primers."
 echo "Results will be in Data.trimmed and each sample will have its own detailed"
 echo "log from cutadapt."
 if [ -d "$OUTDIR/Data.trimmed" ] ; then
-    echo "Directory Data.trimmmed already exists so skipping cutadapt."
+    echo "Directory Data.trimmed already exists so skipping cutadapt."
 else
     ## Not necessary to use processing groups for cutadapt.
     ## Note that runCutadapt output fastq paths have the same directory

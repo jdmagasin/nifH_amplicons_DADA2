@@ -108,6 +108,8 @@ AverageErrorsAcrossAllReads <- function(sr, lengthVec)
 ##   fq2 should have primerRev in 5' to 3' orientation near its start (adapters okay).
 ##   Fwd and rev reads must overlap by >= minOverlap nt and with <= maxMismatch'es
 ##   To save time sample sampSize paired reads.
+## Return NULL if the evaluation cannot be done e.g. because the R2 reads are too
+## short to trim using the lengths requested.
 ##   
 EvalOverlaps <- function(fq1, fq2,
                          trimLensFwd = seq(150,250,25), trimLensRev = seq(150,250,25),
@@ -125,8 +127,15 @@ EvalOverlaps <- function(fq1, fq2,
     ## Drop short reads. Then gather the paired reads that remain.
     fq1 <- fq1[width(fq1) > max(trimLensFwd)]
     fq2 <- fq2[width(fq2) > max(trimLensRev)]
+    okReads <- c(length(fq1), length(fq2))
+    if (any(okReads == 0)) {
+        cat("The R1 fastq has", okReads[1], "reads > trim length", max(trimLensFwd), "nt.\n")
+        cat("The R2 fastq has", okReads[2], "reads > trim length", max(trimLensRev), "nt.\n")
+        return(NULL)
+    }
     x <- PairUpTheReads(fq1, fq2)
-    fq1 <- x$fq1;  fq2 <- x$fq2;  rm(x)
+    stopifnot(length(x) > 0)
+    fq1 <- x$fq1;  fq2 <- x$fq2;  rm(x, okReads)
 
     ## Save time by working with a sample of the reads. Do not first identify
     ## unique fwd/rev combinations (like DADA2's mergePairs source), because (1)
@@ -162,9 +171,11 @@ EvalOverlaps <- function(fq1, fq2,
 PairUpTheReads <- function(fq1,fq2)
 {
     ## Get reads that are paired and order them identically.
+    stopifnot(length(fq1) > 0 && length(fq2) > 0)  # Caller should prevent.
     ids1 <- sub(' +.*$','',as.character(id(fq1)))  # ID precedes any whitespace
     ids2 <- sub(' +.*$','',as.character(id(fq2)))
     pairedIds <- intersect(ids1,ids2)
+    if (length(pairedIds) == 0) { stop("The R1 and R2 fastqs have no shared read IDs.\n") }
     widx <- which(ids1 %in% pairedIds)
     x <- 100*(length(widx)/length(ids1))
     if (x < 50) { warning("Only ",round(x,1),"% of the R1 reads are paired.") }
@@ -232,11 +243,13 @@ CountAcceptableOverlaps <- function(q,s,minOverlap,maxMismatch)
 ## Can improve setting of trimLengths based on trimTailw()!!
 
 fq1 <- readFastq(fastqList[1])
-x <- round(c(0.55,0.85) * median(width(fq1)))
+medianR1length <- median(width(fq1))
+x <- round(c(0.55,0.85) * medianR1length)
 trimLens <- round(seq(x[1],x[2], by=15))
 rm(fq1,x)
 cat("\nWill try the following trim lengths: ", paste(trimLens),"\n")
-cat("These lengths span 55% to 85% of the median read length for",fastqList[1],"\n")
+cat("These lengths span 55% to 85% of the median read length for",fastqList[1],
+    "which is", medianR1length, "nt.\n")
 
 resList <- list()  # results for each of the paired fastqs
 numReadsList <- list()
@@ -266,6 +279,10 @@ for (i in seq(1,length(fastqList),2)) {
     numReads <- mean(length(fq1),length(fq2))
 
     res <- EvalOverlaps(fq1, fq2, trimLensFwd=trimLens, trimLensRev=trimLens)
+    if (is.null(res)) {
+        cat("Could not evaluate overlaps for", nam1, "and", nam2, "using requested trim lengths.\n")
+        next
+    }
     ## Save matrix of the expected proportion of paired reads that will overlap.
     resList[[length(resList)+1]] <- res$counts/res$numPairedReads
     numReadsList[[length(numReadsList)+1]] <- numReads
@@ -275,6 +292,17 @@ for (i in seq(1,length(fastqList),2)) {
     eeR2[[length(eeR2)+1]] <- AverageErrorsAcrossAllReads(fq2, trimLens)
 }
 rm(i,nam1,nam2,fq1,fq2,numReads,res)
+stopifnot(length(resList) == length(numReadsList))
+if (length(resList) == 0) {
+    cat("No FASTQ pairs could be evaluated using the selected trim lengths.  This can happen if the\n",
+        "reads are short, especially the R2 reads.  The trim lengths were selected based on the median\n",
+        "R1 length of the first R1 FASTQ which is:\n", fastqList[1], "\n",
+        "The median for this R1 is", medianR1length, "nt, and the trim lengths used ranged from 55%\n",
+        "to 85% of this length, which is", paste0(trimLens, collapse='-'), ".\n",
+        "Probably the logged messages above show that all of the R2 FASTQs had 0 reads that could be\n",
+        "trimmed using that range of trim lengths.\n")
+    stop("Aborting because no evaluations were done.\n")
+}
 
 ## Weight the expected proportion of overlapping reads for each sample by the
 ## sample's size (out of total reads).

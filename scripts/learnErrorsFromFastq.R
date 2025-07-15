@@ -55,6 +55,9 @@ if (length(idx) > 0) {
 }
 track <- Graceful_filterAndTrim(fwd=fastqList, filt=fastqList.filtered,
                                 truncQ=10, maxEE=2, maxN=0, minLen=80)
+if (is.null(track)) {
+    stop("Aborting because filterAndTrim() failed.")
+}
 df <- data.frame(FASTQ        = sapply(fastqList, dirname),
                  reads.in     = track[,'reads.in'], 
                  reads.out    = track[,'reads.out'],

@@ -423,10 +423,12 @@ if (!all(file.exists(filteredFastqs))) {
                                         id.field = filterAndTrimParams$id.field)
     }
 
-    cat("Here are the numbers of reads input and retained:\n")
-    print( data.frame(track,
-                      PctRetained = round(100*track[,'reads.out']/track[,'reads.in'],1)) )
-    saveRDS(track, file=trackRdsFile)
+    if (!is.null(track)) {
+        cat("Here are the numbers of reads input and retained:\n")
+        print( data.frame(track,
+                          PctRetained = round(100*track[,'reads.out']/track[,'reads.in'],1)) )
+        saveRDS(track, file=trackRdsFile)
+    }
 } else {
     cat("Already filtered.\n")
 }
@@ -441,7 +443,7 @@ if (!file.exists(plotFile)) {
           main='Quality-trimmed reads', xlab = 'read length (nt)') +
         theme_bw()
     ggsave(plotFile, width=5, height=3, units='in')
-    cat("\nStats for read lengths after filtering:\n")
+    cat("\nStats for read lengths (n =", length(lens), "reads) after filtering:\n")
     print(summary(lens))
     rm(lens.fn,lens,plotFile)
 }

@@ -141,6 +141,21 @@ if (!is.na(paramsFile)) {
         rm(ptab)
     }
 }
+
+ParseIntegerParam <- function(pstr, pname) {
+    x <- suppressWarnings(as.integer(pstr))
+    if (is.na(x)) { stop("Parameter ", pname, " must be an integer.\n") }
+    x
+}
+
+ParseLogicalParam <- function(pstr, pname) {
+    ## Unlike as.integer(), as.logical() does not handle spaces or throw warnings.
+    x <- as.logical(gsub(' ', '', pstr))
+    ## Suggest TRUE or FALSE only even though T, F, True, False also work for as.logical()
+    if (is.na(x)) { stop("Parameter ", pname, " must be TRUE or FALSE.\n") }
+    x
+}
+
 if (exists("ptab")) {
     p <- union(names(filterAndTrimParams), names(mergePairsParams))
     p <- union(p, names(specialParams))
@@ -148,25 +163,28 @@ if (exists("ptab")) {
     cat("Will use parameters file",paramsFile,"for",paste(plist,collapse=','),"\n")
     for (p in plist) {
         if (p %in% filterAndTrimParams.ints) {
-            filterAndTrimParams[[p]] <- as.integer(ptab[p,1])
-            ## "Inf" triggers next check. Inf is the default maxEE so it does
-            ## not need to be passed in. Will not special-case for Inf.
-            stopifnot(!is.na(filterAndTrimParams[[p]]))
+            ## "Inf" will trigger the stop() in ParseIntegerParam().  Inf is the default maxEE so it
+            ##  does not need to be passed in.  Will not special-case for "Inf".
+            filterAndTrimParams[[p]] <- ParseIntegerParam(ptab[p,1], p)
         }
         if (p == 'justConcatenate') {
-            mergePairsParams[[p]] <- ifelse(ptab[p,1]=='TRUE',TRUE,FALSE)
+            mergePairsParams[[p]] <- ParseLogicalParam(ptab[p,1], p)
+            if (mergePairsParams[[p]]) {
+                cat("ASVs from R1 and R2 will be concatenated (not merged) for final ASVs.\n")
+            }
         } else if (p %in% names(mergePairsParams)) {
-            mergePairsParams[[p]] <- as.integer(ptab[p,1])
+            mergePairsParams[[p]] <- ParseIntegerParam(ptab[p,1], p)
         }
         if (p == 'useOnlyR1Reads') {
             ## Impacts filterAndTrim and skips mergePairs.
-            cat("NOTE!  You have asked for ASVs to be based just on the R1 reads.\n")
-            specialParams$useOnlyR1Reads <- ifelse(ptab[p,1]=='TRUE',TRUE,FALSE)
+            specialParams$useOnlyR1Reads <- ParseLogicalParam(ptab[p,1], p)
+            if (specialParams$useOnlyR1Reads) {
+                cat("ASVs will be determined from only the R1 reads.\n")
+            }
         }
         if (p == 'id.field' && ptab[p,1] != "NULL") {
-            ## Cannot use 'ints' case above because id.field can be NULL.
-            filterAndTrimParams[[p]] <- as.integer(ptab[p,1])
-            stopifnot(!is.na(filterAndTrimParams[[p]]))
+            ## Not in filterAndTrimParams.ints because id.field can be NULL.
+            filterAndTrimParams[[p]] <- ParseIntegerParam(ptab[p,1], p)
         }
     }
     rm(ptab,plist,p)

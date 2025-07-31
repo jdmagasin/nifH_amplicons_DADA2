@@ -451,10 +451,15 @@ if (!all(file.exists(filteredFastqs))) {
     cat("Already filtered.\n")
 }
 
+if (!all(file.exists(filteredFastqs))) {
+    stop("Stopping the pipeline because the following filtered FASTQs do not exist:\n",
+         paste0(filteredFastqs[which(!file.exists(filteredFastqs))], collapse = ", "))
+}
 
 plotFile = file.path(plotsDir, 'hist.readLengthHistFiltered.pdf')
 if (!file.exists(plotFile)) {
-    ## These are the lengths of reads after filtering.
+    ## These are the lengths of reads after filtering.  Note that getSequences() will return
+    ## the name of a missing fastq (as if it is a sequence).  The stop() above prevents this.
     lens.fn <- lapply(filteredFastqs, function(fn) nchar(getSequences(fn)))
     lens <- do.call(c, lens.fn)
     qplot(lens, geom="histogram", binwidth = round(sd(lens)),

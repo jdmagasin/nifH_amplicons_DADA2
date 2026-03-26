@@ -68,11 +68,11 @@ if (!file.exists(asvFastaPathsFile)) {
     stop(asvFastaPathsFile," does not exist.")
 }
 if (file.exists(outFile) || file.exists(outFasta)) {
-    stop(outFile,"and/or",outFile,"already exist.")
+    stop(outFile," and/or ",outFasta," already exist.")
 }
 
 refFasta <- NULL
-if (length(args[2]) > 0 && !grepl('^-.+',args[2])) {
+if (!is.na(args[2]) > 0 && !grepl('^-.+',args[2])) {
     ## Arg 2 is present and not -fasta or -length.
     refFasta <- args[2]
     if (!file.exists(refFasta)) { stop("Missing reference FASTA ",refFasta) }

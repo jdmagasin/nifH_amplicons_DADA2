@@ -103,8 +103,10 @@ if (mergeTabs) {
     outfile <- 'AUID_abundances.tsv'
     cat("Merging", length(allTabs), "AUID abundance tables into a single table,", outfile, "...")
     x <- lapply(allTabs, function (tab) {
-        tab$label <- rownames(tab)  # The rownames could be AUIDs or md5s
+        sampIds <- colnames(tab)
+        tab$label <- rownames(tab)        # The rownames could be AUIDs or md5s
         rownames(tab) <- NULL
+        tab <- tab[,c('label', sampIds)]  # Ensure 'label' first since merge() could be skipped.
         tab
     })
     ## Make sure colnames are distinct in each table.  The only exception is label.
